@@ -1,0 +1,10 @@
+{
+  "description": "Streamlines task management by organizing and prioritizing activities for users seeking efficient workflow and productivity enhancement.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
