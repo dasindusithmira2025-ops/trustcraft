@@ -7,25 +7,28 @@
   --font-display: 'Instrument Serif', Georgia, serif;
   --font-data: 'DM Mono', 'Courier New', monospace;
 
+  /* ── Preserved TrustCraft palette ───────────────────────────────── */
   --color-teal-950: #063333;
   --color-teal-900: #0A5858;
   --color-teal-800: #0B6B6B;
   --color-teal-700: #0D7E7E;
   --color-teal-600: #129494;
+  --color-teal-400: #3FBFBF;
   --color-teal-200: #B3E0E0;
   --color-teal-100: #E0F2F2;
-  --color-teal-50: #F0F9F9;
+  --color-teal-50:  #F0F9F9;
 
   --color-ink-950: #0A0B0D;
   --color-ink-900: #0F1114;
   --color-ink-800: #1A1D22;
   --color-ink-700: #2D3139;
+  --color-ink-600: #4A4F58;
   --color-ink-500: #6B7280;
   --color-ink-400: #9BA3AF;
   --color-ink-300: #C5C9D0;
   --color-ink-200: #E2E4E8;
   --color-ink-100: #F0F1F3;
-  --color-ink-50: #F7F5F0;
+  --color-ink-50:  #F7F5F0;
 
   --color-gold-600: #9A6D1E;
   --color-gold-500: #B8842A;
@@ -40,105 +43,144 @@
 
   --color-danger-700: #B83232;
   --color-danger-100: #FDECEC;
+
+  /* ── Web surfaces: tone, not boxes ─────────────────────────────── */
+  --color-canvas:  #F7F5F0;  /* the paper everything sits on */
+  --color-sunken:  #EFEBE2;  /* rails, wells, secondary panes  */
+  --color-raised:  #FFFFFF;  /* genuinely-lifted objects only  */
+  --color-rule:    #E4E0D6;  /* hairline on warm canvas        */
+  --color-rule-strong: #D3CEC1;
 }
 
-html, body {
+/* ── Base ───────────────────────────────────────────────────────── */
+
+html { scroll-behavior: smooth; }
+
+html, body, #root {
   margin: 0;
   padding: 0;
+  min-height: 100%;
 }
 
 body {
   font-family: 'Inter', system-ui, sans-serif;
-  background: #111111;
+  background: var(--color-canvas);
+  color: var(--color-ink-900);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-synthesis-weight: none;
 }
 
-/* Scrollbar hiding */
-.no-scroll::-webkit-scrollbar { display: none; }
-.no-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+/* Editorial headings never sit on the sans baseline */
+.font-display { letter-spacing: -0.005em; }
 
-/* Screen slide transition */
-@keyframes slideInRight {
-  from { transform: translateX(30px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+/* ── Focus: always visible, never color-only ────────────────────── */
+
+:where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-teal-700);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
-.screen-slide {
-  animation: slideInRight 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+.focus-inset:focus-visible { outline-offset: -2px; }
+
+/* Skip link */
+.skip-link {
+  position: absolute;
+  left: 16px;
+  top: -60px;
+  z-index: 100;
+  background: var(--color-ink-900);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: top 0.15s ease-out;
+}
+.skip-link:focus { top: 16px; }
+
+/* Screen-reader-only, still focusable */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-/* Fade/scale utilities */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(14px); }
-  to { opacity: 1; transform: translateY(0); }
+/* ── Scrollbars: quiet, not hidden (hidden = unusable on web) ───── */
+
+.thin-scroll::-webkit-scrollbar { width: 10px; height: 10px; }
+.thin-scroll::-webkit-scrollbar-track { background: transparent; }
+.thin-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-rule-strong);
+  border-radius: 99px;
+  border: 3px solid var(--color-canvas);
+}
+.thin-scroll::-webkit-scrollbar-thumb:hover { background: var(--color-ink-300); }
+.thin-scroll { scrollbar-width: thin; scrollbar-color: var(--color-rule-strong) transparent; }
+
+/* ── Motion: fast, calm, precise ────────────────────────────────── */
+
+@keyframes fadeUp   { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes fadeIn   { from { opacity: 0; } to { opacity: 1; } }
+@keyframes riseIn   { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes slideRail{ from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }
+@keyframes drawWidth{ from { width: 0; } }
+@keyframes softPulse{ 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+@keyframes scanY    { 0% { transform: translateY(0); opacity: 0.75; } 90% { opacity: 0.4; } 100% { transform: translateY(320px); opacity: 0; } }
+@keyframes markIn   { from { opacity: 0; transform: scale(0.7); } to { opacity: 1; transform: scale(1); } }
+
+.a-fade    { animation: fadeIn  0.28s ease-out both; }
+.a-up      { animation: fadeUp  0.34s cubic-bezier(0.22,0.61,0.36,1) both; }
+.a-rise    { animation: riseIn  0.5s  cubic-bezier(0.22,0.61,0.36,1) both; }
+.a-rail    { animation: slideRail 0.36s cubic-bezier(0.22,0.61,0.36,1) both; }
+.a-mark    { animation: markIn  0.34s cubic-bezier(0.34,1.28,0.64,1) both; }
+.a-draw    { animation: drawWidth 0.9s cubic-bezier(0.4,0,0.2,1) 0.15s both; }
+.a-pulse   { animation: softPulse 2.2s ease-in-out infinite; }
+.a-scan    { animation: scanY 2.1s ease-in-out infinite; }
+
+.d1 { animation-delay: 0.05s; }
+.d2 { animation-delay: 0.10s; }
+.d3 { animation-delay: 0.16s; }
+.d4 { animation-delay: 0.22s; }
+.d5 { animation-delay: 0.28s; }
+.d6 { animation-delay: 0.34s; }
+.d7 { animation-delay: 0.42s; }
+.d8 { animation-delay: 0.50s; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+/* ── Sticky comparison headers need an opaque backdrop ──────────── */
+.sticky-head { position: sticky; top: 0; z-index: 20; background: var(--color-canvas); }
+.sticky-head-raised { position: sticky; top: 0; z-index: 20; background: var(--color-raised); }
+
+/* Numeric columns line up or the comparison is worthless */
+.tnum { font-variant-numeric: tabular-nums; }
+
+/* Range input — used by the before/after wipe */
+input[type="range"].wipe {
+  -webkit-appearance: none; appearance: none;
+  background: transparent; cursor: ew-resize;
 }
-
-@keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.88); }
-  60% { transform: scale(1.04); }
-  to { opacity: 1; transform: scale(1); }
+input[type="range"].wipe::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 30px; height: 30px; border-radius: 999px;
+  background: #fff; border: 1px solid rgba(0,0,0,0.18);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.28);
 }
-
-.fade-up   { animation: fadeUp 0.38s ease-out both; }
-.fade-up-1 { animation: fadeUp 0.38s ease-out 0.06s both; }
-.fade-up-2 { animation: fadeUp 0.38s ease-out 0.14s both; }
-.fade-up-3 { animation: fadeUp 0.38s ease-out 0.22s both; }
-.fade-up-4 { animation: fadeUp 0.38s ease-out 0.30s both; }
-.fade-up-5 { animation: fadeUp 0.38s ease-out 0.38s both; }
-.fade-in   { animation: fadeIn 0.3s ease-out both; }
-.scale-in  { animation: scaleIn 0.4s cubic-bezier(0.34, 1.2, 0.64, 1) both; }
-
-/* Waveform animation bars */
-@keyframes wv1 { 0%,100%{height:4px} 50%{height:20px} }
-@keyframes wv2 { 0%,100%{height:8px} 50%{height:28px} }
-@keyframes wv3 { 0%,100%{height:12px} 50%{height:36px} }
-@keyframes wv4 { 0%,100%{height:6px} 50%{height:22px} }
-@keyframes wv5 { 0%,100%{height:4px} 50%{height:16px} }
-
-.wave-bar-1 { animation: wv1 0.70s ease-in-out infinite; }
-.wave-bar-2 { animation: wv2 0.85s ease-in-out infinite 0.10s; }
-.wave-bar-3 { animation: wv3 0.65s ease-in-out infinite 0.20s; }
-.wave-bar-4 { animation: wv4 0.90s ease-in-out infinite 0.15s; }
-.wave-bar-5 { animation: wv5 0.75s ease-in-out infinite 0.05s; }
-.wave-bar-6 { animation: wv2 0.80s ease-in-out infinite 0.25s; }
-.wave-bar-7 { animation: wv1 0.95s ease-in-out infinite 0.10s; }
-.wave-bar-8 { animation: wv3 0.70s ease-in-out infinite 0.30s; }
-.wave-bar-9 { animation: wv4 0.85s ease-in-out infinite 0.05s; }
-
-/* AI scan line */
-@keyframes scanLine {
-  0%   { transform: translateY(0);    opacity: 0.7; }
-  90%  { opacity: 0.5; }
-  100% { transform: translateY(148px); opacity: 0; }
+input[type="range"].wipe::-moz-range-thumb {
+  width: 30px; height: 30px; border-radius: 999px;
+  background: #fff; border: 1px solid rgba(0,0,0,0.18);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.28);
 }
-
-.scan-line { animation: scanLine 2s ease-in-out infinite; }
-
-/* Progress bar fill */
-@keyframes fillWidth { from { width: 0; } }
-.progress-fill { animation: fillWidth 1.1s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both; }
-
-/* Soft pulse for live indicators */
-@keyframes softPulse { 0%,100%{opacity:1} 50%{opacity:0.45} }
-.soft-pulse { animation: softPulse 2s ease-in-out infinite; }
-
-/* Timeline active dot glow */
-@keyframes activeGlow {
-  0%,100%{ box-shadow: 0 0 0 0 rgba(11,107,107,0.5); }
-  50%   { box-shadow: 0 0 0 6px rgba(11,107,107,0.0); }
-}
-.timeline-active { animation: activeGlow 2s ease-in-out infinite; }
-
-/* Resolved entrance */
-@keyframes resolvedScale {
-  0%  { opacity: 0; transform: scale(0.8); }
-  65% { transform: scale(1.04); }
-  100%{ opacity: 1; transform: scale(1); }
-}
-.resolved-enter { animation: resolvedScale 0.7s cubic-bezier(0.34, 1.2, 0.64, 1) both; }

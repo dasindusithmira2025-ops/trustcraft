@@ -1,13 +1,29 @@
 # TrustCraft
 
-TrustCraft is an AI-assisted trust platform for home services. It helps a customer understand an uncertain problem, compare professionals using visible evidence, agree to a clear repair plan, and preserve a verified service history after resolution.
+TrustCraft is a web-based decision workspace for home-service problems. It helps a customer understand an uncertain problem, decide who should handle it, agree in writing what the work is, prove it was done, and keep the record afterwards.
+
+The unit of the product is a **Case**, not a service listing: problem evidence, what is known, what is still unknown, safety guidance, a recommended resolution path, curated professionals, quotations compared on scope, a work agreement, structured change requests, a proof timeline, and a permanent home record.
 
 ## Repository
 
-- The root React + Vite application is the preserved Figma Make reference prototype.
+- The root React + Vite application is the web workspace (`src/`), the primary product surface.
 - `mobile/` is the production-structured Flutter application for Android and iOS.
 - `scripts/` and `.vscode/` provide the automated Windows/VS Code workflow.
 - `docs/migration-map.md` maps every reference screen to its semantic mobile route and state boundary.
+
+## Web architecture
+
+`src/` is a React 19 + Vite + Tailwind v4 application with no router or component-library dependency — routing is hash-based (`src/app-state.tsx`), which gives real URLs and working browser back/forward.
+
+- `src/data.ts` — the single source of truth for the demo case (TC-2048). Every screen reads from it, so figures cannot disagree across surfaces.
+- `src/evidence.ts` — evidence imagery drawn as SVG data URIs rather than sourced, so each picture shows the fault the case actually asserts, and renders with no network.
+- `src/ui.tsx` — the design system: tokens-driven primitives, icons, tri-state scope marks, viewport-positioned tooltips.
+- `src/shell.tsx` — the app shell, quiet primary navigation, and the case context bar.
+- `src/pages/` — one file per surface group.
+
+Signature screens: **What happened?** composer, **Problem Workspace** (evidence viewer + known/unknown intelligence rail), **Resolution Path**, **Professional Fit**, **Quote Lens**, **Work Agreement**, **Change Request**, **Proof Timeline**, **Home Ledger**.
+
+Design target is 1440 × 1024, validated at 1280 × 832.
 
 ## Mobile architecture
 
