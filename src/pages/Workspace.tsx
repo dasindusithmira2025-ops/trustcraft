@@ -5,6 +5,7 @@ import {
   Button,
   Display,
   Disclosure,
+  EvidenceRef,
   Eyebrow,
   Icon,
   InfoHint,
@@ -12,6 +13,7 @@ import {
   Rule,
   StatusDot,
   TextLink,
+  evidenceTag,
 } from '../ui'
 import {
   CASE,
@@ -21,6 +23,7 @@ import {
   PATHS,
   QUESTIONS,
   SAFETY,
+  evidenceById,
   type Evidence,
 } from '../data'
 
@@ -48,11 +51,15 @@ export function CaseCreating() {
   }, [])
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-ink-950 px-8">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-ink-950 px-6 py-12 sm:px-8">
       <div className="w-full max-w-[880px]">
-        <div className="grid grid-cols-1 items-center gap-16 md:grid-cols-[300px_minmax(0,1fr)]">
+        <div className="grid grid-cols-1 items-center gap-8 sm:gap-12 md:grid-cols-[280px_minmax(0,1fr)] md:gap-16">
           <div className="relative overflow-hidden rounded-2xl">
-            <img src={EVIDENCE[0].src} alt="" className="h-[220px] w-full object-cover opacity-70" />
+            <img
+              src={EVIDENCE[0].src}
+              alt=""
+              className="h-[170px] w-full object-cover opacity-70 sm:h-[220px]"
+            />
             <div className="pointer-events-none absolute inset-0">
               <div className="a-scan h-px w-full bg-gradient-to-r from-transparent via-teal-400 to-transparent" />
             </div>
@@ -60,7 +67,7 @@ export function CaseCreating() {
           </div>
 
           <div>
-            <Eyebrow tone="light" className="mb-4">
+            <Eyebrow tone="light" className="mb-3 sm:mb-4">
               Creating case {CASE.id}
             </Eyebrow>
             <Display size="md" className="text-white">
@@ -69,15 +76,15 @@ export function CaseCreating() {
               you told us
             </Display>
 
-            <ol className="mt-9 space-y-3.5" aria-live="polite">
+            <ol className="mt-7 space-y-3 sm:mt-9 sm:space-y-3.5" aria-live="polite">
               {STRUCTURING.map((s, i) => (
                 <li
                   key={s}
-                  className={`flex items-center gap-3.5 transition-all duration-500
+                  className={`flex items-start gap-3.5 transition-all duration-500
                     ${i < done ? 'opacity-100' : 'opacity-25'}`}
                 >
                   <span
-                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-colors
+                    className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-colors
                       ${i < done ? 'bg-teal-600 text-white' : 'bg-white/10'}`}
                   >
                     {i < done ? (
@@ -86,12 +93,12 @@ export function CaseCreating() {
                       <span className="h-1.5 w-1.5 rounded-full bg-white/35" />
                     )}
                   </span>
-                  <span className="text-[14.5px] text-white/85">{s}</span>
+                  <span className="text-[14px] leading-snug text-white/85 sm:text-[14.5px]">{s}</span>
                 </li>
               ))}
             </ol>
 
-            <p className="mt-9 max-w-sm text-[12.5px] leading-relaxed text-white/35">
+            <p className="mt-7 max-w-sm text-[12.5px] leading-relaxed text-white/35 sm:mt-9">
               TrustCraft structures evidence. It does not diagnose — a professional confirms the cause.
             </p>
           </div>
@@ -103,6 +110,14 @@ export function CaseCreating() {
 
 // ════════════════════════════════════════════════════════════════════════════
 // Problem Workspace ★
+//
+// The evidence is the subject of this screen, so it gets the light — a dark
+// canvas the photographs sit inside — and the reasoning sits beside it on the
+// paper ground, reading as annotation rather than as a second application.
+//
+//   ≥1024  canvas and rail side by side, each scrolling in its own column
+//   <1024  one column: evidence first, then the reasoning in reading order,
+//          with the next move pinned above the tab bar
 // ════════════════════════════════════════════════════════════════════════════
 
 export function ProblemWorkspace() {
@@ -135,15 +150,25 @@ export function ProblemWorkspace() {
   const answered = Object.keys(progress.answers).length
   const remaining = QUESTIONS.length - answered
 
+  /** Selecting a fact's source pulls that evidence onto the canvas. */
+  const showEvidence = (id: string) => {
+    setActiveId(id)
+    if (window.innerWidth < 1024) {
+      document.getElementById('evidence-canvas')?.scrollIntoView({ block: 'start' })
+    }
+  }
+
   return (
-    <AppShell recede caseStage="understand" wide noFooter>
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_min(38vw,460px)]">
-        {/* ── Evidence viewer ─────────────────────────────────────────── */}
+    <AppShell caseStage="understand" flush noFooter>
+      <div className="lg:grid lg:h-[calc(100dvh-var(--casebar-h))] lg:grid-cols-[minmax(0,1fr)_min(40vw,470px)]">
+        {/* ── Evidence canvas ──────────────────────────────────────── */}
         <section
+          id="evidence-canvas"
           aria-label="Evidence"
-          className="flex h-[calc(100vh-108px)] min-h-[640px] flex-col overflow-hidden bg-ink-950 px-8 pb-7 pt-8 xl:px-12"
+          className="flex flex-col overflow-hidden bg-ink-950 px-4 pb-5 pt-5
+            sm:px-6 sm:pb-6 sm:pt-6 lg:h-full lg:px-8 lg:pb-7 lg:pt-8 xl:px-12"
         >
-          <div className="mb-6 flex flex-wrap items-center gap-4">
+          <div className="mb-4 flex items-center gap-4 sm:mb-6">
             <Eyebrow tone="light">Evidence · {EVIDENCE.length} items</Eyebrow>
             <span className="ml-auto flex items-center gap-1 rounded-lg bg-white/[0.07] px-2 py-1">
               <NavArrow dir="prev" onClick={() => step(-1)} />
@@ -154,17 +179,21 @@ export function ProblemWorkspace() {
             </span>
           </div>
 
-          <EvidenceStage item={active} />
+          {/* A phone gets a generous but bounded stage; the desktop column
+              gives the remaining height to the photograph. */}
+          <div className="flex h-[46vh] min-h-[280px] flex-col lg:h-auto lg:min-h-0 lg:flex-1">
+            <EvidenceStage item={active} />
+          </div>
 
-          <div className="mt-7 flex gap-3 overflow-x-auto pb-1 thin-scroll">
+          <div className="thin-scroll mt-5 flex gap-2.5 overflow-x-auto pb-1 sm:mt-7 sm:gap-3">
             {EVIDENCE.map(e => (
               <Thumb key={e.id} item={e} active={e.id === activeId} onSelect={() => setActiveId(e.id)} />
             ))}
             <button
               type="button"
-              className="flex h-[68px] w-[92px] shrink-0 flex-col items-center justify-center gap-1
+              className="flex h-[60px] w-[80px] shrink-0 flex-col items-center justify-center gap-1
                 rounded-xl border border-dashed border-white/20 text-white/40 transition-colors
-                hover:border-white/40 hover:text-white/70"
+                hover:border-white/40 hover:text-white/70 sm:h-[68px] sm:w-[92px]"
             >
               <Icon.plus size={16} />
               <span className="text-[11px]">Add</span>
@@ -172,41 +201,51 @@ export function ProblemWorkspace() {
           </div>
         </section>
 
-        {/* ── Contextual intelligence rail ────────────────────────────── */}
+        {/* ── Case intelligence ────────────────────────────────────── */}
         <aside
           aria-label="What TrustCraft understands"
-          className="a-rail flex h-[calc(100vh-108px)] min-h-[640px] flex-col overflow-hidden
-            border-l border-[var(--color-rule)] bg-[var(--color-canvas)]"
+          className="a-rail flex flex-col border-[var(--color-rule)] bg-[var(--color-canvas)]
+            lg:h-full lg:overflow-hidden lg:border-l"
         >
-          <div className="flex-1 overflow-y-auto px-8 pb-6 pt-8 thin-scroll">
-            <Eyebrow tone="teal" className="mb-3">
+          <div className="thin-scroll flex-1 px-4 pb-6 pt-7 sm:px-6 lg:overflow-y-auto lg:px-8 lg:pt-8">
+            <Eyebrow tone="teal" className="mb-2.5">
               {CASE.room}
             </Eyebrow>
             <Display size="sm" as="h1" className="text-ink-950">
               {CASE.title}
             </Display>
-            <p className="mt-2.5 text-[13.5px] text-ink-500">Opened {CASE.opened}</p>
 
-            <Rule className="my-7" />
+            <CaseState opened={CASE.opened} known={KNOWN.length + answered} open={remaining} />
 
-            <KnownBlock />
+            <Rule className="my-6 sm:my-7" />
+
+            <KnownBlock onShowEvidence={showEvidence} />
             <UnknownBlock />
             <ExpertiseBlock />
             <SafetyBlock />
             <ConfirmationBlock />
           </div>
 
-          {/* Sticky decision footer — the rail always offers the next move. */}
-          <div className="sticky bottom-0 border-t border-[var(--color-rule)] bg-[var(--color-canvas)]/95 px-8 py-5 backdrop-blur-md">
-            <div className="mb-3 flex items-center gap-2 text-[12.5px] text-ink-500">
+          {/* The rail always offers the next move — pinned above the tab bar
+              on a phone, at the foot of the column on a desktop. */}
+          <div
+            className="sticky bottom-[var(--tabbar-h)] z-20 border-t border-[var(--color-rule)]
+              bg-[var(--color-canvas)]/95 px-4 py-4 backdrop-blur-md sm:px-6
+              md:bottom-0 lg:px-8 lg:py-5"
+          >
+            <div className="mb-2.5 flex items-start gap-2 text-[12.5px] leading-snug text-ink-500 lg:mb-3">
               {remaining > 0 ? (
                 <>
-                  <StatusDot tone="warning" />
+                  <span className="mt-1.5">
+                    <StatusDot tone="warning" />
+                  </span>
                   {remaining} question{remaining > 1 ? 's' : ''} still open — you can continue anyway
                 </>
               ) : (
                 <>
-                  <StatusDot tone="success" />
+                  <span className="mt-1.5">
+                    <StatusDot tone="success" />
+                  </span>
                   Everything we can establish without a professional is recorded
                 </>
               )}
@@ -218,6 +257,24 @@ export function ProblemWorkspace() {
         </aside>
       </div>
     </AppShell>
+  )
+}
+
+/** The case's state as two counted quantities — the whole model in one line. */
+function CaseState({ opened, known, open }: { opened: string; known: number; open: number }) {
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+      <span className="text-[13px] text-ink-500">Opened {opened}</span>
+      <span className="h-3 w-px bg-[var(--color-rule-strong)]" aria-hidden="true" />
+      <span className="flex items-center gap-1.5 text-[13px] font-medium text-teal-800">
+        <Icon.check size={13} />
+        {known} established
+      </span>
+      <span className="flex items-center gap-1.5 text-[13px] font-medium text-gold-600">
+        <Icon.question size={13} />
+        {open} open
+      </span>
+    </div>
   )
 }
 
@@ -243,7 +300,8 @@ function EvidenceStage({ item }: { item: Evidence }) {
           <img src={item.src} alt={item.label} className="h-full w-full object-contain" />
           {item.id === 'ev-1' && <LeakMarker />}
         </div>
-        <figcaption className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-white/55">
+        <figcaption className="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[12.5px] text-white/55 sm:mt-4 sm:text-[13px]">
+          <EvidenceRef tone="light" label={evidenceTag(item.id, item.kind)} />
           <span className="font-medium text-white/85">{item.label}</span>
           <span aria-hidden="true">·</span>
           <span>Added by {item.by}</span>
@@ -257,36 +315,37 @@ function EvidenceStage({ item }: { item: Evidence }) {
   if (item.kind === 'voice') {
     return (
       <div key={item.id} className="a-fade flex min-h-0 flex-1 flex-col justify-center">
-        <div className="rounded-2xl bg-white/[0.05] p-9">
-          <div className="flex items-center gap-5">
+        <div className="thin-scroll min-h-0 overflow-y-auto rounded-2xl bg-white/[0.05] p-5 sm:p-7 lg:p-9">
+          <div className="flex items-center gap-4 sm:gap-5">
             <button
               type="button"
-              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-teal-600
-                text-white transition-colors hover:bg-teal-500"
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-teal-600
+                text-white transition-colors hover:bg-teal-500 sm:h-14 sm:w-14"
               aria-label="Play voice description"
             >
-              <Icon.play size={20} className="ml-0.5" />
+              <Icon.play size={19} className="ml-0.5" />
             </button>
-            <span className="flex h-12 flex-1 items-center gap-[3px]" aria-hidden="true">
+            <span className="flex h-10 min-w-0 flex-1 items-center gap-[3px] overflow-hidden sm:h-12" aria-hidden="true">
               {Array.from({ length: 64 }, (_, i) => (
                 <span
                   key={i}
-                  className="w-[3px] rounded-full bg-teal-400/50"
-                  style={{ height: `${8 + Math.abs(Math.sin(i * 0.9)) * 34}px` }}
+                  className="w-[3px] shrink-0 rounded-full bg-teal-400/50"
+                  style={{ height: `${8 + Math.abs(Math.sin(i * 0.9)) * 30}px` }}
                 />
               ))}
             </span>
-            <span className="font-data shrink-0 text-[13px] text-white/50">{item.duration}</span>
+            <span className="font-data shrink-0 text-[12.5px] text-white/50">{item.duration}</span>
           </div>
 
-          <Rule tone="light" className="my-7" />
+          <Rule tone="light" className="my-5 sm:my-7" />
 
-          <Eyebrow tone="light" className="mb-3">
+          <Eyebrow tone="light" className="mb-2.5 sm:mb-3">
             Transcript
           </Eyebrow>
-          <p className="max-w-2xl font-display text-[24px] leading-[1.45] text-white/90">“{item.body}”</p>
+          <p className="quote-lg max-w-2xl text-white/90">“{item.body}”</p>
         </div>
-        <p className="mt-4 text-[13px] text-white/55">
+        <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12.5px] text-white/55 sm:mt-4">
+          <EvidenceRef tone="light" label={evidenceTag(item.id, item.kind)} />
           {item.label} · Added by {item.by} · <span className="font-data">{item.at}</span>
         </p>
       </div>
@@ -295,13 +354,14 @@ function EvidenceStage({ item }: { item: Evidence }) {
 
   return (
     <div key={item.id} className="a-fade flex min-h-0 flex-1 flex-col justify-center">
-      <div className="rounded-2xl bg-white/[0.05] p-9">
-        <Eyebrow tone="light" className="mb-4">
+      <div className="thin-scroll min-h-0 overflow-y-auto rounded-2xl bg-white/[0.05] p-5 sm:p-7 lg:p-9">
+        <Eyebrow tone="light" className="mb-3 sm:mb-4">
           Written note
         </Eyebrow>
-        <p className="max-w-2xl font-display text-[26px] leading-[1.4] text-white/90">{item.body}</p>
+        <p className="quote-lg max-w-2xl text-white/90">{item.body}</p>
       </div>
-      <p className="mt-4 text-[13px] text-white/55">
+      <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12.5px] text-white/55 sm:mt-4">
+        <EvidenceRef tone="light" label={evidenceTag(item.id, item.kind)} />
         {item.label} · Added by {item.by} · <span className="font-data">{item.at}</span>
       </p>
     </div>
@@ -314,10 +374,10 @@ function LeakMarker() {
     <div className="a-mark absolute left-[30%] top-[60%]">
       <span className="relative flex items-center gap-2">
         <span className="relative flex h-5 w-5 items-center justify-center">
-          <span className="absolute inset-0 rounded-full bg-warning-700/30 a-pulse" />
+          <span className="a-pulse absolute inset-0 rounded-full bg-warning-700/30" />
           <span className="h-2.5 w-2.5 rounded-full bg-warning-700 ring-2 ring-white/70" />
         </span>
-        <span className="whitespace-nowrap rounded-full bg-black/70 px-3 py-1 text-[12px] text-white backdrop-blur-sm">
+        <span className="whitespace-nowrap rounded-full bg-black/70 px-2.5 py-1 text-[11.5px] text-white backdrop-blur-sm sm:px-3 sm:text-[12px]">
           Water visible here
         </span>
       </span>
@@ -331,11 +391,13 @@ function Thumb({ item, active, onSelect }: { item: Evidence; active: boolean; on
       type="button"
       onClick={onSelect}
       aria-current={active ? 'true' : undefined}
-      className={`relative h-[68px] w-[92px] shrink-0 overflow-hidden rounded-xl transition-all duration-150
+      aria-label={`Show ${item.label}`}
+      className={`relative h-[60px] w-[80px] shrink-0 overflow-hidden rounded-xl transition-all duration-150
+        sm:h-[68px] sm:w-[92px]
         ${active ? 'ring-2 ring-teal-400' : 'opacity-55 hover:opacity-100'}`}
     >
       {item.src ? (
-        <img src={item.src} alt={item.label} className="h-full w-full object-cover" loading="lazy" />
+        <img src={item.src} alt="" className="h-full w-full object-cover" loading="lazy" />
       ) : (
         <span className="flex h-full w-full flex-col items-center justify-center gap-1 bg-white/[0.07] text-white/70">
           {item.kind === 'voice' ? <Icon.mic size={16} /> : <Icon.text size={16} />}
@@ -346,40 +408,83 @@ function Thumb({ item, active, onSelect }: { item: Evidence; active: boolean; on
   )
 }
 
-// ── Rail blocks ─────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════════════
+// Rail blocks
+//
+// Known and unknown are deliberately opposite objects. Established facts are
+// closed: solid ground, a teal spine, a citation. Open questions are literally
+// unclosed: a dashed outline, gold, and a control that resolves them. The
+// difference is legible before a single word is read.
+// ════════════════════════════════════════════════════════════════════════════
 
-function RailHeading({ children, tone }: { children: React.ReactNode; tone?: 'teal' | 'gold' }) {
+function RailHeading({
+  children,
+  tone,
+  count,
+}: {
+  children: React.ReactNode
+  tone?: 'teal' | 'gold'
+  count?: number
+}) {
   return (
-    <Eyebrow tone={tone ?? 'muted'} className="mb-3.5">
-      {children}
-    </Eyebrow>
+    <div className="mb-3 flex items-center gap-2.5 sm:mb-3.5">
+      <Eyebrow tone={tone ?? 'muted'}>{children}</Eyebrow>
+      {count !== undefined && (
+        <span
+          className={`font-data text-[10.5px] leading-none ${tone === 'gold' ? 'text-gold-600' : 'text-teal-800'}`}
+        >
+          {count}
+        </span>
+      )}
+      <span className="h-px flex-1 bg-[var(--color-rule)]" aria-hidden="true" />
+    </div>
   )
 }
 
-function KnownBlock() {
+function KnownBlock({ onShowEvidence }: { onShowEvidence: (id: string) => void }) {
   const { progress } = useStore()
   const derived = QUESTIONS.filter(q => progress.answers[q.id]).map(q => ({
     id: q.id,
     text: q.reading[progress.answers[q.id]],
     from: `You answered “${progress.answers[q.id]}”`,
+    evidenceId: null as string | null,
   }))
 
+  const facts = [
+    ...KNOWN.map(k => ({ id: k.id, text: k.text, from: k.from, evidenceId: k.evidenceId })),
+    ...derived,
+  ]
+
   return (
-    <section className="mb-9">
-      <RailHeading tone="teal">What we know</RailHeading>
-      <ul className="space-y-0">
-        {[...KNOWN, ...derived].map((f, i) => (
-          <li key={f.id} className={i >= KNOWN.length ? 'a-up' : ''}>
-            <div className="flex gap-3 py-3">
-              <Icon.check size={15} className="mt-0.5 shrink-0 text-teal-700" />
-              <div className="min-w-0">
-                <p className="text-[14px] leading-snug text-ink-900">{f.text}</p>
-                <p className="mt-1 text-[12px] text-ink-400">{f.from}</p>
+    <section className="mb-8 sm:mb-9">
+      <RailHeading tone="teal" count={facts.length}>
+        What we know
+      </RailHeading>
+
+      <ul className="space-y-1.5">
+        {facts.map((f, i) => {
+          const ev = f.evidenceId ? evidenceById(f.evidenceId) : undefined
+          return (
+            <li
+              key={f.id}
+              className={`rounded-r-lg border-l-2 border-teal-700 bg-white/70 py-2.5 pl-3.5 pr-3
+                ${i >= KNOWN.length ? 'a-up' : ''}`}
+            >
+              <p className="text-[14px] leading-snug text-ink-900">{f.text}</p>
+              <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                {ev ? (
+                  <EvidenceRef
+                    label={evidenceTag(ev.id, ev.kind)}
+                    onSelect={() => onShowEvidence(ev.id)}
+                  />
+                ) : (
+                  <EvidenceRef label="You" tone="muted" />
+                )}
+                <span className="text-[11.5px] text-ink-400">{f.from}</span>
               </div>
-            </div>
-            <Rule />
-          </li>
-        ))}
+            </li>
+          )
+        })}
       </ul>
     </section>
   )
@@ -390,21 +495,29 @@ function UnknownBlock() {
   const open = QUESTIONS.filter(q => !progress.answers[q.id])
 
   return (
-    <section className="mb-9">
-      <RailHeading tone="gold">What we still need</RailHeading>
+    <section className="mb-8 sm:mb-9">
+      <RailHeading tone="gold" count={open.length}>
+        What we still need
+      </RailHeading>
 
       {open.length === 0 ? (
-        <p className="rounded-xl bg-success-100 px-4 py-3.5 text-[13.5px] leading-relaxed text-success-800">
+        <p className="flex items-start gap-2.5 rounded-xl bg-success-100 px-4 py-3.5 text-[13.5px] leading-relaxed text-success-800">
+          <Icon.check size={15} className="mt-0.5 shrink-0" />
           Nothing further can be established from here. The remaining uncertainty needs a professional
           on site.
         </p>
       ) : (
-        <ul className="space-y-5">
+        <ul className="space-y-3">
           {open.map(q => (
-            <li key={q.id} className="a-up">
-              <p className="text-[15px] font-medium leading-snug text-ink-900">{q.question}</p>
-              <p className="mt-1.5 flex items-start gap-1.5 text-[12.5px] leading-relaxed text-ink-500">
-                <Icon.info size={13} className="mt-px shrink-0 text-ink-300" />
+            <li
+              key={q.id}
+              className="a-up rounded-xl border border-dashed border-gold-500/55 bg-gold-100/40 p-3.5 sm:p-4"
+            >
+              <p className="text-[14.5px] font-semibold leading-snug text-ink-950 sm:text-[15px]">
+                {q.question}
+              </p>
+              <p className="mt-1.5 flex items-start gap-1.5 text-[12.5px] leading-relaxed text-ink-600">
+                <Icon.info size={13} className="mt-px shrink-0 text-gold-600" />
                 {q.why}
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -416,9 +529,9 @@ function UnknownBlock() {
                       answer(q.id, opt)
                       notify('Answer recorded — the case updated')
                     }}
-                    className="rounded-[10px] border border-[var(--color-rule-strong)] bg-white px-4 py-2
+                    className="tap rounded-[10px] border border-[var(--color-rule-strong)] bg-white px-3.5 py-2
                       text-[13.5px] font-medium text-ink-800 transition-all duration-150
-                      hover:border-teal-700 hover:bg-teal-50 hover:text-teal-900 active:scale-[0.98]"
+                      hover:border-teal-700 hover:bg-teal-50 hover:text-teal-900 active:scale-[0.98] sm:px-4"
                   >
                     {opt}
                   </button>
@@ -434,27 +547,27 @@ function UnknownBlock() {
 
 function ExpertiseBlock() {
   return (
-    <section className="mb-9">
+    <section className="mb-8 sm:mb-9">
       <RailHeading>Likely expertise</RailHeading>
       <div className="flex items-start gap-3.5">
         <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-teal-100 text-teal-800">
           <Icon.drop size={17} />
         </span>
-        <div>
+        <div className="min-w-0">
           <p className="text-[15px] font-semibold text-ink-950">{LIKELY_EXPERTISE.field}</p>
-          <p className="mt-0.5 text-[13px] text-ink-500">{LIKELY_EXPERTISE.narrow}</p>
+          <p className="mt-0.5 text-[13px] leading-snug text-ink-500">{LIKELY_EXPERTISE.narrow}</p>
         </div>
       </div>
 
       <Rule className="my-5" />
 
       <div className="flex items-start justify-between gap-4">
-        <div>
+        <div className="min-w-0">
           <p className="flex items-center gap-2 text-[14.5px] font-semibold text-ink-950">
             <StatusDot tone="warning" />
             {LIKELY_EXPERTISE.priority}
           </p>
-          <p className="mt-1.5 max-w-xs text-[12.5px] leading-relaxed text-ink-500">
+          <p className="mt-1.5 text-[12.5px] leading-relaxed text-ink-500">
             {LIKELY_EXPERTISE.priorityWhy}
           </p>
         </div>
@@ -466,11 +579,11 @@ function ExpertiseBlock() {
 
 function SafetyBlock() {
   return (
-    <section className="mb-9">
+    <section className="mb-8 sm:mb-9">
       <RailHeading>Safety</RailHeading>
-      <div className="rounded-xl bg-warning-100 p-5">
-        <p className="flex items-center gap-2 text-[14px] font-semibold text-warning-700">
-          <Icon.alert size={15} />
+      <div className="rounded-xl border-l-2 border-warning-700 bg-warning-100 p-4 sm:p-5">
+        <p className="flex items-start gap-2 text-[14px] font-semibold text-warning-700">
+          <Icon.alert size={15} className="mt-0.5 shrink-0" />
           {SAFETY.title}
         </p>
         <p className="mt-2 text-[13.5px] leading-relaxed text-ink-700">{SAFETY.body}</p>
@@ -484,11 +597,11 @@ function SafetyBlock() {
 
 function ConfirmationBlock() {
   return (
-    <section className="mb-4">
+    <section className="mb-2 sm:mb-4">
       <RailHeading>Professional confirmation</RailHeading>
-      <div className="flex gap-3.5 rounded-xl bg-[var(--color-sunken)] p-5">
+      <div className="flex gap-3.5 rounded-xl bg-[var(--color-sunken)] p-4 sm:p-5">
         <Icon.shield size={17} className="mt-0.5 shrink-0 text-ink-500" />
-        <div>
+        <div className="min-w-0">
           <p className="text-[13.5px] font-medium text-ink-900">Required before any diagnosis</p>
           <p className="mt-1.5 text-[13px] leading-relaxed text-ink-600">
             Everything above is drawn from the evidence you provided. TrustCraft has not identified a
@@ -509,10 +622,10 @@ export function ResolutionPathPage() {
   const [expanded, setExpanded] = useState<string | null>(null)
 
   return (
-    <AppShell recede caseStage="decide">
-      <div className="pb-20 pt-12">
+    <AppShell caseStage="decide">
+      <div className="pb-16 pt-8 sm:pt-10 lg:pb-20 lg:pt-12">
         <div className="max-w-2xl">
-          <Eyebrow tone="teal" className="a-up mb-4">
+          <Eyebrow tone="teal" className="a-up mb-3 sm:mb-4">
             Recommended next step
           </Eyebrow>
           <Display size="lg" as="h1" className="a-up d1 text-ink-950">
@@ -520,13 +633,13 @@ export function ResolutionPathPage() {
             <br />
             to see it.
           </Display>
-          <p className="a-up d2 mt-6 text-[16px] leading-relaxed text-ink-600">
+          <p className="a-up d2 measure mt-4 text-[15px] leading-relaxed text-ink-600 sm:mt-6 sm:text-[16px]">
             The exact leak source cannot be confirmed from the available evidence. Two different faults
             look the same in a photograph, and they need different work.
           </p>
         </div>
 
-        <div className="mt-14 space-y-px">
+        <div className="mt-9 space-y-px sm:mt-12 lg:mt-14">
           {PATHS_ORDERED.map((p, i) => (
             <PathRow
               key={p.id}
@@ -547,7 +660,7 @@ export function ResolutionPathPage() {
           ))}
         </div>
 
-        <p className="mt-12 max-w-xl text-[13px] leading-relaxed text-ink-400">
+        <p className="measure mt-10 text-[13px] leading-relaxed text-ink-400 sm:mt-12">
           TrustCraft recommends a path and shows its reasoning. Choosing a different one is recorded
           against the case, not overridden.
         </p>
@@ -579,36 +692,44 @@ function PathRow({
     <div
       className={`a-up transition-colors duration-200
         ${recommended ? 'rounded-2xl bg-white shadow-[0_1px_2px_rgba(15,17,20,0.04),0_14px_40px_-24px_rgba(15,17,20,0.28)]' : ''}
-        ${chosen && !recommended ? 'bg-[var(--color-sunken)] rounded-2xl' : ''}`}
+        ${chosen && !recommended ? 'rounded-2xl bg-[var(--color-sunken)]' : ''}`}
       style={{ animationDelay: `${0.08 * index}s` }}
     >
       {!recommended && <Rule />}
-      <div className={recommended ? 'p-9' : 'py-7'}>
-        <div className="flex flex-wrap items-start gap-x-8 gap-y-5">
+      <div className={recommended ? 'p-5 sm:p-7 lg:p-9' : 'py-6 sm:py-7'}>
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:gap-8">
           <div className="min-w-0 flex-1">
-            <div className="mb-2.5 flex flex-wrap items-center gap-3">
-              {recommended && <Pill tone="teal" icon={<Icon.check size={12} />}>Recommended</Pill>}
-              {chosen && !recommended && <Pill tone="neutral">Your choice</Pill>}
-            </div>
+            {(recommended || chosen) && (
+              <div className="mb-2.5 flex flex-wrap items-center gap-3">
+                {recommended && (
+                  <Pill tone="teal" icon={<Icon.check size={12} />}>
+                    Recommended
+                  </Pill>
+                )}
+                {chosen && !recommended && <Pill tone="neutral">Your choice</Pill>}
+              </div>
+            )}
 
             <h2
-              className={`font-display text-ink-950 ${recommended ? 'text-[32px] leading-tight' : 'text-[24px]'}`}
+              className={`font-display text-ink-950 ${recommended ? 'display-md' : 'text-[21px] leading-tight sm:text-[24px]'}`}
             >
               {path.title}
             </h2>
-            <p className="mt-2 max-w-xl text-[14.5px] leading-relaxed text-ink-600">{path.summary}</p>
+            <p className="measure mt-2 text-[14px] leading-relaxed text-ink-600 sm:text-[14.5px]">
+              {path.summary}
+            </p>
 
             {path.lessAppropriate && (
-              <p className="mt-4 flex max-w-xl items-start gap-2 text-[13px] leading-relaxed text-warning-700">
+              <p className="measure mt-4 flex items-start gap-2 text-[13px] leading-relaxed text-warning-700">
                 <Icon.alert size={14} className="mt-0.5 shrink-0" />
                 {path.lessAppropriate}
               </p>
             )}
 
             {recommended && (
-              <ul className="mt-6 space-y-2.5">
+              <ul className="mt-5 space-y-2.5 sm:mt-6">
                 {path.why.map(w => (
-                  <li key={w} className="flex items-start gap-2.5 text-[14px] leading-relaxed text-ink-700">
+                  <li key={w} className="flex items-start gap-2.5 text-[13.5px] leading-relaxed text-ink-700 sm:text-[14px]">
                     <Icon.check size={15} className="mt-0.5 shrink-0 text-teal-700" />
                     {w}
                   </li>
@@ -628,8 +749,8 @@ function PathRow({
             )}
           </div>
 
-          <div className={`flex shrink-0 flex-col gap-5 ${recommended ? 'items-end' : 'items-end'}`}>
-            <dl className="flex gap-8 text-right">
+          <div className="flex shrink-0 flex-col gap-4 lg:items-end lg:gap-5">
+            <dl className="flex gap-8 lg:text-right">
               <div>
                 <dt className="font-data text-[10.5px] uppercase tracking-[0.14em] text-ink-400">Cost</dt>
                 <dd className="tnum mt-1 text-[15px] font-medium text-ink-900">{path.cost}</dd>
@@ -641,11 +762,16 @@ function PathRow({
             </dl>
 
             {recommended ? (
-              <Button size="lg" onClick={onChoose} iconEnd={<Icon.arrow size={17} />}>
+              <Button
+                size="lg"
+                onClick={onChoose}
+                iconEnd={<Icon.arrow size={17} />}
+                className="w-full sm:w-auto"
+              >
                 Find a professional
               </Button>
             ) : (
-              <div className="flex items-center gap-4">
+              <div className="flex flex-wrap items-center gap-4">
                 <TextLink tone="muted" onClick={onToggle}>
                   {expanded ? 'Hide detail' : 'When this fits'}
                 </TextLink>

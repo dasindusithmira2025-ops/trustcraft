@@ -213,13 +213,9 @@ export function Display({
   className?: string
   as?: 'h1' | 'h2' | 'h3' | 'p'
 }) {
-  const sizes = {
-    sm: 'text-[26px] leading-[1.15]',
-    md: 'text-[34px] leading-[1.1]',
-    lg: 'text-[46px] leading-[1.03]',
-    xl: 'text-[68px] leading-[0.98]',
-  }
-  return <As className={`font-display ${sizes[size]} ${className}`}>{children}</As>
+  // The scale itself lives in index.css as fluid clamps: one continuous
+  // ramp from a 360px phone to a 1440px display, with no snap in between.
+  return <As className={`display-${size} ${className}`}>{children}</As>
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -650,26 +646,163 @@ export function PageHead({
   aside?: ReactNode
 }) {
   return (
-    <header className="mb-9">
+    <header className="mb-8 sm:mb-10 lg:mb-12">
       {back && (
         <button
           type="button"
           onClick={() => navigate(back.to)}
-          className="a-fade mb-5 inline-flex items-center gap-2 text-[13px] text-ink-500
-            transition-colors hover:text-ink-900"
+          className="a-fade tap mb-4 inline-flex items-center gap-2 text-[13px] text-ink-500
+            transition-colors hover:text-ink-900 sm:mb-5"
         >
           <Icon.arrowLeft size={15} />
           {back.label}
         </button>
       )}
-      <div className="flex flex-wrap items-end justify-between gap-6">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-2xl">
-          {eyebrow && <Eyebrow tone="teal" className="mb-3">{eyebrow}</Eyebrow>}
+          {eyebrow && <Eyebrow tone="teal" className="mb-2.5 sm:mb-3">{eyebrow}</Eyebrow>}
           <Display size="md" className="a-up text-ink-950">{title}</Display>
-          {lede && <p className="a-up d1 mt-3 max-w-xl text-[15px] leading-relaxed text-ink-500">{lede}</p>}
+          {lede && (
+            <p className="a-up d1 measure mt-3 text-[14.5px] leading-relaxed text-ink-500 sm:text-[15px]">
+              {lede}
+            </p>
+          )}
         </div>
         {aside && <div className="a-up d2 shrink-0">{aside}</div>}
       </div>
     </header>
+  )
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// Product motifs
+//
+// These are the marks that make a screen recognisably TrustCraft. They come
+// from the product model — provenance, tri-state scope, resolved/open — and
+// not from decoration. Every one of them appears on more than one surface.
+// ════════════════════════════════════════════════════════════════════════════
+
+/**
+ * A provenance mark: the tag that ties an assertion back to the thing that
+ * evidences it. `E1` is the first photograph, `VOICE` the recording, `YOU` an
+ * answer the customer gave. Nothing on a trust screen is asserted without one.
+ */
+export function EvidenceRef({
+  label,
+  onSelect,
+  tone = 'teal',
+}: {
+  label: string
+  onSelect?: () => void
+  tone?: 'teal' | 'muted' | 'light'
+}) {
+  const tones = {
+    teal: 'border-teal-200 bg-teal-50 text-teal-800',
+    muted: 'border-[var(--color-rule-strong)] bg-transparent text-ink-500',
+    light: 'border-white/20 bg-white/[0.06] text-white/70',
+  }
+  const cls = `inline-flex h-[19px] shrink-0 items-center rounded-[5px] border px-1.5
+    font-data text-[10px] uppercase leading-none tracking-[0.1em] ${tones[tone]}`
+
+  if (!onSelect) {
+    return <span className={cls}>{label}</span>
+  }
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className={`${cls} transition-colors hover:border-teal-700 hover:bg-teal-100`}
+      aria-label={`Show the evidence behind this: ${label}`}
+    >
+      {label}
+    </button>
+  )
+}
+
+/** `ev-1` → `E1`, so the mark reads as a citation rather than a database key. */
+export function evidenceTag(id: string, kind?: string): string {
+  if (kind === 'voice') return 'Voice'
+  if (kind === 'note') return 'Note'
+  const n = id.match(/(\d+)$/)?.[1]
+  return n ? `E${n}` : 'Evidence'
+}
+
+/**
+ * Segmented control. On small screens a three-column comparison becomes a
+ * choice of which two things to read — this is how that choice is made.
+ */
+export function Segmented<T extends string>({
+  options,
+  value,
+  onChange,
+  label,
+  size = 'md',
+}: {
+  options: { value: T; label: string; hint?: string }[]
+  value: T
+  onChange: (v: T) => void
+  label: string
+  size?: 'sm' | 'md'
+}) {
+  return (
+    <div
+      role="tablist"
+      aria-label={label}
+      className="flex gap-1 rounded-xl bg-[var(--color-sunken)] p-1"
+    >
+      {options.map(o => {
+        const active = o.value === value
+        return (
+          <button
+            key={o.value}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            onClick={() => onChange(o.value)}
+            className={`tap min-w-0 flex-1 rounded-[9px] px-2 transition-all duration-150
+              ${size === 'sm' ? 'py-1.5 text-[12.5px]' : 'py-2 text-[13.5px]'}
+              ${
+                active
+                  ? 'bg-white font-semibold text-ink-950 shadow-[0_1px_2px_rgba(15,17,20,0.10)]'
+                  : 'font-medium text-ink-500 hover:text-ink-900'
+              }`}
+          >
+            <span className="block truncate">{o.label}</span>
+            {o.hint && (
+              <span className={`mt-0.5 block truncate text-[10.5px] font-normal ${active ? 'text-ink-500' : 'text-ink-400'}`}>
+                {o.hint}
+              </span>
+            )}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+/**
+ * A stated / not-stated pair for stacked mobile comparison. Colour is never
+ * the only carrier: an unstated value keeps its words and its glyph.
+ */
+export function CompareCell({
+  name,
+  children,
+  emphasis,
+}: {
+  name: string
+  children: ReactNode
+  emphasis?: boolean
+}) {
+  return (
+    <div
+      className={`min-w-0 rounded-xl px-3.5 py-3 ${
+        emphasis ? 'bg-white ring-1 ring-[var(--color-rule)]' : 'bg-[var(--color-sunken)]/70'
+      }`}
+    >
+      <p className="mb-1.5 truncate font-data text-[10px] uppercase tracking-[0.13em] text-ink-400">
+        {name}
+      </p>
+      <div className="text-[13.5px] font-medium text-ink-900">{children}</div>
+    </div>
   )
 }

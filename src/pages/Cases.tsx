@@ -38,7 +38,7 @@ const GROUPS: { key: Attention; title: string; blurb: string; tone: 'gold' | 'te
 export function Cases() {
   return (
     <AppShell>
-      <div className="pb-20 pt-12">
+      <div className="pb-16 pt-8 sm:pt-10 lg:pb-20 lg:pt-12">
         <PageHead
           eyebrow="Cases"
           title="What needs you, and what does not"
@@ -54,7 +54,7 @@ export function Cases() {
           const items = CASES.filter(c => c.attention === g.key)
           if (items.length === 0) return null
           return (
-            <section key={g.key} className="mb-14">
+            <section key={g.key} className="mb-10 sm:mb-14">
               <div className="mb-1 flex flex-wrap items-baseline gap-x-4 gap-y-1">
                 <Eyebrow tone={g.tone === 'muted' ? 'muted' : g.tone}>{g.title}</Eyebrow>
                 <span className="font-data text-[11px] text-ink-300">{items.length}</span>
@@ -84,27 +84,38 @@ function CaseRow({ record, index }: { record: CaseRecord; index: number }) {
       <button
         type="button"
         onClick={() => navigate(record.route)}
-        className="a-up group flex w-full flex-wrap items-center gap-x-8 gap-y-3 py-6 text-left"
+        className="a-up group flex w-full flex-col gap-3 py-5 text-left
+          lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-8 lg:gap-y-3 lg:py-6"
         style={{ animationDelay: `${index * 0.05}s` }}
       >
-        <span className="font-data w-[74px] shrink-0 text-[11.5px] text-ink-400">{record.id}</span>
+        <span className="flex items-center gap-3 lg:contents">
+          <span className="font-data shrink-0 text-[11.5px] text-ink-400 lg:w-[74px]">{record.id}</span>
+          {record.attention === 'needs-you' && (
+            <span className="lg:hidden">
+              <Pill tone="gold">Decide</Pill>
+            </span>
+          )}
+          <span className="font-data ml-auto text-[11.5px] text-ink-400 lg:hidden">{record.opened}</span>
+        </span>
 
-        <span className="min-w-[220px] flex-1">
-          <span className="block font-display text-[24px] leading-tight text-ink-950 transition-colors group-hover:text-teal-800">
+        <span className="min-w-0 lg:min-w-[220px] lg:flex-1">
+          <span className="block font-display text-[21px] leading-tight text-ink-950 transition-colors group-hover:text-teal-800 sm:text-[24px]">
             {record.title}
           </span>
           <span className="mt-1 block text-[13px] text-ink-500">{record.room}</span>
         </span>
 
-        <span className="flex min-w-[210px] flex-col gap-1.5">
-          <span className="flex items-center gap-2 text-[13.5px] font-medium text-ink-800">
-            <StatusDot tone={tone[record.attention]} pulse={record.attention === 'active'} />
+        <span className="flex flex-col gap-1.5 lg:min-w-[210px]">
+          <span className="flex items-start gap-2 text-[13.5px] font-medium text-ink-800">
+            <span className="mt-1.5">
+              <StatusDot tone={tone[record.attention]} pulse={record.attention === 'active'} />
+            </span>
             {record.status}
           </span>
           {record.pro && <span className="pl-4 text-[12.5px] text-ink-400">{record.pro}</span>}
         </span>
 
-        <span className="flex items-center gap-4">
+        <span className="hidden items-center gap-4 lg:flex">
           {record.attention === 'needs-you' && <Pill tone="gold">Decide</Pill>}
           <span className="text-[12.5px] text-ink-400">{record.opened}</span>
           <Icon.chevronRight
@@ -128,7 +139,7 @@ export function Messages() {
 
   return (
     <AppShell>
-      <div className="pb-20 pt-12">
+      <div className="pb-16 pt-8 sm:pt-10 lg:pb-20 lg:pt-12">
         <PageHead
           eyebrow="Messages"
           title={`Chamod Fernando`}
@@ -136,9 +147,9 @@ export function Messages() {
           back={{ label: 'All cases', to: '/cases' }}
         />
 
-        <div className="grid grid-cols-1 gap-x-16 gap-y-10 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <div className="grid grid-cols-1 gap-x-14 gap-y-10 lg:grid-cols-[minmax(0,1fr)_280px] xl:gap-x-16 xl:grid-cols-[minmax(0,1fr)_300px]">
           <div className="min-w-0">
-            <div className="space-y-6">
+            <div className="space-y-5 sm:space-y-6">
               {THREAD.map(m =>
                 m.kind === 'text' ? (
                   <TextBubble key={m.id} from={m.from} at={m.at} body={m.body} tint={pro.tint} name={pro.name} />
@@ -173,25 +184,25 @@ export function Messages() {
                 name="msg"
                 rows={3}
                 placeholder="Write a message…"
-                className="w-full resize-none rounded-xl bg-white px-5 py-4 text-[14.5px] text-ink-900
+                className="w-full resize-none rounded-xl bg-white px-4 py-3.5 text-[14.5px] text-ink-900 sm:px-5 sm:py-4
                   ring-1 ring-[var(--color-rule)] transition-shadow placeholder:text-ink-300
                   focus:outline-none focus:ring-2 focus:ring-teal-700"
               />
-              <div className="mt-3 flex items-center gap-3">
+              <div className="mt-3 flex flex-wrap items-center gap-3">
                 <Button size="md" type="submit">
                   Send
                 </Button>
                 <Button size="md" variant="ghost" icon={<Icon.camera size={16} />}>
                   Attach a photo
                 </Button>
-                <span className="ml-auto text-[12px] text-ink-400">
+                <span className="w-full text-[12px] text-ink-400 sm:ml-auto sm:w-auto">
                   Messages are attached to case TC-2048
                 </span>
               </div>
             </form>
           </div>
 
-          <aside className="lg:sticky lg:top-28 lg:self-start">
+          <aside className="lg:sticky lg:top-24 lg:self-start">
             <Eyebrow className="mb-4">Decisions in this case</Eyebrow>
             <p className="mb-5 text-[13px] leading-relaxed text-ink-500">
               These are the things that changed what you owe or what you agreed to. They live in the
@@ -227,11 +238,10 @@ function TextBubble({
   return (
     <div className={`flex gap-3 ${mine ? 'flex-row-reverse' : ''}`}>
       {!mine && <Avatar tint={tint} name={name} size={32} />}
-      <div className={`max-w-lg ${mine ? 'text-right' : ''}`}>
+      <div className={`min-w-0 max-w-[80%] sm:max-w-lg ${mine ? 'text-right' : ''}`}>
         <div
-          className={`inline-block rounded-2xl px-4.5 py-3 text-[14.5px] leading-relaxed
+          className={`inline-block rounded-2xl px-[18px] py-3 text-left text-[14px] leading-relaxed sm:text-[14.5px]
             ${mine ? 'bg-teal-800 text-white' : 'bg-white text-ink-800 ring-1 ring-[var(--color-rule)]'}`}
-          style={{ paddingLeft: 18, paddingRight: 18 }}
         >
           {body}
         </div>
@@ -263,7 +273,7 @@ function ObjectCard({
       <button
         type="button"
         onClick={() => navigate(href)}
-        className="group w-full max-w-md rounded-2xl bg-[var(--color-sunken)] p-5 text-left
+        className="group w-full max-w-md rounded-2xl bg-[var(--color-sunken)] p-4 text-left sm:p-5
           ring-1 ring-[var(--color-rule)] transition-all duration-150 hover:-translate-y-0.5 hover:ring-teal-700"
       >
         <div className="flex items-center justify-between">
