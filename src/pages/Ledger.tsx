@@ -13,7 +13,7 @@ import {
   StatusDot,
   TextLink,
 } from '../ui'
-import { CASES, LEDGER, money, type LedgerAsset } from '../data'
+import { CASES, LEDGER, money, type LedgerAsset, type LedgerEntry } from '../data'
 
 // ════════════════════════════════════════════════════════════════════════════
 // Home Ledger
@@ -76,7 +76,7 @@ export function HomeLedger({ assetId }: { assetId?: string }) {
           aside={
             <dl className="flex gap-8 sm:gap-10">
               <div>
-                <dt className="font-data text-[10.5px] uppercase tracking-[0.14em] text-ink-400">
+                <dt className="font-data text-[11px] uppercase tracking-[0.14em] text-ink-400">
                   Recorded jobs
                 </dt>
                 <dd className="tnum mt-1.5 font-display text-[24px] leading-none text-ink-950 sm:text-[28px]">
@@ -84,7 +84,7 @@ export function HomeLedger({ assetId }: { assetId?: string }) {
                 </dd>
               </div>
               <div>
-                <dt className="font-data text-[10.5px] uppercase tracking-[0.14em] text-ink-400">
+                <dt className="font-data text-[11px] uppercase tracking-[0.14em] text-ink-400">
                   Total spend
                 </dt>
                 <dd className="tnum mt-1.5 font-display text-[24px] leading-none text-ink-950 sm:text-[28px]">
@@ -96,7 +96,7 @@ export function HomeLedger({ assetId }: { assetId?: string }) {
         />
 
         {/* ── Small screens: drill down ──────────────────────────────── */}
-        <div className="lg:hidden">
+        <div className="md:hidden">
           {level === 'areas' && (
             <div className="a-fade">
               <Eyebrow className="mb-3">My home</Eyebrow>
@@ -116,7 +116,7 @@ export function HomeLedger({ assetId }: { assetId?: string }) {
                         <span className="block font-display text-[21px] leading-tight text-ink-950">
                           {area}
                         </span>
-                        <span className="mt-1 block text-[12.5px] text-ink-500">
+                        <span className="mt-1 block text-[13.5px] text-ink-500">
                           {assets.length} tracked {assets.length === 1 ? 'item' : 'items'}
                           {assets.some(a => a.warrantyUntil) && ' · some still covered'}
                         </span>
@@ -152,7 +152,7 @@ export function HomeLedger({ assetId }: { assetId?: string }) {
                       >
                         <span className="min-w-0 flex-1">
                           <span className="block text-[15px] font-semibold text-ink-950">{a.name}</span>
-                          <span className="mt-1 flex items-center gap-1.5 text-[12.5px] text-ink-500">
+                          <span className="mt-1 flex items-center gap-1.5 text-[13.5px] text-ink-500">
                             <StatusDot tone={cond.tone} />
                             {cond.detail}
                           </span>
@@ -188,8 +188,8 @@ export function HomeLedger({ assetId }: { assetId?: string }) {
         </div>
 
         {/* ── Laptop and wider: structure beside record ──────────────── */}
-        <div className="hidden lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-x-14 xl:grid-cols-[264px_minmax(0,1fr)] xl:gap-x-16">
-          <nav aria-label="Rooms and assets" className="lg:sticky lg:top-24 lg:self-start">
+        <div className="hidden md:grid md:grid-cols-[204px_minmax(0,1fr)] md:gap-x-9 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-x-14 xl:grid-cols-[264px_minmax(0,1fr)] xl:gap-x-16">
+          <nav aria-label="Rooms and assets" className="md:sticky md:top-24 md:self-start">
             <Eyebrow className="mb-4">My home</Eyebrow>
             {areas.map(([area, assets]) => (
               <div key={area} className="mb-6">
@@ -213,11 +213,11 @@ export function HomeLedger({ assetId }: { assetId?: string }) {
                           </span>
                           <span className="min-w-0 flex-1">
                             <span
-                              className={`block truncate text-[13.5px] ${active ? 'font-semibold text-ink-950' : 'font-medium text-ink-700'}`}
+                              className={`block truncate text-[14.5px] ${active ? 'font-semibold text-ink-950' : 'font-medium text-ink-700'}`}
                             >
                               {a.name}
                             </span>
-                            <span className="mt-0.5 block truncate text-[11.5px] text-ink-400">
+                            <span className="mt-0.5 block truncate text-[12.5px] text-ink-400">
                               {a.lastService}
                             </span>
                           </span>
@@ -247,7 +247,7 @@ function BackLink({ label, onClick }: { label: string; onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="tap mb-4 inline-flex items-center gap-2 text-[13px] text-ink-500 transition-colors hover:text-ink-900"
+      className="tap mb-4 inline-flex items-center gap-2 text-[14px] text-ink-500 transition-colors hover:text-ink-900"
     >
       <Icon.arrowLeft size={15} />
       {label}
@@ -267,16 +267,16 @@ function AssetRecord({ asset }: { asset: LedgerAsset }) {
       <Display size="md" as="h2" className="text-ink-950">
         {asset.name}
       </Display>
-      <p className="mt-2 text-[13.5px] text-ink-500 sm:text-[14px]">{asset.detail}</p>
+      <p className="mt-2 text-[14.5px] text-ink-500 sm:text-[15px]">{asset.detail}</p>
 
       {/* Condition first — the question a person actually arrives with. */}
       <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-4 rounded-xl bg-[var(--color-sunken)] p-4 sm:mt-7 sm:grid-cols-3 sm:p-5">
         <div className="min-w-0">
-          <dt className="font-data text-[10px] uppercase tracking-[0.14em] text-ink-400">
+          <dt className="font-data text-[10.5px] uppercase tracking-[0.14em] text-ink-400">
             Current state
           </dt>
           <dd
-            className={`mt-1.5 flex items-center gap-1.5 text-[14px] font-semibold
+            className={`mt-1.5 flex items-center gap-1.5 text-[15px] font-semibold
               ${cond.tone === 'gold' ? 'text-gold-600' : 'text-success-700'}`}
           >
             <StatusDot tone={cond.tone} />
@@ -284,14 +284,14 @@ function AssetRecord({ asset }: { asset: LedgerAsset }) {
           </dd>
         </div>
         <div className="min-w-0">
-          <dt className="font-data text-[10px] uppercase tracking-[0.14em] text-ink-400">
+          <dt className="font-data text-[10.5px] uppercase tracking-[0.14em] text-ink-400">
             Latest service
           </dt>
-          <dd className="mt-1.5 text-[14px] font-semibold text-ink-950">{asset.lastService}</dd>
+          <dd className="mt-1.5 text-[15px] font-semibold text-ink-950">{asset.lastService}</dd>
         </div>
         <div className="col-span-2 min-w-0 sm:col-span-1">
-          <dt className="font-data text-[10px] uppercase tracking-[0.14em] text-ink-400">Warranty</dt>
-          <dd className="mt-1.5 text-[14px] font-semibold text-ink-950">
+          <dt className="font-data text-[10.5px] uppercase tracking-[0.14em] text-ink-400">Cover</dt>
+          <dd className="mt-1.5 text-[15px] font-semibold text-ink-950">
             {asset.warrantyUntil ? (
               <Pill tone="success" icon={<Icon.shield size={12} />}>
                 {asset.warrantyUntil.startsWith('Certificate')
@@ -299,7 +299,7 @@ function AssetRecord({ asset }: { asset: LedgerAsset }) {
                   : `Until ${asset.warrantyUntil}`}
               </Pill>
             ) : (
-              <span className="text-[13.5px] font-medium text-ink-500">None active</span>
+              <span className="text-[14.5px] font-medium text-ink-500">None active</span>
             )}
           </dd>
         </div>
@@ -307,11 +307,11 @@ function AssetRecord({ asset }: { asset: LedgerAsset }) {
 
       {asset.reminder && (
         <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-dashed border-[var(--color-rule-strong)] px-4 py-3.5 sm:px-5">
-          <span className="flex items-center gap-2 text-[13.5px] font-medium text-ink-900">
+          <span className="flex items-center gap-2 text-[14.5px] font-medium text-ink-900">
             <Icon.clock size={15} className="text-ink-500" />
             {asset.reminder.label}
           </span>
-          <span className="text-[13px] text-ink-500">Due {asset.reminder.due}</span>
+          <span className="text-[14px] text-ink-500">Due {asset.reminder.due}</span>
           <TextLink tone="muted" className="ml-auto">
             Remind me
           </TextLink>
@@ -326,9 +326,9 @@ function AssetRecord({ asset }: { asset: LedgerAsset }) {
         <article key={h.caseId} className="a-up" style={{ animationDelay: `${i * 0.06}s` }}>
           <div className="grid grid-cols-1 gap-x-10 gap-y-4 py-6 sm:py-7 lg:grid-cols-[120px_minmax(0,1fr)]">
             <div className="flex items-center gap-3 lg:block">
-              <p className="tnum font-data text-[12px] text-ink-400">{h.date}</p>
+              <p className="tnum font-data text-[13px] text-ink-400">{h.date}</p>
               {i === 0 && (
-                <span className="inline-flex items-center gap-1.5 text-[11.5px] font-medium text-teal-800 lg:mt-2">
+                <span className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-teal-800 lg:mt-2">
                   <StatusDot tone="teal" />
                   Most recent
                 </span>
@@ -349,14 +349,19 @@ function AssetRecord({ asset }: { asset: LedgerAsset }) {
                 <Meta label="Professional" value={h.pro} />
                 <Meta label="Case" value={h.caseId} />
                 <Meta label="Evidence" value={`${h.evidence} items`} />
+                {h.versions && h.versions > 1 && (
+                  <Meta label="Agreement versions" value={String(h.versions)} />
+                )}
                 {h.warranty && <Meta label="Cover" value={h.warranty} tone="success" />}
               </dl>
+
+              <EvidenceStrip entry={h} />
 
               {h.parts && h.parts.length > 0 && (
                 <Disclosure summary={`Parts fitted (${h.parts.length})`} className="mt-4 max-w-md">
                   <ul className="space-y-2 pb-2">
                     {h.parts.map(p => (
-                      <li key={p} className="flex items-start gap-2.5 text-[13.5px] text-ink-600">
+                      <li key={p} className="flex items-start gap-2.5 text-[14.5px] text-ink-600">
                         <Icon.check size={14} className="mt-0.5 shrink-0 text-ink-300" />
                         {p}
                       </li>
@@ -382,7 +387,7 @@ function AssetRecord({ asset }: { asset: LedgerAsset }) {
         </article>
       ))}
 
-      <p className="measure mt-7 flex items-start gap-2 text-[12.5px] leading-relaxed text-ink-400 sm:mt-8">
+      <p className="measure mt-7 flex items-start gap-2 text-[13.5px] leading-relaxed text-ink-400 sm:mt-8">
         <Icon.info size={13} className="mt-0.5 shrink-0" />
         This record stays with the home, not with the professional. If you sell, it is the honest
         maintenance history a buyer would otherwise have to take on trust.
@@ -391,11 +396,93 @@ function AssetRecord({ asset }: { asset: LedgerAsset }) {
   )
 }
 
+/**
+ * Evidence strip.
+ *
+ * Not a gallery — a strip, capped and quiet, sitting under the figures rather
+ * than competing with them. Four photographs and the two documents that were
+ * actually signed are enough to make a ledger row feel like a thing that
+ * happened to this house.
+ */
+function EvidenceStrip({ entry }: { entry: LedgerEntry }) {
+  const [open, setOpen] = useState<string | null>(null)
+  if (!entry.strip || entry.strip.length === 0) return null
+
+  const shown = entry.strip
+  const photo = open ? shown.find(i => i.label === open) : null
+
+  return (
+    <div className="mt-5">
+      <Eyebrow className="mb-2.5">What this looked like</Eyebrow>
+
+      <ul className="snap-row gap-2.5">
+        {shown.map(item => (
+          <li key={item.label}>
+            <button
+              type="button"
+              onClick={() => (item.to ? navigate(item.to.replace('#', '')) : setOpen(item.label))}
+              className="group block w-[104px] text-left focus:outline-none sm:w-[116px]"
+            >
+              <span
+                className="relative block h-[74px] overflow-hidden rounded-lg ring-1 ring-[var(--color-rule)]
+                  transition-all duration-150 group-hover:-translate-y-0.5 group-hover:ring-teal-700
+                  group-focus-visible:ring-2 group-focus-visible:ring-teal-700 sm:h-[82px]"
+              >
+                {item.src ? (
+                  <img src={item.src} alt="" className="h-full w-full object-cover" loading="lazy" />
+                ) : (
+                  <span className="flex h-full w-full items-center justify-center bg-[var(--color-sunken)] text-ink-500">
+                    <Icon.file size={19} />
+                  </span>
+                )}
+              </span>
+              <span className="mt-1.5 block truncate text-[12.5px] font-medium text-ink-700">
+                {item.label}
+              </span>
+              <span className="block truncate text-[11.5px] text-ink-500">
+                {item.kind === 'document' ? 'Open the record' : 'Photograph'}
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+
+      {photo?.src && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={photo.label}
+          onClick={() => setOpen(null)}
+          className="a-fade fixed inset-0 z-[70] flex items-center justify-center bg-ink-950/92 p-4 sm:p-8"
+        >
+          <div className="max-w-3xl" onClick={e => e.stopPropagation()}>
+            <img src={photo.src} alt={photo.label} className="max-h-[70vh] w-full rounded-xl object-contain" />
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+              <p className="text-[14px] text-white/80">
+                {photo.label} · {entry.title} · {entry.date}
+              </p>
+              <button
+                type="button"
+                onClick={() => setOpen(null)}
+                className="tap flex items-center gap-2 rounded-lg bg-white/10 px-3.5 py-2 text-[13.5px]
+                  text-white transition-colors hover:bg-white/20"
+              >
+                <Icon.close size={14} />
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function Meta({ label, value, tone }: { label: string; value: string; tone?: 'success' }) {
   return (
     <div className="min-w-0">
-      <dt className="font-data text-[10px] uppercase tracking-[0.14em] text-ink-400">{label}</dt>
-      <dd className={`mt-1 text-[13.5px] font-medium ${tone === 'success' ? 'text-success-700' : 'text-ink-900'}`}>
+      <dt className="font-data text-[10.5px] uppercase tracking-[0.14em] text-ink-400">{label}</dt>
+      <dd className={`mt-1 text-[14.5px] font-medium ${tone === 'success' ? 'text-success-700' : 'text-ink-900'}`}>
         {value}
       </dd>
     </div>

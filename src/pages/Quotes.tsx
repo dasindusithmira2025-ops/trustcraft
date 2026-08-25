@@ -47,7 +47,7 @@ function gapsOf(q: Quote): { label: string; kind: 'unstated' | 'excluded' }[] {
     if (state === 'unstated') gaps.push({ label: `${line.label} not specified`, kind: 'unstated' })
     if (state === 'no') gaps.push({ label: `${line.label} excluded`, kind: 'excluded' })
   }
-  if (q.warrantyDays === null) gaps.push({ label: 'Warranty not specified', kind: 'unstated' })
+  if (q.warrantyDays === null) gaps.push({ label: 'Cover not specified', kind: 'unstated' })
   return gaps
 }
 
@@ -100,7 +100,7 @@ export function QuoteLens() {
             Three quotes. They are
             <br className="hidden sm:block" /> not the same job.
           </Display>
-          <p className="a-up d2 measure mt-3.5 text-[14.5px] leading-relaxed text-ink-500 sm:mt-5 sm:text-[15.5px]">
+          <p className="a-up d2 measure mt-3.5 text-[15.5px] leading-relaxed text-ink-500 sm:mt-5 sm:text-[15.5px]">
             Every quote answers the same six questions about scope. Read across before you read the
             totals — the cheapest quote is cheapest partly because it promises less.
           </p>
@@ -114,7 +114,7 @@ export function QuoteLens() {
             <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <Eyebrow className="mb-1.5">Scope, line by line</Eyebrow>
-                <p className="text-[13px] text-ink-500">
+                <p className="text-[14px] text-ink-500">
                   {diffOnly
                     ? `Showing only what differs — ${SCOPE_LINES.length - matrixRows.length} identical line(s) hidden`
                     : 'Every line each quote does or does not commit to'}
@@ -187,7 +187,7 @@ function Verdict({
     >
       <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-white/10 px-5 py-3.5 sm:px-7 lg:px-9">
         <Eyebrow tone="light">The lens found</Eyebrow>
-        <p className="font-data ml-auto text-[11.5px] tracking-[0.1em] text-white/55">
+        <p className="font-data ml-auto text-[12.5px] tracking-[0.1em] text-white/68">
           {QUOTES.length} QUOTES · {comparable} COMPARABLE · {incomplete} INCOMPLETE
         </p>
       </div>
@@ -205,17 +205,17 @@ function Verdict({
             {money(cheapest.total)}
           </p>
 
-          <p className="mt-5 flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.12em] text-warning-700">
+          <p className="mt-5 flex items-center gap-2 text-[14px] font-semibold uppercase tracking-[0.12em] text-warning-700">
             <span className="h-px w-6 bg-warning-700" aria-hidden="true" />
             But
           </p>
           <ul className="mt-3 space-y-2">
             {gaps.map(g => (
-              <li key={g.label} className="flex items-start gap-2.5 text-[14px] leading-snug text-white/85">
+              <li key={g.label} className="flex items-start gap-2.5 text-[15px] leading-snug text-white/85">
                 {g.kind === 'unstated' ? (
                   <Icon.question size={15} className="mt-0.5 shrink-0 text-warning-700" />
                 ) : (
-                  <Icon.dash size={15} className="mt-0.5 shrink-0 text-white/40" />
+                  <Icon.dash size={15} className="mt-0.5 shrink-0 text-white/58" />
                 )}
                 {g.label}
               </li>
@@ -231,7 +231,7 @@ function Verdict({
           <p className="tnum font-display text-[34px] leading-none text-teal-400 sm:text-[42px]">
             ~{money(likely)}
           </p>
-          <p className="measure-sm mt-3 text-[13.5px] leading-relaxed text-white/55">
+          <p className="measure-sm mt-3 text-[14.5px] leading-relaxed text-white/68">
             If the unspecified parts are billed at the typical {money(quoteFor('chamod').parts)}, this
             quote lands above both of the others.
           </p>
@@ -289,8 +289,8 @@ function ScaleBar({
   return (
     <div>
       <div className="mb-1.5 flex items-baseline justify-between gap-3">
-        <span className="truncate text-[12px] text-white/55">{label}</span>
-        <span className="tnum font-data shrink-0 text-[12px] text-white/80">{money(value)}</span>
+        <span className="truncate text-[13px] text-white/68">{label}</span>
+        <span className="tnum font-data shrink-0 text-[13px] text-white/80">{money(value)}</span>
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-white/10">
         <div
@@ -319,7 +319,7 @@ function DiffToggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => v
       aria-checked={on}
       onClick={() => onChange(!on)}
       className={`tap inline-flex shrink-0 self-start items-center gap-2.5 rounded-[10px] border px-3.5 py-2.5
-        text-[13px] font-medium transition-colors
+        text-[14px] font-medium transition-colors
         ${
           on
             ? 'border-teal-800 bg-teal-800 text-white'
@@ -367,7 +367,7 @@ function ScopeMatrix({
   return (
     <table className="w-full border-collapse text-left">
       <caption className="sr-only">
-        Quote comparison across scope lines, warranty, duration, inspection fee and total.
+        Quote comparison across scope lines, cover, duration, inspection fee and total.
       </caption>
 
       <thead className="sticky-head">
@@ -398,12 +398,12 @@ function ScopeMatrix({
                       {pro.short}
                     </span>
                     {gaps > 0 ? (
-                      <span className="mt-0.5 flex items-center gap-1 text-[11px] font-normal text-warning-700">
+                      <span className="mt-0.5 flex items-center gap-1 text-[11.5px] font-normal text-warning-700">
                         <Icon.question size={11} />
                         {gaps} unstated
                       </span>
                     ) : (
-                      <span className="mt-0.5 flex items-center gap-1 text-[11px] font-normal text-success-700">
+                      <span className="mt-0.5 flex items-center gap-1 text-[11.5px] font-normal text-success-700">
                         <Icon.check size={11} />
                         Fully stated
                       </span>
@@ -426,7 +426,7 @@ function ScopeMatrix({
           <tr key={line.key} className="group/row">
             <th
               scope="row"
-              className="py-3.5 pr-6 text-[13.5px] font-medium text-ink-700 transition-colors
+              className="py-3.5 pr-6 text-[14.5px] font-medium text-ink-700 transition-colors
                 group-hover/row:text-ink-950"
             >
               <span className="inline-flex items-center gap-1.5">
@@ -453,7 +453,7 @@ function ScopeMatrix({
 
         {rows.length === 0 && (
           <tr>
-            <td colSpan={4} className="py-8 text-[14px] text-ink-500">
+            <td colSpan={4} className="py-8 text-[15px] text-ink-500">
               Every scope line is identical across the three quotes.
             </td>
           </tr>
@@ -466,12 +466,12 @@ function ScopeMatrix({
         </tr>
 
         <TermRow
-          label="Warranty"
+          label="Cover"
           hint="Cover on the labour if the same fault returns."
           col={col}
           render={q =>
             q.warrantyDays ? (
-              <span className="tnum text-[14.5px] font-medium text-ink-900">{q.warrantyDays} days</span>
+              <span className="tnum text-[15.5px] font-medium text-ink-900">{q.warrantyDays} days</span>
             ) : (
               <ScopeMark state="unstated" />
             )
@@ -482,13 +482,13 @@ function ScopeMatrix({
           label="Expected duration"
           hint="How long the professional expects to be on site."
           col={col}
-          render={q => <span className="tnum text-[14.5px] text-ink-700">{q.durationMin} min</span>}
+          render={q => <span className="tnum text-[15.5px] text-ink-700">{q.durationMin} min</span>}
         />
         <TermRow
           label="Inspection"
           hint="Credited against the repair if you continue with the same professional."
           col={col}
-          render={q => <span className="tnum text-[14.5px] text-ink-700">{money(q.inspection)}</span>}
+          render={q => <span className="tnum text-[15.5px] text-ink-700">{money(q.inspection)}</span>}
         />
 
         <tr aria-hidden="true">
@@ -519,7 +519,7 @@ function ScopeMatrix({
               )}
               {unstatedCount(q) > 0 && (
                 <Tooltip label="Unstated lines can be billed on top. This figure is not directly comparable to the others.">
-                  <p className="mt-2 flex items-center gap-1.5 text-[12px] text-warning-700">
+                  <p className="mt-2 flex items-center gap-1.5 text-[13px] text-warning-700">
                     <Icon.alert size={12} />
                     Not directly comparable
                   </p>
@@ -530,7 +530,7 @@ function ScopeMatrix({
         </tr>
 
         <tr>
-          <th scope="row" className="py-4 pr-6 align-top text-[13.5px] font-medium text-ink-600">
+          <th scope="row" className="py-4 pr-6 align-top text-[14.5px] font-medium text-ink-600">
             Decide
           </th>
           {QUOTES.map(q => {
@@ -574,7 +574,7 @@ function TermRow({
 }) {
   return (
     <tr className="group/row">
-      <th scope="row" className="py-3.5 pr-6 text-[13.5px] font-medium text-ink-700">
+      <th scope="row" className="py-3.5 pr-6 text-[14.5px] font-medium text-ink-700">
         <span className="inline-flex items-center gap-1.5">
           {label}
           <InfoHint label={hint} />
@@ -638,7 +638,7 @@ function PairCompare({
                 aria-pressed={on}
                 onClick={() => onPick(q.proId)}
                 className={`tap flex items-center gap-2 rounded-full border py-1.5 pl-1.5 pr-3.5
-                  text-[13.5px] font-medium transition-colors
+                  text-[14.5px] font-medium transition-colors
                   ${
                     on
                       ? 'border-teal-800 bg-teal-50 text-teal-900'
@@ -654,7 +654,7 @@ function PairCompare({
         </div>
       </fieldset>
 
-      <h3 className="mb-4 flex items-center gap-2.5 text-[14px] font-semibold text-ink-950">
+      <h3 className="mb-4 flex items-center gap-2.5 text-[15px] font-semibold text-ink-950">
         {proA.short}
         <span className="text-ink-300" aria-hidden="true">
           ↔
@@ -669,11 +669,11 @@ function PairCompare({
           const differs = a.scope[line.key] !== b.scope[line.key]
           return (
             <li key={line.key}>
-              <p className="mb-1.5 flex items-center gap-1.5 text-[13px] font-medium text-ink-700">
+              <p className="mb-1.5 flex items-center gap-1.5 text-[14px] font-medium text-ink-700">
                 {line.label}
                 <InfoHint label={line.hint} />
                 {differs && (
-                  <span className="font-data ml-auto text-[10px] uppercase tracking-[0.12em] text-warning-700">
+                  <span className="font-data ml-auto text-[10.5px] uppercase tracking-[0.12em] text-warning-700">
                     Differs
                   </span>
                 )}
@@ -691,15 +691,15 @@ function PairCompare({
         })}
 
         {rows.length === 0 && (
-          <li className="rounded-xl bg-[var(--color-sunken)] px-4 py-5 text-[13.5px] text-ink-600">
+          <li className="rounded-xl bg-[var(--color-sunken)] px-4 py-5 text-[14.5px] text-ink-600">
             {proA.short} and {proB.short} commit to exactly the same scope. The difference between them
-            is price, warranty and timing.
+            is price, cover and timing.
           </li>
         )}
       </ul>
 
       {diffOnly && hiddenCount > 0 && (
-        <p className="mt-3 text-[12.5px] text-ink-400">
+        <p className="mt-3 text-[13.5px] text-ink-400">
           {hiddenCount} identical line{hiddenCount > 1 ? 's' : ''} hidden.
         </p>
       )}
@@ -709,7 +709,7 @@ function PairCompare({
       {/* Terms. */}
       <ul className="space-y-3">
         <PairRow
-          label="Warranty"
+          label="Cover"
           a={a.warrantyDays ? `${a.warrantyDays} days` : undefined}
           b={b.warrantyDays ? `${b.warrantyDays} days` : undefined}
           nameA={proA.short}
@@ -746,12 +746,12 @@ function PairCompare({
               key={q.proId}
               className={`rounded-xl p-3.5 ${gaps > 0 ? 'bg-warning-100' : 'bg-[var(--color-sunken)]'}`}
             >
-              <p className="mb-1.5 truncate font-data text-[10px] uppercase tracking-[0.13em] text-ink-500">
+              <p className="mb-1.5 truncate font-data text-[10.5px] uppercase tracking-[0.13em] text-ink-500">
                 {label(q)}
               </p>
               <p className="tnum font-display text-[26px] leading-none text-ink-950">{money(q.total)}</p>
               {gaps > 0 && (
-                <p className="mt-2 flex items-start gap-1.5 text-[11.5px] leading-snug text-warning-700">
+                <p className="mt-2 flex items-start gap-1.5 text-[12.5px] leading-snug text-warning-700">
                   <Icon.alert size={12} className="mt-px shrink-0" />
                   Not directly comparable — {gaps} line{gaps > 1 ? 's' : ''} unstated
                 </p>
@@ -794,10 +794,10 @@ function PairRow({
   const differs = a !== b
   return (
     <li>
-      <p className="mb-1.5 flex items-center gap-1.5 text-[13px] font-medium text-ink-700">
+      <p className="mb-1.5 flex items-center gap-1.5 text-[14px] font-medium text-ink-700">
         {label}
         {differs && (
-          <span className="font-data ml-auto text-[10px] uppercase tracking-[0.12em] text-warning-700">
+          <span className="font-data ml-auto text-[10.5px] uppercase tracking-[0.12em] text-warning-700">
             Differs
           </span>
         )}
@@ -830,7 +830,7 @@ function InTheirWords() {
             <Rule />
             <div className="flex gap-4 py-4 sm:gap-5 sm:py-5">
               <Avatar tint={pro.tint} name={pro.name} size={32} />
-              <p className="measure text-[13.5px] leading-relaxed text-ink-600 sm:text-[14px]">
+              <p className="measure text-[14.5px] leading-relaxed text-ink-600 sm:text-[15px]">
                 <span className="font-medium text-ink-900">{pro.short}: </span>
                 {q.note}
               </p>
@@ -860,7 +860,7 @@ function LensNotes({ focus, onFocus }: { focus: string | null; onFocus: (id: str
       </div>
 
       {focusPro && (
-        <p className="mb-3 flex items-center gap-2 text-[13px] text-ink-500">
+        <p className="mb-3 flex items-center gap-2 text-[14px] text-ink-500">
           <Avatar tint={focusPro.tint} name={focusPro.name} size={20} />
           Filtered to {focusPro.short}
         </p>
@@ -880,15 +880,15 @@ function LensNotes({ focus, onFocus }: { focus: string | null; onFocus: (id: str
                     <Avatar tint={pro.tint} name={pro.name} size={22} />
                   )}
                   <p
-                    className={`text-[14px] font-semibold ${
+                    className={`text-[15px] font-semibold ${
                       ins.kind === 'gap' ? 'text-warning-700' : 'text-ink-950'
                     }`}
                   >
                     {ins.headline}
                   </p>
                 </div>
-                <p className="text-[13px] leading-relaxed text-ink-600">{ins.body}</p>
-                {ins.kind !== 'gap' && <p className="mt-1.5 text-[12px] text-ink-400">{pro.name}</p>}
+                <p className="text-[14px] leading-relaxed text-ink-600">{ins.body}</p>
+                {ins.kind !== 'gap' && <p className="mt-1.5 text-[13px] text-ink-400">{pro.name}</p>}
               </div>
             </div>
           )
@@ -897,10 +897,10 @@ function LensNotes({ focus, onFocus }: { focus: string | null; onFocus: (id: str
       </div>
 
       <div className="mt-7 rounded-xl bg-[var(--color-sunken)] p-4 sm:p-5">
-        <p className="text-[13.5px] leading-relaxed text-ink-700">
+        <p className="text-[14.5px] leading-relaxed text-ink-700">
           TrustCraft highlights differences. The decision remains yours.
         </p>
-        <p className="mt-2 text-[12.5px] leading-relaxed text-ink-500">
+        <p className="mt-2 text-[13.5px] leading-relaxed text-ink-500">
           None of these quotes is wrong. They describe different amounts of work, and only you know how
           long you plan to keep this kitchen.
         </p>
@@ -928,7 +928,7 @@ export function RepairPlan() {
             <button
               type="button"
               onClick={() => navigate('/case/TC-2048/quotes')}
-              className="tap mb-6 inline-flex items-center gap-2 text-[13px] text-ink-500 transition-colors hover:text-ink-900 sm:mb-7"
+              className="tap mb-6 inline-flex items-center gap-2 text-[14px] text-ink-500 transition-colors hover:text-ink-900 sm:mb-7"
             >
               <Icon.arrowLeft size={15} />
               All three quotes
@@ -940,7 +940,7 @@ export function RepairPlan() {
             <Display size="lg" as="h1" className="a-up max-w-xl text-ink-950">
               {REPAIR_PLAN.title}
             </Display>
-            <p className="a-up d1 mt-4 flex items-center gap-2.5 text-[14px] text-ink-500">
+            <p className="a-up d1 mt-4 flex items-center gap-2.5 text-[15px] text-ink-500">
               <Avatar tint={pro.tint} name={pro.name} size={24} />
               {pro.name} · 23 August 2026
             </p>
@@ -958,13 +958,13 @@ export function RepairPlan() {
                 <div key={l.label}>
                   <div className="flex items-start justify-between gap-6 py-4 sm:gap-8 sm:py-5">
                     <div className="min-w-0">
-                      <dt className="font-data text-[10.5px] uppercase tracking-[0.14em] text-ink-400">
+                      <dt className="font-data text-[11px] uppercase tracking-[0.14em] text-ink-400">
                         {l.group}
                       </dt>
                       <p className="mt-1.5 text-[15px] font-medium text-ink-950 sm:text-[16px]">
                         {l.label}
                       </p>
-                      <p className="mt-0.5 text-[13px] text-ink-500">{l.detail}</p>
+                      <p className="mt-0.5 text-[14px] text-ink-500">{l.detail}</p>
                     </div>
                     <dd className="tnum shrink-0 font-data text-[15px] text-ink-900 sm:text-[16px]">
                       {money(l.amount)}
@@ -979,13 +979,13 @@ export function RepairPlan() {
               <Eyebrow className="mb-3 sm:mb-4">Not included</Eyebrow>
               <ul className="space-y-2.5">
                 {REPAIR_PLAN.excluded.map(e => (
-                  <li key={e} className="flex items-start gap-2.5 text-[14px] leading-relaxed text-ink-600">
+                  <li key={e} className="flex items-start gap-2.5 text-[15px] leading-relaxed text-ink-600">
                     <Icon.dash size={15} className="mt-0.5 shrink-0 text-ink-300" />
                     {e}
                   </li>
                 ))}
               </ul>
-              <p className="measure mt-4 flex items-start gap-2 text-[12.5px] leading-relaxed text-ink-400">
+              <p className="measure mt-4 flex items-start gap-2 text-[13.5px] leading-relaxed text-ink-400">
                 <Icon.info size={13} className="mt-0.5 shrink-0" />
                 Excluded work cannot be added silently. If the hose turns out to need replacing, it comes
                 back to you as a change request first.
@@ -1000,14 +1000,14 @@ export function RepairPlan() {
               <p className="tnum mt-3 font-display text-[40px] leading-none sm:text-[46px]">
                 {money(REPAIR_PLAN.total)}
               </p>
-              <p className="mt-3 text-[12.5px] leading-relaxed text-white/45">
+              <p className="mt-3 text-[13.5px] leading-relaxed text-white/62">
                 Parts, labour and the inspection fee you already paid, in one figure.
               </p>
 
               <Rule tone="light" className="my-6" />
 
               <dl className="space-y-3.5">
-                <DarkRow label="Warranty" value={REPAIR_PLAN.warranty} />
+                <DarkRow label="Cover" value={REPAIR_PLAN.warranty} />
                 <DarkRow label="Expected duration" value={REPAIR_PLAN.duration} />
                 <DarkRow label="Quote holds until" value="Tomorrow, 18:00" />
               </dl>
@@ -1033,8 +1033,8 @@ export function RepairPlan() {
 function DarkRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-baseline justify-between gap-4">
-      <dt className="text-[12.5px] text-white/45">{label}</dt>
-      <dd className="text-right text-[13px] font-medium text-white/90">{value}</dd>
+      <dt className="text-[13.5px] text-white/62">{label}</dt>
+      <dd className="text-right text-[14px] font-medium text-white/90">{value}</dd>
     </div>
   )
 }
@@ -1046,7 +1046,7 @@ function PriceContext({ total }: { total: number }) {
   const pos = ((total - low) / (high - low)) * 100
   return (
     <div className="pt-2">
-      <p className="mb-4 text-[13px] leading-relaxed text-ink-600">
+      <p className="mb-4 text-[14px] leading-relaxed text-ink-600">
         Based on 14 comparable completed jobs in the Colombo area over the last 12 months.
       </p>
       <div className="relative mb-2 h-2 rounded-full bg-ink-100">
@@ -1056,11 +1056,11 @@ function PriceContext({ total }: { total: number }) {
           style={{ left: `calc(${pos}% - 8px)` }}
         />
       </div>
-      <div className="tnum flex justify-between font-data text-[11px] text-ink-400">
+      <div className="tnum flex justify-between font-data text-[11.5px] text-ink-400">
         <span>{money(low)}</span>
         <span>{money(high)}</span>
       </div>
-      <p className="mt-4 text-[13px] text-ink-700">
+      <p className="mt-4 text-[14px] text-ink-700">
         This quote sits in the usual range. Being in range is not the same as being right for you — the
         scope still matters more.
       </p>

@@ -3,6 +3,7 @@ import { navigate, useStore } from '../app-state'
 import { AppShell } from '../shell'
 import {
   Button,
+  Confidence,
   Display,
   Disclosure,
   EvidenceRef,
@@ -10,6 +11,7 @@ import {
   Icon,
   InfoHint,
   Pill,
+  ReadingRow,
   Rule,
   StatusDot,
   TextLink,
@@ -17,6 +19,7 @@ import {
 } from '../ui'
 import {
   CASE,
+  CONFIDENCE,
   EVIDENCE,
   KNOWN,
   LIKELY_EXPERTISE,
@@ -24,6 +27,7 @@ import {
   QUESTIONS,
   SAFETY,
   evidenceById,
+  readingFor,
   type Evidence,
 } from '../data'
 
@@ -32,10 +36,10 @@ import {
 // ════════════════════════════════════════════════════════════════════════════
 
 const STRUCTURING = [
-  'Reading the evidence you attached',
-  'Separating what is established from what is assumed',
+  'Reviewing what you showed us',
+  'Separating what is established from what is only likely',
   'Identifying which questions still matter',
-  'Matching the likely field of expertise',
+  'Looking for the relevant field of expertise',
 ]
 
 export function CaseCreating() {
@@ -93,12 +97,12 @@ export function CaseCreating() {
                       <span className="h-1.5 w-1.5 rounded-full bg-white/35" />
                     )}
                   </span>
-                  <span className="text-[14px] leading-snug text-white/85 sm:text-[14.5px]">{s}</span>
+                  <span className="text-[15px] leading-snug text-white/85 sm:text-[15.5px]">{s}</span>
                 </li>
               ))}
             </ol>
 
-            <p className="mt-7 max-w-sm text-[12.5px] leading-relaxed text-white/35 sm:mt-9">
+            <p className="mt-7 max-w-sm text-[13.5px] leading-relaxed text-white/68 sm:mt-9">
               TrustCraft structures evidence. It does not diagnose — a professional confirms the cause.
             </p>
           </div>
@@ -147,8 +151,10 @@ export function ProblemWorkspace() {
     return () => window.removeEventListener('keydown', onKey)
   }, [step])
 
-  const answered = Object.keys(progress.answers).length
-  const remaining = QUESTIONS.length - answered
+  const answered = QUESTIONS.filter(
+    q => progress.answers[q.id] && progress.answers[q.id] !== 'Not sure',
+  ).length
+  const remaining = QUESTIONS.length - Object.keys(progress.answers).length
 
   /** Selecting a fact's source pulls that evidence onto the canvas. */
   const showEvidence = (id: string) => {
@@ -160,19 +166,25 @@ export function ProblemWorkspace() {
 
   return (
     <AppShell caseStage="understand" flush noFooter>
-      <div className="lg:grid lg:h-[calc(100dvh-var(--casebar-h))] lg:grid-cols-[minmax(0,1fr)_min(40vw,470px)]">
+      <div
+        className="md:grid md:h-[calc(100dvh-var(--casebar-h))]
+          md:grid-cols-[minmax(0,1fr)_minmax(300px,42vw)]
+          lg:grid-cols-[minmax(0,1fr)_min(42vw,480px)]
+          xl:grid-cols-[minmax(0,1fr)_min(54vw,880px)]
+          2xl:grid-cols-[minmax(0,1fr)_min(52vw,960px)]"
+      >
         {/* ── Evidence canvas ──────────────────────────────────────── */}
         <section
           id="evidence-canvas"
           aria-label="Evidence"
           className="flex flex-col overflow-hidden bg-ink-950 px-4 pb-5 pt-5
-            sm:px-6 sm:pb-6 sm:pt-6 lg:h-full lg:px-8 lg:pb-7 lg:pt-8 xl:px-12"
+            sm:px-6 sm:pb-6 sm:pt-6 md:h-full lg:px-8 lg:pb-7 lg:pt-8 xl:px-12"
         >
           <div className="mb-4 flex items-center gap-4 sm:mb-6">
             <Eyebrow tone="light">Evidence · {EVIDENCE.length} items</Eyebrow>
             <span className="ml-auto flex items-center gap-1 rounded-lg bg-white/[0.07] px-2 py-1">
               <NavArrow dir="prev" onClick={() => step(-1)} />
-              <span className="font-data px-1.5 text-[11.5px] text-white/55">
+              <span className="font-data px-1.5 text-[12.5px] text-white/68">
                 {index + 1} / {EVIDENCE.length}
               </span>
               <NavArrow dir="next" onClick={() => step(1)} />
@@ -181,7 +193,7 @@ export function ProblemWorkspace() {
 
           {/* A phone gets a generous but bounded stage; the desktop column
               gives the remaining height to the photograph. */}
-          <div className="flex h-[46vh] min-h-[280px] flex-col lg:h-auto lg:min-h-0 lg:flex-1">
+          <div className="flex h-[46vh] min-h-[280px] flex-col md:h-auto md:min-h-0 md:flex-1">
             <EvidenceStage item={active} />
           </div>
 
@@ -192,38 +204,51 @@ export function ProblemWorkspace() {
             <button
               type="button"
               className="flex h-[60px] w-[80px] shrink-0 flex-col items-center justify-center gap-1
-                rounded-xl border border-dashed border-white/20 text-white/40 transition-colors
+                rounded-xl border border-dashed border-white/20 text-white/58 transition-colors
                 hover:border-white/40 hover:text-white/70 sm:h-[68px] sm:w-[92px]"
             >
               <Icon.plus size={16} />
-              <span className="text-[11px]">Add</span>
+              <span className="text-[11.5px]">Add</span>
             </button>
           </div>
         </section>
 
         {/* ── Case intelligence ────────────────────────────────────── */}
         <aside
-          aria-label="What TrustCraft understands"
+          aria-label="Problem record"
           className="a-rail flex flex-col border-[var(--color-rule)] bg-[var(--color-canvas)]
-            lg:h-full lg:overflow-hidden lg:border-l"
+            md:h-full md:overflow-hidden md:border-l"
         >
-          <div className="thin-scroll flex-1 px-4 pb-6 pt-7 sm:px-6 lg:overflow-y-auto lg:px-8 lg:pt-8">
-            <Eyebrow tone="teal" className="mb-2.5">
-              {CASE.room}
-            </Eyebrow>
-            <Display size="sm" as="h1" className="text-ink-950">
-              {CASE.title}
-            </Display>
+          <div
+            className="thin-scroll flex-1 px-4 pb-6 pt-7 sm:px-6 md:overflow-y-auto lg:px-8 lg:pt-8
+              xl:grid xl:grid-cols-2 xl:items-start xl:gap-x-10"
+          >
+            <div className="min-w-0 xl:col-start-1 xl:row-start-1">
+              <Eyebrow tone="teal" className="mb-2.5">
+                Problem record · {CASE.room}
+              </Eyebrow>
+              <Display size="sm" as="h1" className="text-ink-950">
+                {CASE.title}
+              </Display>
 
-            <CaseState opened={CASE.opened} known={KNOWN.length + answered} open={remaining} />
+              <CaseState opened={CASE.opened} known={KNOWN.length + answered} open={remaining} />
 
-            <Rule className="my-6 sm:my-7" />
+              <Rule className="my-6 sm:my-7" />
 
-            <KnownBlock onShowEvidence={showEvidence} />
-            <UnknownBlock />
-            <ExpertiseBlock />
-            <SafetyBlock />
-            <ConfirmationBlock />
+              <KnownBlock onShowEvidence={showEvidence} />
+              <LikelyBlock />
+            </div>
+
+            {/* What is still being asked — its own column once there is room. */}
+            <div className="min-w-0 xl:col-start-2 xl:row-span-2 xl:row-start-1">
+              <UnknownBlock />
+              <SafetyBlock />
+            </div>
+
+            <div className="min-w-0 xl:col-start-1 xl:row-start-2">
+              <ExpertiseBlock />
+              <ConfirmationBlock />
+            </div>
           </div>
 
           {/* The rail always offers the next move — pinned above the tab bar
@@ -231,9 +256,9 @@ export function ProblemWorkspace() {
           <div
             className="sticky bottom-[var(--tabbar-h)] z-20 border-t border-[var(--color-rule)]
               bg-[var(--color-canvas)]/95 px-4 py-4 backdrop-blur-md sm:px-6
-              md:bottom-0 lg:px-8 lg:py-5"
+              md:bottom-0 md:shrink-0 lg:px-8 lg:py-5"
           >
-            <div className="mb-2.5 flex items-start gap-2 text-[12.5px] leading-snug text-ink-500 lg:mb-3">
+            <div className="mb-2.5 flex items-start gap-2 text-[13.5px] leading-snug text-ink-500 lg:mb-3">
               {remaining > 0 ? (
                 <>
                   <span className="mt-1.5">
@@ -264,13 +289,13 @@ export function ProblemWorkspace() {
 function CaseState({ opened, known, open }: { opened: string; known: number; open: number }) {
   return (
     <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
-      <span className="text-[13px] text-ink-500">Opened {opened}</span>
+      <span className="text-[14px] text-ink-500">Opened {opened}</span>
       <span className="h-3 w-px bg-[var(--color-rule-strong)]" aria-hidden="true" />
-      <span className="flex items-center gap-1.5 text-[13px] font-medium text-teal-800">
+      <span className="flex items-center gap-1.5 text-[14px] font-medium text-teal-800">
         <Icon.check size={13} />
         {known} established
       </span>
-      <span className="flex items-center gap-1.5 text-[13px] font-medium text-gold-600">
+      <span className="flex items-center gap-1.5 text-[14px] font-medium text-gold-600">
         <Icon.question size={13} />
         {open} open
       </span>
@@ -300,7 +325,7 @@ function EvidenceStage({ item }: { item: Evidence }) {
           <img src={item.src} alt={item.label} className="h-full w-full object-contain" />
           {item.id === 'ev-1' && <LeakMarker />}
         </div>
-        <figcaption className="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[12.5px] text-white/55 sm:mt-4 sm:text-[13px]">
+        <figcaption className="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[13.5px] text-white/68 sm:mt-4 sm:text-[14px]">
           <EvidenceRef tone="light" label={evidenceTag(item.id, item.kind)} />
           <span className="font-medium text-white/85">{item.label}</span>
           <span aria-hidden="true">·</span>
@@ -334,7 +359,7 @@ function EvidenceStage({ item }: { item: Evidence }) {
                 />
               ))}
             </span>
-            <span className="font-data shrink-0 text-[12.5px] text-white/50">{item.duration}</span>
+            <span className="font-data shrink-0 text-[13.5px] text-white/62">{item.duration}</span>
           </div>
 
           <Rule tone="light" className="my-5 sm:my-7" />
@@ -344,7 +369,7 @@ function EvidenceStage({ item }: { item: Evidence }) {
           </Eyebrow>
           <p className="quote-lg max-w-2xl text-white/90">“{item.body}”</p>
         </div>
-        <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12.5px] text-white/55 sm:mt-4">
+        <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13.5px] text-white/68 sm:mt-4">
           <EvidenceRef tone="light" label={evidenceTag(item.id, item.kind)} />
           {item.label} · Added by {item.by} · <span className="font-data">{item.at}</span>
         </p>
@@ -360,7 +385,7 @@ function EvidenceStage({ item }: { item: Evidence }) {
         </Eyebrow>
         <p className="quote-lg max-w-2xl text-white/90">{item.body}</p>
       </div>
-      <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12.5px] text-white/55 sm:mt-4">
+      <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13.5px] text-white/68 sm:mt-4">
         <EvidenceRef tone="light" label={evidenceTag(item.id, item.kind)} />
         {item.label} · Added by {item.by} · <span className="font-data">{item.at}</span>
       </p>
@@ -377,7 +402,7 @@ function LeakMarker() {
           <span className="a-pulse absolute inset-0 rounded-full bg-warning-700/30" />
           <span className="h-2.5 w-2.5 rounded-full bg-warning-700 ring-2 ring-white/70" />
         </span>
-        <span className="whitespace-nowrap rounded-full bg-black/70 px-2.5 py-1 text-[11.5px] text-white backdrop-blur-sm sm:px-3 sm:text-[12px]">
+        <span className="whitespace-nowrap rounded-full bg-black/70 px-2.5 py-1 text-[12.5px] text-white backdrop-blur-sm sm:px-3 sm:text-[13px]">
           Water visible here
         </span>
       </span>
@@ -401,7 +426,7 @@ function Thumb({ item, active, onSelect }: { item: Evidence; active: boolean; on
       ) : (
         <span className="flex h-full w-full flex-col items-center justify-center gap-1 bg-white/[0.07] text-white/70">
           {item.kind === 'voice' ? <Icon.mic size={16} /> : <Icon.text size={16} />}
-          <span className="text-[10px]">{item.kind === 'voice' ? item.duration : 'Note'}</span>
+          <span className="text-[10.5px]">{item.kind === 'voice' ? item.duration : 'Note'}</span>
         </span>
       )}
     </button>
@@ -431,7 +456,7 @@ function RailHeading({
       <Eyebrow tone={tone ?? 'muted'}>{children}</Eyebrow>
       {count !== undefined && (
         <span
-          className={`font-data text-[10.5px] leading-none ${tone === 'gold' ? 'text-gold-600' : 'text-teal-800'}`}
+          className={`font-data text-[11px] leading-none ${tone === 'gold' ? 'text-gold-600' : 'text-teal-800'}`}
         >
           {count}
         </span>
@@ -443,7 +468,11 @@ function RailHeading({
 
 function KnownBlock({ onShowEvidence }: { onShowEvidence: (id: string) => void }) {
   const { progress } = useStore()
-  const derived = QUESTIONS.filter(q => progress.answers[q.id]).map(q => ({
+  // "Not sure" is an answer, but it establishes nothing — listing it as a
+  // known fact would be exactly the overclaiming this screen exists to avoid.
+  const derived = QUESTIONS.filter(
+    q => progress.answers[q.id] && progress.answers[q.id] !== 'Not sure',
+  ).map(q => ({
     id: q.id,
     text: q.reading[progress.answers[q.id]],
     from: `You answered “${progress.answers[q.id]}”`,
@@ -470,7 +499,7 @@ function KnownBlock({ onShowEvidence }: { onShowEvidence: (id: string) => void }
               className={`rounded-r-lg border-l-2 border-teal-700 bg-white/70 py-2.5 pl-3.5 pr-3
                 ${i >= KNOWN.length ? 'a-up' : ''}`}
             >
-              <p className="text-[14px] leading-snug text-ink-900">{f.text}</p>
+              <p className="text-[15px] leading-snug text-ink-900">{f.text}</p>
               <div className="mt-1.5 flex flex-wrap items-center gap-2">
                 {ev ? (
                   <EvidenceRef
@@ -480,12 +509,57 @@ function KnownBlock({ onShowEvidence }: { onShowEvidence: (id: string) => void }
                 ) : (
                   <EvidenceRef label="You" tone="muted" />
                 )}
-                <span className="text-[11.5px] text-ink-400">{f.from}</span>
+                <span className="text-[12.5px] text-ink-400">{f.from}</span>
               </div>
             </li>
           )
         })}
       </ul>
+    </section>
+  )
+}
+
+/**
+ * What may be happening.
+ *
+ * The block the product turns on. KNOWN is closed and cited; this is openly
+ * provisional — shares that add to one, a confidence figure that is never
+ * allowed to reach certainty, and a visible movement when an answer arrives.
+ * Saying "we think" out loud is the honest version of an AI feature.
+ */
+function LikelyBlock() {
+  const { progress } = useStore()
+  const reading = readingFor(progress.answers)
+
+  return (
+    <section className="mb-8 sm:mb-9">
+      <RailHeading count={reading.hypotheses.length}>What may be happening</RailHeading>
+
+      <Confidence
+        value={reading.confidence}
+        claim={CONFIDENCE.claim}
+        moved={reading.moved}
+        note={reading.confidence >= CONFIDENCE.ceiling ? CONFIDENCE.ceilingReason : undefined}
+      />
+
+      <ul className="mt-2 divide-y divide-[var(--color-rule)]">
+        {reading.hypotheses.map((h, i) => (
+          <ReadingRow
+            key={h.id}
+            text={h.text}
+            detail={h.detail}
+            weight={h.weight}
+            delta={h.delta}
+            leading={i === 0}
+          />
+        ))}
+      </ul>
+
+      <p className="mt-3 flex items-start gap-2 text-[13px] leading-relaxed text-ink-500">
+        <Icon.info size={14} className="mt-0.5 shrink-0 text-ink-400" />
+        Based on what you have shown us. None of this is a diagnosis — a professional confirms the
+        cause before any repair.
+      </p>
     </section>
   )
 }
@@ -501,7 +575,7 @@ function UnknownBlock() {
       </RailHeading>
 
       {open.length === 0 ? (
-        <p className="flex items-start gap-2.5 rounded-xl bg-success-100 px-4 py-3.5 text-[13.5px] leading-relaxed text-success-800">
+        <p className="flex items-start gap-2.5 rounded-xl bg-success-100 px-4 py-3.5 text-[14.5px] leading-relaxed text-success-800">
           <Icon.check size={15} className="mt-0.5 shrink-0" />
           Nothing further can be established from here. The remaining uncertainty needs a professional
           on site.
@@ -513,10 +587,10 @@ function UnknownBlock() {
               key={q.id}
               className="a-up rounded-xl border border-dashed border-gold-500/55 bg-gold-100/40 p-3.5 sm:p-4"
             >
-              <p className="text-[14.5px] font-semibold leading-snug text-ink-950 sm:text-[15px]">
+              <p className="text-[15.5px] font-semibold leading-snug text-ink-950 sm:text-[15px]">
                 {q.question}
               </p>
-              <p className="mt-1.5 flex items-start gap-1.5 text-[12.5px] leading-relaxed text-ink-600">
+              <p className="mt-1.5 flex items-start gap-1.5 text-[13.5px] leading-relaxed text-ink-600">
                 <Icon.info size={13} className="mt-px shrink-0 text-gold-600" />
                 {q.why}
               </p>
@@ -530,7 +604,7 @@ function UnknownBlock() {
                       notify('Answer recorded — the case updated')
                     }}
                     className="tap rounded-[10px] border border-[var(--color-rule-strong)] bg-white px-3.5 py-2
-                      text-[13.5px] font-medium text-ink-800 transition-all duration-150
+                      text-[14.5px] font-medium text-ink-800 transition-all duration-150
                       hover:border-teal-700 hover:bg-teal-50 hover:text-teal-900 active:scale-[0.98] sm:px-4"
                   >
                     {opt}
@@ -555,7 +629,7 @@ function ExpertiseBlock() {
         </span>
         <div className="min-w-0">
           <p className="text-[15px] font-semibold text-ink-950">{LIKELY_EXPERTISE.field}</p>
-          <p className="mt-0.5 text-[13px] leading-snug text-ink-500">{LIKELY_EXPERTISE.narrow}</p>
+          <p className="mt-0.5 text-[14px] leading-snug text-ink-500">{LIKELY_EXPERTISE.narrow}</p>
         </div>
       </div>
 
@@ -563,11 +637,11 @@ function ExpertiseBlock() {
 
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="flex items-center gap-2 text-[14.5px] font-semibold text-ink-950">
+          <p className="flex items-center gap-2 text-[15.5px] font-semibold text-ink-950">
             <StatusDot tone="warning" />
             {LIKELY_EXPERTISE.priority}
           </p>
-          <p className="mt-1.5 text-[12.5px] leading-relaxed text-ink-500">
+          <p className="mt-1.5 text-[13.5px] leading-relaxed text-ink-500">
             {LIKELY_EXPERTISE.priorityWhy}
           </p>
         </div>
@@ -582,13 +656,13 @@ function SafetyBlock() {
     <section className="mb-8 sm:mb-9">
       <RailHeading>Safety</RailHeading>
       <div className="rounded-xl border-l-2 border-warning-700 bg-warning-100 p-4 sm:p-5">
-        <p className="flex items-start gap-2 text-[14px] font-semibold text-warning-700">
+        <p className="flex items-start gap-2 text-[15px] font-semibold text-warning-700">
           <Icon.alert size={15} className="mt-0.5 shrink-0" />
           {SAFETY.title}
         </p>
-        <p className="mt-2 text-[13.5px] leading-relaxed text-ink-700">{SAFETY.body}</p>
+        <p className="mt-2 text-[14.5px] leading-relaxed text-ink-700">{SAFETY.body}</p>
         <Disclosure summary="If the valve will not turn" className="mt-1">
-          <p className="text-[13px] leading-relaxed text-ink-600">{SAFETY.caveat}</p>
+          <p className="text-[14px] leading-relaxed text-ink-600">{SAFETY.caveat}</p>
         </Disclosure>
       </div>
     </section>
@@ -596,17 +670,52 @@ function SafetyBlock() {
 }
 
 function ConfirmationBlock() {
+  const { notify } = useStore()
   return (
     <section className="mb-2 sm:mb-4">
       <RailHeading>Professional confirmation</RailHeading>
       <div className="flex gap-3.5 rounded-xl bg-[var(--color-sunken)] p-4 sm:p-5">
         <Icon.shield size={17} className="mt-0.5 shrink-0 text-ink-500" />
         <div className="min-w-0">
-          <p className="text-[13.5px] font-medium text-ink-900">Required before any diagnosis</p>
-          <p className="mt-1.5 text-[13px] leading-relaxed text-ink-600">
+          <p className="text-[14.5px] font-medium text-ink-900">Required before any diagnosis</p>
+          <p className="mt-1.5 text-[14px] leading-relaxed text-ink-600">
             Everything above is drawn from the evidence you provided. TrustCraft has not identified a
             cause and cannot — a supply-side and a drain-side fault look identical from here.
           </p>
+
+          {/* Recovery. If the reading is wrong, saying so has to lead somewhere
+              other than back to the same screen. */}
+          <Disclosure summary="This does not match what happened" className="mt-2">
+            <p className="text-[14px] leading-relaxed text-ink-600">
+              Then we do not have enough to structure it yet. Any of these will move it forward:
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button
+                size="sm"
+                variant="secondary"
+                icon={<Icon.camera size={14} />}
+                onClick={() => notify('Add another photo — the reading updates as evidence arrives')}
+              >
+                Add another photo
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                icon={<Icon.text size={14} />}
+                onClick={() => navigate('/')}
+              >
+                Tell us more
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                icon={<Icon.people size={14} />}
+                onClick={() => navigate('/professionals')}
+              >
+                Choose a service yourself
+              </Button>
+            </div>
+          </Disclosure>
         </div>
       </div>
     </section>
@@ -660,7 +769,7 @@ export function ResolutionPathPage() {
           ))}
         </div>
 
-        <p className="measure mt-10 text-[13px] leading-relaxed text-ink-400 sm:mt-12">
+        <p className="measure mt-10 text-[14px] leading-relaxed text-ink-400 sm:mt-12">
           TrustCraft recommends a path and shows its reasoning. Choosing a different one is recorded
           against the case, not overridden.
         </p>
@@ -715,12 +824,12 @@ function PathRow({
             >
               {path.title}
             </h2>
-            <p className="measure mt-2 text-[14px] leading-relaxed text-ink-600 sm:text-[14.5px]">
+            <p className="measure mt-2 text-[15px] leading-relaxed text-ink-600 sm:text-[15.5px]">
               {path.summary}
             </p>
 
             {path.lessAppropriate && (
-              <p className="measure mt-4 flex items-start gap-2 text-[13px] leading-relaxed text-warning-700">
+              <p className="measure mt-4 flex items-start gap-2 text-[14px] leading-relaxed text-warning-700">
                 <Icon.alert size={14} className="mt-0.5 shrink-0" />
                 {path.lessAppropriate}
               </p>
@@ -729,7 +838,7 @@ function PathRow({
             {recommended && (
               <ul className="mt-5 space-y-2.5 sm:mt-6">
                 {path.why.map(w => (
-                  <li key={w} className="flex items-start gap-2.5 text-[13.5px] leading-relaxed text-ink-700 sm:text-[14px]">
+                  <li key={w} className="flex items-start gap-2.5 text-[14.5px] leading-relaxed text-ink-700 sm:text-[15px]">
                     <Icon.check size={15} className="mt-0.5 shrink-0 text-teal-700" />
                     {w}
                   </li>
@@ -740,7 +849,7 @@ function PathRow({
             {!recommended && expanded && (
               <ul className="a-up mt-5 space-y-2">
                 {path.why.map(w => (
-                  <li key={w} className="flex items-start gap-2.5 text-[13.5px] text-ink-600">
+                  <li key={w} className="flex items-start gap-2.5 text-[14.5px] text-ink-600">
                     <Icon.dash size={14} className="mt-0.5 shrink-0 text-ink-300" />
                     {w}
                   </li>
@@ -752,11 +861,11 @@ function PathRow({
           <div className="flex shrink-0 flex-col gap-4 lg:items-end lg:gap-5">
             <dl className="flex gap-8 lg:text-right">
               <div>
-                <dt className="font-data text-[10.5px] uppercase tracking-[0.14em] text-ink-400">Cost</dt>
+                <dt className="font-data text-[11px] uppercase tracking-[0.14em] text-ink-400">Cost</dt>
                 <dd className="tnum mt-1 text-[15px] font-medium text-ink-900">{path.cost}</dd>
               </div>
               <div>
-                <dt className="font-data text-[10.5px] uppercase tracking-[0.14em] text-ink-400">When</dt>
+                <dt className="font-data text-[11px] uppercase tracking-[0.14em] text-ink-400">When</dt>
                 <dd className="mt-1 text-[15px] font-medium text-ink-900">{path.time}</dd>
               </div>
             </dl>

@@ -48,6 +48,21 @@ const KIND_ICON: Record<EventKind, (p: { size?: number; className?: string }) =>
   resolved: Icon.shield,
 }
 
+/**
+ * What kind of thing each entry is. The icons already separate them visually;
+ * the word is what makes the separation survive a screen reader, a printout,
+ * and a reader who does not know the icon language yet.
+ */
+const KIND_LABEL: Record<EventKind, string> = {
+  report: 'Evidence',
+  system: 'System',
+  decision: 'Decision',
+  work: 'Work',
+  money: 'Agreement',
+  verify: 'Verification',
+  resolved: 'Completion',
+}
+
 /** The three movements of a case, keyed off the step each event belongs to. */
 const PHASES = [
   { key: 'problem', label: 'The problem', from: 0, to: 0 },
@@ -82,7 +97,7 @@ export function ProofTimeline() {
               <br />
               happened, in order.
             </Display>
-            <p className="a-up d1 measure mt-4 text-[14.5px] leading-relaxed text-ink-500 sm:mt-5 sm:text-[15px]">
+            <p className="a-up d1 measure mt-4 text-[15.5px] leading-relaxed text-ink-500 sm:mt-5 sm:text-[15px]">
               Each entry records what happened, who confirmed it, and what evidence exists. Nothing here
               can be edited after the fact.
             </p>
@@ -112,7 +127,7 @@ export function ProofTimeline() {
               <div className="flex items-center justify-between gap-3">
                 <Eyebrow tone="light">Agreed total</Eyebrow>
                 {progress.changeDecision === 'approved' && (
-                  <span className="font-data rounded bg-white/10 px-2 py-0.5 text-[10px] tracking-wider text-white/60">
+                  <span className="font-data rounded bg-white/10 px-2 py-0.5 text-[10.5px] tracking-wider text-white/60">
                     REVISED
                   </span>
                 )}
@@ -125,7 +140,7 @@ export function ProofTimeline() {
                 )}
               </p>
               {progress.changeDecision === 'approved' && (
-                <p className="mt-2 text-[12.5px] leading-relaxed text-white/45">
+                <p className="mt-2 text-[13.5px] leading-relaxed text-white/62">
                   {money(CHANGE_REQUEST.originalTotal)} agreed, plus {money(CHANGE_REQUEST.priceChange)}{' '}
                   you approved at 11:52.
                 </p>
@@ -136,8 +151,8 @@ export function ProofTimeline() {
               <div className="flex items-center gap-3">
                 <Avatar tint={pro.tint} name={pro.name} size={34} />
                 <div className="min-w-0">
-                  <p className="truncate text-[13.5px] font-medium">{pro.name}</p>
-                  <p className="text-[12px] text-white/45">On site since 11:02</p>
+                  <p className="truncate text-[14.5px] font-medium">{pro.name}</p>
+                  <p className="text-[13px] text-white/62">On site since 11:02</p>
                 </div>
               </div>
               <Button full size="md" variant="onDark" className="mt-5" to="/messages">
@@ -184,11 +199,11 @@ export function ProofTimeline() {
             )}
 
             <div className="mt-5 rounded-xl bg-[var(--color-sunken)] p-4 sm:mt-6 sm:p-5">
-              <p className="flex items-center gap-2 text-[13px] font-medium text-ink-800">
+              <p className="flex items-center gap-2 text-[14px] font-medium text-ink-800">
                 <Icon.shield size={14} />
                 Why this record matters
               </p>
-              <p className="mt-2 text-[12.5px] leading-relaxed text-ink-600">
+              <p className="mt-2 text-[13.5px] leading-relaxed text-ink-600">
                 If anyone later disagrees about what was agreed or what was done, this is the answer —
                 timestamped, attributed, and with the photographs attached.
               </p>
@@ -229,7 +244,7 @@ function TimelineRow({
       {phaseLabel && (
         <div className={`flex items-center gap-3 pb-4 ${index === 0 ? '' : 'pt-3'}`}>
           <span
-            className={`font-data text-[10.5px] uppercase tracking-[0.16em]
+            className={`font-data text-[11px] uppercase tracking-[0.16em]
               ${reached ? 'text-teal-800' : 'text-ink-400'}`}
           >
             {phaseLabel}
@@ -241,7 +256,7 @@ function TimelineRow({
       {/* The time gutter is a luxury a 360px screen cannot afford; below `sm`
           the timestamp moves inline with the title instead. */}
       <div className="grid grid-cols-[26px_minmax(0,1fr)] gap-x-3.5 sm:grid-cols-[52px_28px_minmax(0,1fr)] sm:gap-x-4">
-        <span className="tnum hidden pt-[3px] text-right font-data text-[12px] text-ink-400 sm:block">
+        <span className="tnum hidden pt-[3px] text-right font-data text-[13px] text-ink-400 sm:block">
           {event.time}
         </span>
 
@@ -271,25 +286,25 @@ function TimelineRow({
         <div className={isLast ? 'pb-2' : 'pb-8 sm:pb-9'}>
           <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
             <h3 className="text-[15px] font-semibold text-ink-950 sm:text-[16px]">{event.title}</h3>
-            <span className="tnum font-data text-[11.5px] text-ink-400 sm:hidden">{event.time}</span>
+            <span className="tnum font-data text-[12.5px] text-ink-400 sm:hidden">{event.time}</span>
             {event.amount !== undefined && reached && (
-              <Money value={event.amount} className="text-[13px] text-ink-600 sm:text-[13.5px]" />
+              <Money value={event.amount} className="text-[14px] text-ink-600 sm:text-[14.5px]" />
             )}
             {!reached && (
-              <span className="font-data text-[10.5px] uppercase tracking-[0.14em] text-ink-400">
+              <span className="font-data text-[11px] uppercase tracking-[0.14em] text-ink-400">
                 Not yet
               </span>
             )}
           </div>
 
           {event.detail && (
-            <p className="measure mt-1.5 text-[13.5px] leading-relaxed text-ink-600 sm:text-[14px]">
+            <p className="measure mt-1.5 text-[14.5px] leading-relaxed text-ink-600 sm:text-[15px]">
               {event.detail}
             </p>
           )}
 
           {/* Attribution and proof only exist once the event actually happened. */}
-          <p className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[12.5px] text-ink-400">
+          <p className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[13.5px] text-ink-400">
             {reached ? (
               <>
                 <span>By {event.by}</span>
@@ -371,13 +386,13 @@ function NextAction({
   const dot = { teal: 'teal', warning: 'warning', success: 'success' } as const
   return (
     <div className={`a-up mt-5 rounded-2xl p-5 sm:p-6 ${bg}`}>
-      <p className="flex items-start gap-2 text-[14px] font-semibold text-ink-950">
+      <p className="flex items-start gap-2 text-[15px] font-semibold text-ink-950">
         <span className="mt-1.5">
           <StatusDot tone={dot[tone]} pulse={tone === 'warning'} />
         </span>
         {title}
       </p>
-      <p className="mt-2 text-[13px] leading-relaxed text-ink-600">{body}</p>
+      <p className="mt-2 text-[14px] leading-relaxed text-ink-600">{body}</p>
       <Button full size="md" className="mt-4" to={to}>
         {cta}
       </Button>
@@ -411,7 +426,7 @@ function Lightbox({ id, onClose }: { id: string; onClose: () => void }) {
       <div className="max-w-4xl" onClick={e => e.stopPropagation()}>
         <img src={ev.src} alt={ev.label} className="max-h-[70vh] w-full rounded-xl object-contain" />
         <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4">
-          <p className="flex flex-wrap items-center gap-2 text-[13.5px] text-white/80 sm:text-[14px]">
+          <p className="flex flex-wrap items-center gap-2 text-[14.5px] text-white/80 sm:text-[15px]">
             <EvidenceRef tone="light" label={evidenceTag(ev.id, ev.kind)} />
             {ev.label} · taken by {ev.by} at <span className="font-data">{ev.at}</span>
           </p>
@@ -419,7 +434,7 @@ function Lightbox({ id, onClose }: { id: string; onClose: () => void }) {
             type="button"
             onClick={onClose}
             className="tap flex shrink-0 items-center justify-center gap-2 rounded-lg bg-white/10 px-3.5 py-2
-              text-[13px] text-white transition-colors hover:bg-white/20"
+              text-[14px] text-white transition-colors hover:bg-white/20"
           >
             <Icon.close size={14} />
             Close
@@ -451,7 +466,7 @@ export function CompletionVerify() {
               <br />
               what you see?
             </Display>
-            <p className="a-up d1 measure mt-4 text-[14.5px] leading-relaxed text-ink-500 sm:mt-5 sm:text-[15px]">
+            <p className="a-up d1 measure mt-4 text-[15.5px] leading-relaxed text-ink-500 sm:mt-5 sm:text-[15px]">
               Chamod has marked the repair complete and submitted evidence. Nothing is released until you
               agree.
             </p>
@@ -485,8 +500,8 @@ export function CompletionVerify() {
                           style={{ width: 17, height: 17 }}
                         />
                         <span className="min-w-0">
-                          <span className="block text-[14px] font-medium text-ink-950">{c.label}</span>
-                          <span className="mt-0.5 block text-[12.5px] leading-relaxed text-ink-500">
+                          <span className="block text-[15px] font-medium text-ink-950">{c.label}</span>
+                          <span className="mt-0.5 block text-[13.5px] leading-relaxed text-ink-500">
                             {c.detail}
                           </span>
                         </span>
@@ -514,9 +529,9 @@ export function CompletionVerify() {
                 Something is not right
               </Button>
 
-              <p className="mt-4 text-center text-[12px] leading-relaxed text-ink-400">
+              <p className="mt-4 text-center text-[13px] leading-relaxed text-ink-500">
                 {all
-                  ? `Verifying releases ${money(RESOLVED_SUMMARY.finalAmount)} and starts the 30-day warranty.`
+                  ? `Verifying releases ${money(RESOLVED_SUMMARY.finalAmount)} and starts the 30 days of cover.`
                   : 'Confirm all three points to continue.'}
               </p>
             </div>
@@ -555,10 +570,10 @@ function BeforeAfter() {
           style={{ left: `${pos}%` }}
         />
 
-        <span className="font-data pointer-events-none absolute left-3 top-3 rounded-full bg-ink-950/70 px-2.5 py-1 text-[10px] tracking-[0.14em] text-white sm:left-4 sm:top-4 sm:px-3 sm:text-[10.5px]">
+        <span className="font-data pointer-events-none absolute left-3 top-3 rounded-full bg-ink-950/70 px-2.5 py-1 text-[10.5px] tracking-[0.14em] text-white sm:left-4 sm:top-4 sm:px-3 sm:text-[11px]">
           BEFORE
         </span>
-        <span className="font-data pointer-events-none absolute right-3 top-3 rounded-full bg-ink-950/70 px-2.5 py-1 text-[10px] tracking-[0.14em] text-white sm:right-4 sm:top-4 sm:px-3 sm:text-[10.5px]">
+        <span className="font-data pointer-events-none absolute right-3 top-3 rounded-full bg-ink-950/70 px-2.5 py-1 text-[10.5px] tracking-[0.14em] text-white sm:right-4 sm:top-4 sm:px-3 sm:text-[11px]">
           AFTER
         </span>
 
@@ -572,7 +587,7 @@ function BeforeAfter() {
           className="wipe absolute inset-0 h-full w-full"
         />
       </div>
-      <figcaption className="mt-3 text-[12.5px] leading-relaxed text-ink-500">
+      <figcaption className="mt-3 text-[13.5px] leading-relaxed text-ink-500">
         Drag to compare · both images timestamped and attributed to Chamod Fernando
       </figcaption>
     </figure>
@@ -600,7 +615,7 @@ export function Resolved() {
           <p className="a-rise d2 mt-5 font-display text-[22px] leading-tight text-ink-600 sm:mt-6 sm:text-[28px]">
             {CASE.title}
           </p>
-          <p className="a-up d3 mt-4 flex items-center justify-center gap-2.5 text-[14px] text-ink-500 sm:text-[14.5px]">
+          <p className="a-up d3 mt-4 flex items-center justify-center gap-2.5 text-[15px] text-ink-500 sm:text-[15.5px]">
             <Avatar tint={pro.tint} name={pro.name} size={26} />
             {pro.name}
           </p>
@@ -612,12 +627,12 @@ export function Resolved() {
             <Summary label="Final amount" value={money(RESOLVED_SUMMARY.finalAmount)} delay={0} />
             <Summary label="Repair duration" value={`${RESOLVED_SUMMARY.durationMin} min`} delay={0.07} />
             <Summary label="Evidence" value={`${RESOLVED_SUMMARY.evidenceCount} items`} delay={0.14} />
-            <Summary label="Warranty" value={RESOLVED_SUMMARY.warranty} delay={0.21} last />
+            <Summary label="Cover" value={RESOLVED_SUMMARY.warranty} delay={0.21} last />
           </dl>
           <Rule />
 
-          <p className="a-up d5 measure mx-auto mt-7 text-center text-[13.5px] leading-relaxed text-ink-500 sm:mt-8">
-            Warranty on labour runs until {RESOLVED_SUMMARY.warrantyUntil}. It is attached to the ledger
+          <p className="a-up d5 measure mx-auto mt-7 text-center text-[14.5px] leading-relaxed text-ink-500 sm:mt-8">
+            Cover on labour runs until {RESOLVED_SUMMARY.warrantyUntil}. It is attached to the ledger
             entry, so you will not need to find this page again.
           </p>
 
@@ -635,8 +650,8 @@ export function Resolved() {
               Added to your Home Ledger
             </Pill>
             <p className="font-display text-[23px] text-ink-950 sm:text-[26px]">Kitchen · Sink</p>
-            <p className="mx-auto mt-3 max-w-md text-[13.5px] leading-relaxed text-ink-600">
-              The parts fitted, the professional who fitted them, the price, the warranty and the five
+            <p className="mx-auto mt-3 max-w-md text-[14.5px] leading-relaxed text-ink-600">
+              The parts fitted, the professional who fitted them, the price, the cover and the five
               photographs are now part of this home&apos;s permanent record.
             </p>
             <TextLink className="mt-5" onClick={() => navigate('/ledger?asset=kitchen-sink')}>
@@ -668,7 +683,7 @@ function Summary({
         sm:px-6 sm:py-8 ${last ? '' : 'md:border-r'}`}
       style={{ animationDelay: `${0.35 + delay}s` }}
     >
-      <dt className="font-data text-[10px] uppercase tracking-[0.14em] text-ink-400 sm:text-[10.5px]">
+      <dt className="font-data text-[10.5px] uppercase tracking-[0.14em] text-ink-400 sm:text-[11px]">
         {label}
       </dt>
       <dd className="tnum mt-2 font-display text-[24px] leading-none text-ink-950 sm:mt-2.5 sm:text-[30px]">

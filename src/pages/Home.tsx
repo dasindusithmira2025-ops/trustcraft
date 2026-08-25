@@ -215,7 +215,7 @@ function Composer() {
 
           <div className="ml-auto flex w-full items-center gap-3 sm:w-auto">
             <span
-              className={`hidden text-[12px] text-ink-400 transition-opacity lg:inline
+              className={`hidden text-[13px] text-ink-400 transition-opacity lg:inline
                 ${hasContent ? 'opacity-100' : 'opacity-0'}`}
             >
               <kbd className="font-data">⌘↵</kbd> to start
@@ -238,7 +238,7 @@ function Composer() {
         <TextLink tone="muted" onClick={() => navigate('/professionals')}>
           Browse services instead
         </TextLink>
-        <span className="flex items-start gap-1.5 text-[12.5px] leading-relaxed text-ink-400">
+        <span className="flex items-start gap-1.5 text-[13.5px] leading-relaxed text-ink-400">
           <Icon.shield size={13} className="mt-0.5 shrink-0" />
           Nothing is shared with a professional until you choose one
         </span>
@@ -275,7 +275,7 @@ function ComposerTool({
       onClick={onClick}
       aria-pressed={active}
       aria-label={longLabel}
-      className={`tap inline-flex h-10 items-center gap-2 rounded-[10px] px-3 text-[13px] font-medium
+      className={`tap inline-flex h-10 items-center gap-2 rounded-[10px] px-3 text-[14px] font-medium
         transition-colors duration-150 sm:px-3.5
         ${active ? 'bg-danger-100 text-danger-700' : 'text-ink-600 hover:bg-ink-100 hover:text-ink-900'}`}
     >
@@ -289,7 +289,7 @@ function ComposerTool({
 function RecordingStrip({ onStop }: { onStop: () => void }) {
   return (
     <div className="mx-5 mb-1 mt-1 flex items-center gap-3 rounded-xl bg-danger-100/60 px-3 py-2.5 sm:mx-7 sm:gap-4 sm:px-4 sm:py-3">
-      <span className="flex shrink-0 items-center gap-2 text-[12.5px] font-medium text-danger-700">
+      <span className="flex shrink-0 items-center gap-2 text-[13.5px] font-medium text-danger-700">
         <StatusDot tone="danger" pulse />
         Recording
       </span>
@@ -308,7 +308,7 @@ function RecordingStrip({ onStop }: { onStop: () => void }) {
       <button
         type="button"
         onClick={onStop}
-        className="shrink-0 text-[12.5px] font-medium text-ink-600 hover:text-ink-900"
+        className="shrink-0 text-[13.5px] font-medium text-ink-600 hover:text-ink-900"
       >
         Stop
       </button>
@@ -326,7 +326,7 @@ function AttachmentChip({ attachment, onRemove }: { attachment: Attachment; onRe
           <Icon.mic size={15} />
         </span>
       )}
-      <span className="max-w-[38vw] truncate text-[12.5px] font-medium text-ink-700 sm:max-w-none">
+      <span className="max-w-[38vw] truncate text-[13.5px] font-medium text-ink-700 sm:max-w-none">
         {attachment.label}
       </span>
       <button
@@ -341,26 +341,72 @@ function AttachmentChip({ attachment, onRemove }: { attachment: Attachment; onRe
   )
 }
 
-/** The product's spine, stated once. Four numbered movements, not four cards. */
+/**
+ * The product's spine, stated once — and walkable.
+ *
+ * Five movements, each of which is also the entry point to that part of the
+ * case. A visitor who does not want to type anything can still start reading
+ * the product anywhere, which is the difference between a story and a demo.
+ */
+const STAGES = [
+  {
+    n: 'Understand',
+    body: 'We separate what is known from what is only likely, and say which is which.',
+    to: '/case/TC-2048',
+  },
+  {
+    n: 'Decide',
+    body: 'A recommended professional, the alternatives, and the reasoning behind both.',
+    to: '/case/TC-2048/fit',
+  },
+  {
+    n: 'Agree',
+    body: 'Scope and price in writing before anything starts. Changes come back to you.',
+    to: '/case/TC-2048/plan',
+  },
+  {
+    n: 'Prove',
+    body: 'Every decision and photograph lands in a record that cannot be edited later.',
+    to: '/case/TC-2048/record',
+  },
+  {
+    n: 'Remember',
+    body: 'The finished repair becomes part of this home’s permanent service history.',
+    to: '/ledger?asset=kitchen-sink',
+  },
+]
+
 function HowItWorks() {
-  const steps = [
-    { n: 'Understand', body: 'We separate what is known from what is still unknown.' },
-    { n: 'Decide', body: 'A recommended next step, with the reasoning shown.' },
-    { n: 'Agree', body: 'Compare scope, not only price. Then a written agreement.' },
-    { n: 'Prove', body: 'Every decision and photo lands in a permanent record.' },
-  ]
   return (
     <div className="mt-2 lg:mt-6">
       <Rule />
-      <Eyebrow className="mb-5 mt-7 sm:mb-6 sm:mt-9">How a case moves</Eyebrow>
-      <ol className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2 sm:gap-y-8 lg:grid-cols-4 xl:gap-x-14">
-        {steps.map((s, i) => (
-          <li key={s.n} className="a-up flex gap-4 sm:block" style={{ animationDelay: `${0.05 * i}s` }}>
-            <span className="font-data mt-1 shrink-0 text-[11px] text-ink-300 sm:mt-0">0{i + 1}</span>
-            <div className="min-w-0">
-              <p className="font-display text-[19px] text-ink-900 sm:mt-1.5">{s.n}</p>
-              <p className="mt-1 text-[13px] leading-relaxed text-ink-500">{s.body}</p>
-            </div>
+      <div className="mb-5 mt-7 flex flex-wrap items-baseline gap-x-4 gap-y-1 sm:mb-6 sm:mt-9">
+        <Eyebrow>How a case moves</Eyebrow>
+        <span className="text-[13px] text-ink-500">Open the case at any stage</span>
+      </div>
+      <ol className="grid grid-cols-1 gap-x-8 gap-y-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 xl:gap-x-8">
+        {STAGES.map((s, i) => (
+          <li key={s.n} className="a-up" style={{ animationDelay: `${0.05 * i}s` }}>
+            <button
+              type="button"
+              onClick={() => navigate(s.to)}
+              className="group -mx-3 flex w-full gap-4 rounded-xl px-3 py-3 text-left
+                transition-colors duration-150 hover:bg-white/70 sm:block"
+            >
+              <span className="font-data mt-1 shrink-0 text-[11.5px] text-ink-400 sm:mt-0">
+                0{i + 1}
+              </span>
+              <span className="min-w-0">
+                <span className="mt-0 block font-display text-[19px] text-ink-900 transition-colors group-hover:text-teal-800 sm:mt-1.5">
+                  {s.n}
+                </span>
+                <span className="mt-1 block text-[14px] leading-relaxed text-ink-500">{s.body}</span>
+                <span className="mt-2 hidden items-center gap-1.5 text-[13px] font-medium text-teal-800 opacity-0 transition-opacity group-hover:opacity-100 sm:inline-flex">
+                  Open
+                  <Icon.arrow size={13} className="transition-transform group-hover:translate-x-0.5" />
+                </span>
+              </span>
+            </button>
           </li>
         ))}
       </ol>
@@ -393,7 +439,7 @@ function ContextRail() {
             Needs your decision
           </Eyebrow>
           {needsYou.map(c => (
-            <DecisionRow key={c.id} to={c.route} title={c.title} reason={c.attentionReason ?? c.status} />
+            <DecisionRow key={c.id} to={c.route} title={c.title} reason={c.next} />
           ))}
         </section>
       )}
@@ -423,7 +469,7 @@ function ContextRail() {
             accent={
               a.warrantyUntil ? (
                 <Tooltip label={`Warranty or certificate valid until ${a.warrantyUntil}`}>
-                  <span className="flex items-center gap-1 text-[11.5px] font-medium text-success-700">
+                  <span className="flex items-center gap-1 text-[12.5px] font-medium text-success-700">
                     <Icon.shield size={12} />
                     Covered
                   </span>
@@ -462,13 +508,13 @@ function ActiveCase({ title, pro, to }: { title: string; pro: string; to: string
     >
       <div className="flex items-center justify-between gap-4">
         <Eyebrow tone="light">Active case</Eyebrow>
-        <span className="flex items-center gap-1.5 text-[11.5px] font-medium text-teal-400">
+        <span className="flex items-center gap-1.5 text-[12.5px] font-medium text-teal-400">
           <StatusDot tone="teal" pulse />
           Live
         </span>
       </div>
       <p className="mt-3 font-display text-[24px] leading-tight text-white sm:text-[26px]">{title}</p>
-      <p className="mt-1.5 text-[13px] text-white/45">
+      <p className="mt-1.5 text-[14px] text-white/62">
         {pro} · {status}
       </p>
 
@@ -479,11 +525,11 @@ function ActiveCase({ title, pro, to }: { title: string; pro: string; to: string
             style={{ width: `${Math.max(8, (step / 7) * 100)}%` }}
           />
         </span>
-        <span className="font-data shrink-0 text-[11px] text-white/40">Step {step + 1} of 8</span>
+        <span className="font-data shrink-0 text-[11.5px] text-white/58">Step {step + 1} of 8</span>
       </div>
 
       <span
-        className="mt-5 inline-flex items-center gap-1.5 text-[13px] font-medium text-white/80
+        className="mt-5 inline-flex items-center gap-1.5 text-[14px] font-medium text-white/80
           transition-colors group-hover:text-white"
       >
         Open the record
@@ -508,8 +554,8 @@ function DecisionRow({ title, reason, to }: { title: string; reason: string; to:
           Decide
         </Pill>
       </div>
-      <p className="mt-1 text-[12.5px] leading-relaxed text-ink-600">{reason}</p>
-      <span className="mt-2 inline-flex items-center gap-1.5 text-[12.5px] font-medium text-gold-600">
+      <p className="mt-1 text-[13.5px] leading-relaxed text-ink-600">{reason}</p>
+      <span className="mt-2 inline-flex items-center gap-1.5 text-[13.5px] font-medium text-gold-600">
         Compare them
         <Icon.arrow size={13} className="transition-transform group-hover:translate-x-0.5" />
       </span>
@@ -540,10 +586,10 @@ function QuietRow({
       >
         {resolved && <Icon.check size={14} className="shrink-0 text-success-700" />}
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-[13.5px] font-medium text-ink-900 transition-colors group-hover:text-teal-800">
+          <span className="block truncate text-[14.5px] font-medium text-ink-900 transition-colors group-hover:text-teal-800">
             {title}
           </span>
-          <span className="mt-0.5 block truncate text-[12px] text-ink-400">{meta}</span>
+          <span className="mt-0.5 block truncate text-[13px] text-ink-400">{meta}</span>
         </span>
         {accent}
         <Icon.chevronRight

@@ -13,46 +13,19 @@ logs/
 .claude-replay.*
 .tmp-*
 
-# Flutter / Dart
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-.packages
-.pub-cache/
-.pub/
-coverage/
-**/android/local.properties
-**/android/key.properties
-**/android/**/GeneratedPluginRegistrant.java
-**/ios/Flutter/ephemeral/
-**/ios/Pods/
-**/ios/.symlinks/
-**/DerivedData/
-
-# Android Studio / Gradle
-.gradle/
-.idea/
-*.iml
-**/.cxx/
-**/captures/
-*.jks
-*.keystore
-
-# VS Code local state (project tasks/config are intentionally tracked)
+# Editor local state
 .vscode/*.log
 .vscode/.ropeproject
+.idea/
+*.iml
 
-# Native build / QA output
-*.apk
-*.aab
-*.ipa
+# QA output
 screenshots/
 qa-artifacts/
 
 # Credentials and local operating-system data
 *.pem
 *.p12
-*.mobileprovision
 *.credentials
 .DS_Store
 Thumbs.db

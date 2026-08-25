@@ -15,7 +15,14 @@ import {
   TextLink,
   evidenceTag,
 } from '../ui'
-import { AGREEMENT, CHANGE_REQUEST, evidenceById, money, proById } from '../data'
+import {
+  AGREEMENT,
+  AGREEMENT_VERSIONS,
+  CHANGE_REQUEST,
+  evidenceById,
+  money,
+  proById,
+} from '../data'
 
 // ════════════════════════════════════════════════════════════════════════════
 // Work Agreement
@@ -32,7 +39,7 @@ const CLAUSES = [
   'Agreed work',
   'Materials',
   'Price',
-  'Warranty',
+  'Cover',
   'Completion evidence',
   'If something changes',
 ]
@@ -43,13 +50,17 @@ export function WorkAgreement() {
   const pro = proById(progress.acceptedQuote ?? AGREEMENT.proId)
   const approved = progress.agreementApproved
 
+  // An approved change supersedes the agreement rather than editing it.
+  const revised = progress.changeDecision === 'approved'
+  const current = revised ? AGREEMENT_VERSIONS[1] : AGREEMENT_VERSIONS[0]
+
   return (
     <AppShell caseStage="agree">
       <div className="pb-16 pt-8 sm:pt-10 lg:pb-20 lg:pt-12">
         <button
           type="button"
           onClick={() => navigate('/case/TC-2048/plan')}
-          className="tap mb-6 inline-flex items-center gap-2 text-[13px] text-ink-500 transition-colors hover:text-ink-900 sm:mb-7"
+          className="tap mb-6 inline-flex items-center gap-2 text-[14px] text-ink-500 transition-colors hover:text-ink-900 sm:mb-7"
         >
           <Icon.arrowLeft size={15} />
           Repair plan
@@ -64,7 +75,10 @@ export function WorkAgreement() {
             {/* Masthead — a document states what it is before it says anything. */}
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-[var(--color-rule)] bg-[var(--color-sunken)]/60 px-5 py-3 sm:px-8 lg:px-10">
               <Eyebrow tone="teal">Work agreement</Eyebrow>
-              <span className="font-data ml-auto text-[10.5px] tracking-[0.14em] text-ink-400">
+              <span className="font-data rounded bg-white px-1.5 py-0.5 text-[11px] tracking-[0.12em] text-ink-600 ring-1 ring-[var(--color-rule)]">
+                V{current.version}
+              </span>
+              <span className="font-data ml-auto text-[11px] tracking-[0.14em] text-ink-500">
                 {AGREEMENT.caseId} · 23 AUG 2026
               </span>
             </div>
@@ -75,7 +89,7 @@ export function WorkAgreement() {
                 <br />
                 agreeing to.
               </Display>
-              <p className="a-up d1 measure mt-4 text-[14.5px] leading-relaxed text-ink-500 sm:mt-5 sm:text-[15px]">
+              <p className="a-up d1 measure mt-4 text-[15.5px] leading-relaxed text-ink-500 sm:mt-5 sm:text-[15px]">
                 This is the whole of it. Anything not written here is not part of the job, and cannot be
                 added without coming back to you.
               </p>
@@ -84,7 +98,7 @@ export function WorkAgreement() {
 
               <Clause n={1} label="Case">
                 <p className="text-[15px] font-medium text-ink-950 sm:text-[16px]">Kitchen sink leak</p>
-                <p className="mt-1 text-[13.5px] text-ink-500">Kitchen · Sink · Colombo 05</p>
+                <p className="mt-1 text-[14.5px] text-ink-500">Kitchen · Sink · Colombo 05</p>
               </Clause>
 
               <Clause n={2} label="Professional">
@@ -92,7 +106,7 @@ export function WorkAgreement() {
                   <Avatar tint={pro.tint} name={pro.name} size={34} />
                   <div className="min-w-0">
                     <p className="text-[15px] font-medium text-ink-950 sm:text-[16px]">{pro.name}</p>
-                    <p className="mt-0.5 text-[12.5px] leading-snug text-ink-500 sm:text-[13px]">
+                    <p className="mt-0.5 text-[13.5px] leading-snug text-ink-500 sm:text-[14px]">
                       Identity and qualification verified · {pro.similarJobs} similar repairs
                     </p>
                   </div>
@@ -101,7 +115,7 @@ export function WorkAgreement() {
 
               <Clause n={3} label="Agreed work">
                 <ul className="space-y-2.5 sm:space-y-3">
-                  {AGREEMENT.agreedWork.map(w => (
+                  {current.scope.map(w => (
                     <li
                       key={w}
                       className="flex items-start gap-3 text-[15px] leading-snug text-ink-900 sm:text-[16px]"
@@ -114,38 +128,46 @@ export function WorkAgreement() {
               </Clause>
 
               <Clause n={4} label="Materials">
-                <p className="text-[14.5px] text-ink-800 sm:text-[15px]">{AGREEMENT.materials}</p>
+                <p className="text-[15.5px] text-ink-800 sm:text-[15px]">{AGREEMENT.materials}</p>
               </Clause>
 
               <Clause n={5} label="Price">
                 <p className="tnum font-display text-[32px] leading-none text-ink-950 sm:text-[38px]">
-                  {money(AGREEMENT.price)}
+                  {money(current.total)}
                 </p>
-                <p className="mt-2 text-[13px] leading-relaxed text-ink-500">
+                {revised && (
+                  <p className="a-up mt-2 text-[13.5px] text-ink-500">
+                    <span className="line-through">{money(AGREEMENT_VERSIONS[0].total)}</span> agreed at
+                    11:28, revised by change request {AGREEMENT_VERSIONS[1].changedBy} at 11:52.
+                  </p>
+                )}
+                <p className="mt-2 text-[14px] leading-relaxed text-ink-500">
                   Fixed for the work described above. Nothing else is chargeable without your approval.
                 </p>
               </Clause>
 
-              <Clause n={6} label="Warranty">
-                <p className="text-[14.5px] text-ink-800 sm:text-[15px]">{AGREEMENT.warranty}</p>
+              <Clause n={6} label="Cover">
+                <p className="text-[15.5px] text-ink-800 sm:text-[15px]">{AGREEMENT.warranty}</p>
               </Clause>
 
               <Clause n={7} label="Completion evidence">
-                <p className="flex items-start gap-2.5 text-[14.5px] text-ink-800 sm:text-[15px]">
+                <p className="flex items-start gap-2.5 text-[15.5px] text-ink-800 sm:text-[15px]">
                   <Icon.camera size={16} className="mt-0.5 shrink-0 text-ink-400" />
                   {AGREEMENT.evidenceRequired}
                 </p>
               </Clause>
 
               <Clause n={8} label="If something changes" last>
-                <p className="text-[14.5px] leading-relaxed text-ink-800 sm:text-[15px]">
+                <p className="text-[15.5px] leading-relaxed text-ink-800 sm:text-[15px]">
                   {AGREEMENT.changePolicy}
                 </p>
-                <p className="mt-3 text-[13px] leading-relaxed text-ink-500">
+                <p className="mt-3 text-[14px] leading-relaxed text-ink-500">
                   Extra work discovered mid-job is normal. What is not normal is finding out about it on
                   the final bill.
                 </p>
               </Clause>
+
+              <VersionHistory currentVersion={current.version} />
             </div>
           </article>
 
@@ -168,7 +190,7 @@ export function WorkAgreement() {
                   <p className="font-display text-[24px] leading-tight text-success-800 sm:text-[26px]">
                     Agreement approved
                   </p>
-                  <p className="mt-2 text-[13.5px] leading-relaxed text-success-800/80">
+                  <p className="mt-2 text-[14.5px] leading-relaxed text-success-800/80">
                     Recorded at 11:28 against case {AGREEMENT.caseId}. {pro.short} has been notified and
                     can begin.
                   </p>
@@ -184,7 +206,7 @@ export function WorkAgreement() {
                   <p className="tnum font-display text-[24px] leading-tight text-ink-950 sm:text-[26px]">
                     {money(AGREEMENT.price)}
                   </p>
-                  <p className="mt-2 text-[13px] leading-relaxed text-ink-500">
+                  <p className="mt-2 text-[14px] leading-relaxed text-ink-500">
                     Payment is held until you verify the work is done. {pro.short} is paid after that.
                   </p>
 
@@ -199,8 +221,8 @@ export function WorkAgreement() {
                       className="mt-0.5 shrink-0 accent-teal-800"
                       style={{ width: 17, height: 17 }}
                     />
-                    <span className="text-[13px] leading-relaxed text-ink-700">
-                      I have read the agreed work, the price and the warranty above.
+                    <span className="text-[14px] leading-relaxed text-ink-700">
+                      I have read the agreed work, the price and the cover above.
                     </span>
                   </label>
 
@@ -221,7 +243,7 @@ export function WorkAgreement() {
                   </Button>
 
                   {!read && (
-                    <p className="mt-3 flex items-center justify-center gap-1.5 text-[12px] text-ink-400">
+                    <p className="mt-3 flex items-center justify-center gap-1.5 text-[13px] text-ink-400">
                       <Icon.info size={12} />
                       Confirm you have read it to continue
                     </p>
@@ -231,7 +253,7 @@ export function WorkAgreement() {
             </div>
 
             <Disclosure summary="What happens to my money" className="mt-5 sm:mt-6">
-              <p className="text-[13px] leading-relaxed text-ink-600">
+              <p className="text-[14px] leading-relaxed text-ink-600">
                 The amount is authorised now and held. It is released to {pro.short} once you confirm the
                 work is complete on the proof timeline. If you and {pro.short} disagree, it stays held
                 while the case is reviewed.
@@ -241,6 +263,69 @@ export function WorkAgreement() {
         </div>
       </div>
     </AppShell>
+  )
+}
+
+/**
+ * Version history.
+ *
+ * The superseded version stays legible rather than being replaced — struck
+ * through, dated, and still showing what it said. An audit trail that hides
+ * the previous version is not an audit trail.
+ */
+function VersionHistory({ currentVersion }: { currentVersion: number }) {
+  const shown = AGREEMENT_VERSIONS.filter(v => v.version <= currentVersion)
+  if (shown.length < 2) {
+    return (
+      <div className="mt-2 flex items-start gap-2.5 rounded-xl bg-[var(--color-sunken)] px-4 py-3.5">
+        <Icon.file size={15} className="mt-0.5 shrink-0 text-ink-500" />
+        <p className="text-[13.5px] leading-relaxed text-ink-600">
+          This is version 1. If the scope changes, a new version is created and this one stays
+          readable underneath it.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <section className="mt-4" aria-label="Agreement versions">
+      <Eyebrow className="mb-3">Versions</Eyebrow>
+      <ol className="space-y-2.5">
+        {[...shown].reverse().map(v => {
+          const live = v.version === currentVersion
+          return (
+            <li
+              key={v.version}
+              className={`a-up rounded-xl px-4 py-3.5 ${
+                live ? 'bg-teal-50 ring-1 ring-teal-200' : 'bg-[var(--color-sunken)]'
+              }`}
+            >
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                <p className="flex items-center gap-2.5 text-[14.5px] font-semibold text-ink-950">
+                  <span className="font-data text-[11.5px] tracking-[0.12em] text-ink-500">
+                    V{v.version}
+                  </span>
+                  {live ? 'In force' : 'Superseded'}
+                  {!live && <Icon.dash size={14} className="text-ink-400" />}
+                </p>
+                <p
+                  className={`tnum font-data text-[14px] ${live ? 'text-ink-950' : 'text-ink-500 line-through'}`}
+                >
+                  {money(v.total)}
+                </p>
+              </div>
+              <p className="mt-1 text-[13px] text-ink-500">
+                Approved {v.at} · {v.date}
+                {v.changedBy && ` · raised by change request ${v.changedBy}`}
+              </p>
+              <p className="mt-1.5 text-[13px] leading-relaxed text-ink-600">
+                {v.scope.length} items of agreed work
+              </p>
+            </li>
+          )
+        })}
+      </ol>
+    </section>
   )
 }
 
@@ -263,7 +348,7 @@ function Clause({
   return (
     <section className="grid grid-cols-1 gap-x-8 gap-y-2.5 py-5 sm:grid-cols-[132px_minmax(0,1fr)] sm:py-6 lg:gap-x-10 lg:grid-cols-[150px_minmax(0,1fr)]">
       <div className="flex items-baseline gap-2 sm:pt-1">
-        <span className="font-data text-[10.5px] text-ink-300">{String(n).padStart(2, '0')}</span>
+        <span className="font-data text-[11px] text-ink-300">{String(n).padStart(2, '0')}</span>
         <Eyebrow>{label}</Eyebrow>
       </div>
       <div className="min-w-0">{children}</div>
@@ -313,7 +398,7 @@ export function ChangeRequest() {
 
         <div className="a-up d1 mt-5 flex items-center gap-3">
           <Avatar tint={pro.tint} name={pro.name} size={32} />
-          <p className="text-[13.5px] text-ink-500 sm:text-[14px]">
+          <p className="text-[14.5px] text-ink-500 sm:text-[15px]">
             Raised by <span className="font-medium text-ink-800">{pro.name}</span>, on site
           </p>
         </div>
@@ -335,7 +420,7 @@ export function ChangeRequest() {
                     className="max-h-[380px] w-full object-cover"
                   />
                 </div>
-                <figcaption className="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[12.5px] text-ink-500">
+                <figcaption className="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[13.5px] text-ink-500">
                   <EvidenceRef label={evidenceTag(evidence.id, evidence.kind)} />
                   {evidence.label}
                   <span aria-hidden="true">·</span>
@@ -366,7 +451,7 @@ export function ChangeRequest() {
                 icon={<Icon.clock size={15} className="text-ink-400" />}
               />
               <ChangeRow
-                label="Warranty"
+                label="Cover"
                 value="Unchanged — 30 days on labour, now covering both parts"
                 icon={<Icon.shield size={15} className="text-success-700" />}
                 last
@@ -374,7 +459,7 @@ export function ChangeRequest() {
             </dl>
 
             <Disclosure summary="What happens if I decline" className="measure mt-7 sm:mt-8">
-              <p className="text-[13.5px] leading-relaxed text-ink-600">
+              <p className="text-[14.5px] leading-relaxed text-ink-600">
                 {CHANGE_REQUEST.declineConsequence}
               </p>
             </Disclosure>
@@ -396,12 +481,29 @@ export function ChangeRequest() {
                   {decision === 'approved' ? <Icon.check size={20} /> : <Icon.dash size={20} />}
                   {decision === 'approved' ? 'Approved' : 'Declined'}
                 </p>
-                <p className="mt-2 text-[13px] leading-relaxed text-ink-600">
+                <p className="mt-2 text-[14px] leading-relaxed text-ink-600">
                   {decision === 'approved'
                     ? `Recorded at 11:52. ${pro.short} has resumed, and the new total of ${money(CHANGE_REQUEST.newTotal)} is now the agreed figure.`
                     : CHANGE_REQUEST.declineConsequence}
                 </p>
-                <Button full size="lg" className="mt-5" to="/case/TC-2048/record">
+                {decision === 'approved' && (
+                  <Button
+                    full
+                    size="lg"
+                    className="mt-5"
+                    to="/case/TC-2048/agreement"
+                    iconEnd={<Icon.arrow size={16} />}
+                  >
+                    See the revised agreement
+                  </Button>
+                )}
+                <Button
+                  full
+                  size={decision === 'approved' ? 'md' : 'lg'}
+                  variant={decision === 'approved' ? 'secondary' : 'primary'}
+                  className={decision === 'approved' ? 'mt-2' : 'mt-5'}
+                  to="/case/TC-2048/record"
+                >
                   Back to the record
                 </Button>
               </div>
@@ -440,7 +542,7 @@ export function ChangeRequest() {
 
                 {asking && (
                   <div className="a-up rounded-xl bg-white p-4 ring-1 ring-[var(--color-rule)]">
-                    <label htmlFor="cr-q" className="mb-2 block text-[12.5px] font-medium text-ink-700">
+                    <label htmlFor="cr-q" className="mb-2 block text-[13.5px] font-medium text-ink-700">
                       Your question to {pro.short}
                     </label>
                     <textarea
@@ -449,7 +551,7 @@ export function ChangeRequest() {
                       value={question}
                       onChange={e => setQuestion(e.target.value)}
                       placeholder="Is the hose likely to fail soon if I leave it?"
-                      className="w-full resize-none rounded-lg bg-[var(--color-sunken)] px-3 py-2.5 text-[13.5px]
+                      className="w-full resize-none rounded-lg bg-[var(--color-sunken)] px-3 py-2.5 text-[16px]
                         text-ink-900 placeholder:text-ink-400 focus:outline-none"
                     />
                     <Button
@@ -467,7 +569,7 @@ export function ChangeRequest() {
                   </div>
                 )}
 
-                <p className="hidden pt-2 text-center text-[12px] leading-relaxed text-ink-400 md:block">
+                <p className="hidden pt-2 text-center text-[13px] leading-relaxed text-ink-400 md:block">
                   Whatever you choose is recorded against the case with today&apos;s date.
                 </p>
               </div>
@@ -493,7 +595,7 @@ function Delta() {
     >
       <div className="grid grid-cols-1 items-stretch sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)]">
         <DeltaCell label="Originally agreed" sub="Approved 11:28">
-          <span className="tnum font-data text-[26px] text-white/55 line-through sm:text-[28px]">
+          <span className="tnum font-data text-[26px] text-white/68 line-through sm:text-[28px]">
             {money(CHANGE_REQUEST.originalTotal)}
           </span>
         </DeltaCell>
@@ -532,13 +634,13 @@ function DeltaCell({
   return (
     <div className={`px-5 py-5 sm:px-6 sm:py-7 ${tone === 'new' ? 'bg-white/[0.05]' : ''}`}>
       <p
-        className={`font-data text-[10px] uppercase tracking-[0.14em]
-          ${tone === 'warning' ? 'text-warning-700' : 'text-white/45'}`}
+        className={`font-data text-[10.5px] uppercase tracking-[0.14em]
+          ${tone === 'warning' ? 'text-warning-700' : 'text-white/62'}`}
       >
         {label}
       </p>
       <p className="mt-2.5">{children}</p>
-      <p className="mt-2 text-[12px] leading-snug text-white/40">{sub}</p>
+      <p className="mt-2 text-[13px] leading-snug text-white/58">{sub}</p>
     </div>
   )
 }
@@ -546,7 +648,7 @@ function DeltaCell({
 function DeltaArrow() {
   return (
     <div className="flex items-center justify-center py-1 sm:px-1 sm:py-0" aria-hidden="true">
-      <Icon.arrow size={18} className="rotate-90 text-white/25 sm:rotate-0" />
+      <Icon.arrow size={18} className="rotate-90 text-white/40 sm:rotate-0" />
     </div>
   )
 }
@@ -565,8 +667,8 @@ function ChangeRow({
   return (
     <>
       <div className="flex items-start justify-between gap-6 py-3.5 sm:gap-8 sm:py-4">
-        <dt className="shrink-0 text-[13px] text-ink-500 sm:text-[13.5px]">{label}</dt>
-        <dd className="flex max-w-md items-start gap-2.5 text-right text-[14px] font-medium text-ink-950 sm:text-[15px]">
+        <dt className="shrink-0 text-[14px] text-ink-500 sm:text-[14.5px]">{label}</dt>
+        <dd className="flex max-w-md items-start gap-2.5 text-right text-[15px] font-medium text-ink-950 sm:text-[15px]">
           <span>{value}</span>
           <span className="mt-0.5 shrink-0">{icon}</span>
         </dd>

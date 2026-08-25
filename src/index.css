@@ -23,10 +23,10 @@
   --color-ink-800: #1A1D22;
   --color-ink-700: #2D3139;
   --color-ink-600: #4A4F58;
-  --color-ink-500: #6B7280;
-  --color-ink-400: #9BA3AF;
-  --color-ink-300: #C5C9D0;
-  --color-ink-200: #E2E4E8;
+  --color-ink-500: #565C66;
+  --color-ink-400: #676D78;
+  --color-ink-300: #878C96;
+  --color-ink-200: #DCDFE4;
   --color-ink-100: #F0F1F3;
   --color-ink-50:  #F7F5F0;
 
@@ -243,10 +243,10 @@ input[type="range"].wipe::-moz-range-thumb {
 .page {
   width: 100%;
   margin-inline: auto;
-  max-width: 1360px;
+  max-width: 1440px;
   padding-inline: var(--gutter);
 }
-.page-wide { max-width: 1560px; }
+.page-wide { max-width: 1720px; }
 
 /* Line length. Prose past ~72ch stops being readable on a wide screen. */
 .measure    { max-width: 68ch; }

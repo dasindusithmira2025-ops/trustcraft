@@ -13,10 +13,10 @@ import {
   UNDER_SINK,
 } from './evidence'
 
-export const CURRENCY = 'Rs.'
+export const CURRENCY = 'LKR'
 
 export function money(n: number): string {
-  return `${CURRENCY}${n.toLocaleString('en-LK')}`
+  return `${CURRENCY} ${n.toLocaleString('en-LK')}`
 }
 
 // ── Evidence ────────────────────────────────────────────────────────────────
@@ -158,6 +158,96 @@ export const QUESTIONS: OpenQuestion[] = [
   },
 ]
 
+// ── What may be happening ───────────────────────────────────────────────────
+//
+// Deliberately separate from KNOWN. These are readings of the evidence, not
+// facts drawn from it, and the interface has to be able to say so. Each one
+// carries a weight that the customer's own answers move — so an answer does
+// something visible rather than disappearing into a form.
+
+export interface Hypothesis {
+  id: string
+  text: string
+  detail: string
+  /** Weight before any clarification has been answered. */
+  base: number
+  /** questionId -> answer -> how much that answer moves this reading. */
+  shift?: Record<string, Record<string, number>>
+}
+
+export const LIKELY: Hypothesis[] = [
+  {
+    id: 'h1',
+    text: 'Supply-side connector or its seal',
+    detail:
+      'The pressurised joint beneath the tap. A fault here keeps leaking whether or not the tap is being used.',
+    base: 52,
+    shift: { q1: { Yes: 30, No: -36 } },
+  },
+  {
+    id: 'h2',
+    text: 'Flexible supply hose',
+    detail:
+      'The braided hose between the isolation valve and the tap. The outer sleeve splits with age, often before the hose itself fails.',
+    base: 26,
+    shift: { q1: { Yes: 6, No: -12 } },
+  },
+  {
+    id: 'h3',
+    text: 'Waste trap or drain connection',
+    detail:
+      'The unpressurised side. This would only wet the cabinet while water is actually running through the waste.',
+    base: 22,
+    shift: { q1: { Yes: -28, No: 40 } },
+  },
+]
+
+/**
+ * How confident TrustCraft is in the *reading*, never in a diagnosis. It
+ * starts below certainty and stays below it: a decisive answer narrows the
+ * field, and nothing available from here can close it.
+ */
+export const CONFIDENCE = {
+  claim: 'A plumbing fault on the sink’s supply or waste connection',
+  base: 87,
+  ceiling: 94,
+  /** Why it cannot go higher without someone on site. */
+  ceilingReason:
+    'The remaining uncertainty is physical. Two different faults look the same in a photograph, and only a professional on site can separate them.',
+}
+
+export interface Reading {
+  confidence: number
+  /** True once an answer has actually moved the reading. */
+  moved: boolean
+  hypotheses: (Hypothesis & { weight: number; delta: number })[]
+}
+
+/** The current reading of the evidence, given whatever has been answered. */
+export function readingFor(answers: Record<string, string>): Reading {
+  let moved = false
+  const scored = LIKELY.map(h => {
+    let delta = 0
+    for (const [qid, byAnswer] of Object.entries(h.shift ?? {})) {
+      const given = answers[qid]
+      if (given && byAnswer[given] !== undefined) {
+        delta += byAnswer[given]
+        moved = true
+      }
+    }
+    return { ...h, delta, raw: Math.max(2, h.base + delta) }
+  })
+
+  const sum = scored.reduce((t, h) => t + h.raw, 0)
+  const hypotheses = scored
+    .map(({ raw, ...h }) => ({ ...h, weight: Math.round((raw / sum) * 100) }))
+    .sort((a, b) => b.weight - a.weight)
+
+  // A decisive answer narrows the field. "Not sure" honestly changes nothing.
+  const decisive = answers.q1 === 'Yes' || answers.q1 === 'No'
+  return { confidence: decisive ? CONFIDENCE.ceiling : CONFIDENCE.base, moved, hypotheses }
+}
+
 export const SAFETY = {
   title: 'Close the local isolation valve',
   body:
@@ -197,7 +287,7 @@ export const PATHS: ResolutionPath[] = [
       'Supply-side and drain-side faults look identical in a photograph',
       'The inspection fee is credited against the repair if you proceed',
     ],
-    cost: 'Rs.700 – Rs.1,000',
+    cost: 'LKR 700 – LKR 1,000',
     time: 'Today',
   },
   {
@@ -219,7 +309,7 @@ export const PATHS: ResolutionPath[] = [
     why: ['Right when water is uncontained, reaching electrics, or flooding'],
     lessAppropriate:
       'Less appropriate here: the water is contained inside the cabinet and no electrical fitting is involved.',
-    cost: '+ Rs.1,500 surcharge',
+    cost: '+ LKR 1,500 surcharge',
     time: 'Within 1 hr',
   },
 ]
@@ -556,14 +646,14 @@ export const LENS_INSIGHTS: LensInsight[] = [
     kind: 'cheapest',
     proId: 'nimal',
     headline: 'Lowest total',
-    body: 'Rs.5,400 — Rs.1,500 below the next quote.',
+    body: 'LKR 5,400 — LKR 1,500 below the next quote.',
   },
   {
     kind: 'gap',
     proId: 'nimal',
     headline: 'But three lines are not stated',
     body:
-      'Materials, warranty and cleanup are unspecified. If parts are billed separately at the typical Rs.2,400, this quote lands near Rs.7,800 — above both of the others.',
+      'Materials, warranty and cleanup are unspecified. If parts are billed separately at the typical LKR 2,400, this quote lands near LKR 7,800 — above both of the others.',
   },
   {
     kind: 'complete',
@@ -619,6 +709,51 @@ export const AGREEMENT = {
   evidenceRequired: 'Before and after images required at completion',
   changePolicy: 'Any additional work needs a written change request and your approval before it starts.',
 }
+
+/**
+ * Agreement versions.
+ *
+ * An approved change does not edit the agreement — it supersedes it. Both
+ * versions stay readable, because "what did we actually agree to, and when"
+ * is the question a dispute turns on, and an overwritten document cannot
+ * answer it.
+ */
+export interface AgreementVersion {
+  version: number
+  at: string
+  date: string
+  total: number
+  scope: string[]
+  /** What this version added over the one before it. */
+  changedBy?: string
+  superseded?: boolean
+}
+
+export const AGREEMENT_VERSIONS: AgreementVersion[] = [
+  {
+    version: 1,
+    at: '11:28',
+    date: '23 Aug 2026',
+    total: 6900,
+    scope: [
+      'Replace the fractured compression connector',
+      'Pressure-test the new connection before leaving',
+    ],
+    superseded: true,
+  },
+  {
+    version: 2,
+    at: '11:52',
+    date: '23 Aug 2026',
+    total: 8400,
+    scope: [
+      'Replace the fractured compression connector',
+      'Replace the flexible supply hose',
+      'Pressure-test the new connection before leaving',
+    ],
+    changedBy: 'CR-1',
+  },
+]
 
 // ── Change request ──────────────────────────────────────────────────────────
 
@@ -724,7 +859,7 @@ export const TIMELINE: TimelineEvent[] = [
     id: 't7',
     time: '11:52',
     title: 'Change request approved',
-    detail: 'New agreed total Rs.8,400',
+    detail: 'New agreed total LKR 8,400',
     by: 'Nadeesha',
     confirmedBy: 'Nadeesha',
     amount: 8400,
@@ -798,6 +933,10 @@ export interface CaseRecord {
   attentionReason?: string
   pro?: string
   route: string
+  /** The next thing that will actually happen — better than a raw status. */
+  next: string
+  /** The verb for it, when that next thing is yours to do. */
+  action?: 'Decide' | 'Approve' | 'Verify' | 'Review'
 }
 
 export const CASES: CaseRecord[] = [
@@ -810,6 +949,8 @@ export const CASES: CaseRecord[] = [
     attention: 'needs-you',
     attentionReason: 'Two quotes are waiting for your decision',
     route: '#/case/TC-2048/quotes',
+    next: '2 quotes ready to compare',
+    action: 'Decide',
   },
   {
     id: 'TC-2048',
@@ -820,6 +961,7 @@ export const CASES: CaseRecord[] = [
     attention: 'active',
     pro: 'Chamod Fernando',
     route: '#/case/TC-2048/record',
+    next: 'Chamod is on site — repair underway',
   },
   {
     id: 'TC-2039',
@@ -829,6 +971,7 @@ export const CASES: CaseRecord[] = [
     opened: '20 Aug 2026',
     attention: 'waiting',
     route: '#/cases',
+    next: 'Waiting on an electrician to respond',
   },
   {
     id: 'TC-2012',
@@ -839,6 +982,7 @@ export const CASES: CaseRecord[] = [
     attention: 'resolved',
     pro: 'Nuwan Silva',
     route: '#/ledger',
+    next: 'In the ledger · Living room · Power',
   },
   {
     id: 'TC-1998',
@@ -849,6 +993,7 @@ export const CASES: CaseRecord[] = [
     attention: 'resolved',
     pro: 'Samith Rajapaksa',
     route: '#/ledger',
+    next: 'In the ledger · covered until 14 Jul 2027',
   },
 ]
 
@@ -863,6 +1008,14 @@ export interface LedgerEntry {
   warranty?: string
   evidence: number
   parts?: string[]
+  /** Agreement versions this job passed through — 2 means a change was approved. */
+  versions?: number
+  /**
+   * The physical residue of the job. A ledger that is only rows and figures
+   * reads like a database; a strip of what was actually photographed and
+   * signed reminds you it happened in a real kitchen.
+   */
+  strip?: { label: string; src?: string; kind: 'photo' | 'document'; to?: string }[]
 }
 
 export interface LedgerAsset {
@@ -893,7 +1046,16 @@ export const LEDGER: LedgerAsset[] = [
         caseId: 'TC-2048',
         warranty: 'Labour warranty until 18 Sep 2026',
         evidence: 5,
+        versions: 2,
         parts: ['15 mm brass compression connector', 'Braided flexible supply hose'],
+        strip: [
+          { label: 'Before', kind: 'photo', src: UNDER_SINK },
+          { label: 'The fault', kind: 'photo', src: FRACTURED_CONNECTOR },
+          { label: 'Hose', kind: 'photo', src: PERISHED_HOSE },
+          { label: 'After', kind: 'photo', src: AFTER_REPAIR },
+          { label: 'Repair plan', kind: 'document', to: '#/case/TC-2048/plan' },
+          { label: 'Agreement V2', kind: 'document', to: '#/case/TC-2048/agreement' },
+        ],
       },
       {
         date: '11 Feb 2025',
@@ -1029,7 +1191,7 @@ export const THREAD: MessageItem[] = [
     at: '11:26',
     objectType: 'Repair plan',
     title: 'Replace damaged sink connector',
-    meta: 'Rs.6,900 · 30-day warranty',
+    meta: 'LKR 6,900 · 30-day warranty',
     href: '#/case/TC-2048/plan',
   },
   {
@@ -1039,7 +1201,7 @@ export const THREAD: MessageItem[] = [
     at: '11:28',
     objectType: 'Work agreement',
     title: 'Approved',
-    meta: 'Rs.6,900 agreed',
+    meta: 'LKR 6,900 agreed',
     href: '#/case/TC-2048/agreement',
   },
   {
@@ -1049,7 +1211,7 @@ export const THREAD: MessageItem[] = [
     at: '11:47',
     objectType: 'Change request',
     title: 'Flexible hose also requires replacement',
-    meta: '+ Rs.1,500 · + 20 min',
+    meta: '+ LKR 1,500 · + 20 min',
     href: '#/case/TC-2048/change',
   },
   { id: 'm7', kind: 'text', from: 'you', at: '11:50', body: 'Is the hose likely to fail soon if I leave it?' },
@@ -1128,6 +1290,37 @@ if (import.meta.env.DEV) {
   // Every fact must point at evidence that exists.
   for (const k of KNOWN) {
     if (!evidenceById(k.evidenceId)) bad.push(`known fact ${k.id} cites missing evidence`)
+  }
+
+  // The agreement's last version must be the figure the case actually settled at.
+  const last = AGREEMENT_VERSIONS[AGREEMENT_VERSIONS.length - 1]
+  if (last.total !== CHANGE_REQUEST.newTotal) {
+    bad.push('the final agreement version disagrees with the approved change')
+  }
+  if (AGREEMENT_VERSIONS[0].total !== AGREEMENT.price) {
+    bad.push('agreement version 1 disagrees with the originally agreed price')
+  }
+
+  // ── The reading of the evidence ───────────────────────────────────────────
+  // This is the only real branching in the domain, and it makes a claim on
+  // screen: that an answer moves the reading, that "Not sure" moves nothing,
+  // and that confidence never reaches certainty.
+  const base = readingFor({})
+  const yes = readingFor({ q1: 'Yes' })
+  const no = readingFor({ q1: 'No' })
+  const unsure = readingFor({ q1: 'Not sure' })
+
+  if (base.moved) bad.push('the reading claims to have moved before anything was answered')
+  if (!yes.moved) bad.push('a decisive answer must visibly move the reading')
+  if (unsure.moved || unsure.confidence !== base.confidence) {
+    bad.push('"Not sure" must not move the reading — it establishes nothing')
+  }
+  if (yes.hypotheses[0].id !== 'h1') bad.push('"leak continues with the tap closed" must favour the supply side')
+  if (no.hypotheses[0].id !== 'h3') bad.push('"leak stops with the tap closed" must favour the drain side')
+  for (const r of [base, yes, no, unsure]) {
+    if (r.confidence >= 100) bad.push('confidence must stay below certainty')
+    const total = r.hypotheses.reduce((t, h) => t + h.weight, 0)
+    if (Math.abs(total - 100) > 2) bad.push(`readings should be shares of one whole, summed to ${total}`)
   }
 
   if (bad.length > 0) {

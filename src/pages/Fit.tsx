@@ -59,12 +59,12 @@ export function ProfessionalFit() {
     <AppShell caseStage="decide">
       <div className="pb-16 pt-8 sm:pt-10 lg:pb-20 lg:pt-12">
         <PageHead
-          eyebrow="Three professionals, curated"
+          eyebrow="Decide"
           title={
             <>
-              Who should
+              Who fits this case,
               <br />
-              look at this?
+              and why?
             </>
           }
           lede="Not everyone available — the three whose record is actually relevant to a supply-side connector leak. One of them fits this job best, and the reason is not that they are cheapest."
@@ -112,7 +112,7 @@ export function ProfessionalFit() {
           <CompareDetails selected={selected} onChoose={choose} />
         </section>
 
-        <p className="measure mt-10 flex items-start gap-2 text-[13px] leading-relaxed text-ink-400 sm:mt-12">
+        <p className="measure mt-10 flex items-start gap-2 text-[14px] leading-relaxed text-ink-400 sm:mt-12">
           <Icon.info size={14} className="mt-0.5 shrink-0" />
           Ratings are deliberately not the headline. Every figure above comes from completed jobs on
           TrustCraft and can be traced to its source.
@@ -151,7 +151,7 @@ function PrimaryFit({
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-10">
           <div className="min-w-0 flex-1">
             <Pill tone="teal" icon={<Icon.check size={12} />}>
-              Strongest fit for this case
+              Recommended for this case
             </Pill>
 
             <div className="mt-4 flex items-center gap-4">
@@ -160,7 +160,7 @@ function PrimaryFit({
                 <Display size="md" as="h2" className="text-ink-950">
                   {pro.name}
                 </Display>
-                <p className="mt-1 text-[13.5px] text-ink-500">{pro.specialty}</p>
+                <p className="mt-1 text-[14.5px] text-ink-500">{pro.specialty}</p>
               </div>
             </div>
 
@@ -190,7 +190,7 @@ function PrimaryFit({
               <Button full size="lg" className="mt-4" onClick={onChoose}>
                 {selected ? 'Selected' : `Choose ${pro.short}`}
               </Button>
-              <p className="mt-2.5 text-center text-[11.5px] leading-relaxed text-ink-400">
+              <p className="mt-2.5 text-center text-[12.5px] leading-relaxed text-ink-400">
                 Nothing is charged until you approve a plan.
               </p>
             </div>
@@ -213,7 +213,7 @@ function StatStrip({ pro }: { pro: Pro }) {
         const isLeader = leaderOf(row.key) === pro.id
         return (
           <div key={row.key} className="min-w-0">
-            <dt className="flex items-center gap-1 text-[11.5px] leading-snug text-ink-500">
+            <dt className="flex items-center gap-1 text-[12.5px] leading-snug text-ink-500">
               <span className="truncate">{row.label}</span>
               <InfoHint label={row.hint} />
             </dt>
@@ -223,7 +223,7 @@ function StatStrip({ pro }: { pro: Pro }) {
                 <Tooltip
                   label={row.better === 'high' ? `Highest of the three. ${row.hint}` : `Lowest of the three. ${row.hint}`}
                 >
-                  <span className="font-data rounded bg-teal-100 px-1 py-0.5 text-[10px] uppercase tracking-[0.1em] text-teal-800">
+                  <span className="font-data rounded bg-teal-100 px-1 py-0.5 text-[10.5px] uppercase tracking-[0.1em] text-teal-800">
                     Best
                   </span>
                 </Tooltip>
@@ -239,8 +239,8 @@ function StatStrip({ pro }: { pro: Pro }) {
 function MiniRow({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
   return (
     <div className="flex items-baseline justify-between gap-3">
-      <dt className="text-[12.5px] text-ink-500">{label}</dt>
-      <dd className={`tnum text-[13px] ${strong ? 'font-semibold text-teal-800' : 'font-medium text-ink-900'}`}>
+      <dt className="text-[13.5px] text-ink-500">{label}</dt>
+      <dd className={`tnum text-[14px] ${strong ? 'font-semibold text-teal-800' : 'font-medium text-ink-900'}`}>
         {value}
       </dd>
     </div>
@@ -250,6 +250,15 @@ function MiniRow({ label, value, strong }: { label: string; value: string; stron
 // ════════════════════════════════════════════════════════════════════════════
 // The alternatives — deliberately quieter, and honest about the trade
 // ════════════════════════════════════════════════════════════════════════════
+
+const TRADE_LABEL: Record<string, string> = {
+  availability: 'Fastest',
+  inspection: 'Lower inspection cost',
+  distance: 'Closest',
+  similar: 'Most relevant experience',
+  completion: 'Highest completion',
+  accuracy: 'Most accurate quotes',
+}
 
 function AlternativeFit({
   pro,
@@ -275,20 +284,26 @@ function AlternativeFit({
         ${selected ? 'border-teal-700 bg-teal-50/40' : 'border-[var(--color-rule)] bg-[var(--color-sunken)]/55'}`}
       style={{ animationDelay: `${0.06 * index}s` }}
     >
+      {leads.length > 0 && (
+        <Pill tone="neutral" className="mb-3.5 self-start">
+          {TRADE_LABEL[leads[0].key] ?? `Best on ${leads[0].label.toLowerCase()}`}
+        </Pill>
+      )}
+
       <div className="flex items-start gap-3.5">
         <Avatar tint={pro.tint} name={pro.name} size={40} ring={selected} />
         <div className="min-w-0 flex-1">
           <h3 className="font-display text-[21px] leading-tight text-ink-950">{pro.name}</h3>
-          <p className="mt-0.5 text-[12.5px] text-ink-500">{pro.fitLabel}</p>
+          <p className="mt-0.5 text-[13.5px] text-ink-500">{pro.fitLabel}</p>
         </div>
       </div>
 
-      <p className="mt-4 text-[13.5px] leading-relaxed text-ink-600">{pro.fitNote}</p>
+      <p className="mt-4 text-[14.5px] leading-relaxed text-ink-600">{pro.fitNote}</p>
 
       {leads.length > 0 && (
         <ul className="mt-4 space-y-1.5">
           {leads.map(r => (
-            <li key={r.key} className="flex items-center gap-2 text-[12.5px] text-ink-700">
+            <li key={r.key} className="flex items-center gap-2 text-[13.5px] text-ink-700">
               <Icon.check size={13} className="shrink-0 text-teal-700" />
               <span>
                 Best on {r.label.toLowerCase()} — <span className="tnum font-medium">{r.value(pro)}</span>
@@ -319,8 +334,8 @@ function AlternativeFit({
 function MiniStat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="font-data text-[10px] uppercase tracking-[0.13em] text-ink-400">{label}</dt>
-      <dd className="tnum mt-0.5 text-[13.5px] font-medium text-ink-900">{value}</dd>
+      <dt className="font-data text-[10.5px] uppercase tracking-[0.13em] text-ink-400">{label}</dt>
+      <dd className="tnum mt-0.5 text-[14.5px] font-medium text-ink-900">{value}</dd>
     </div>
   )
 }
@@ -354,8 +369,8 @@ function CompareDetails({
           hover:border-ink-400 sm:px-5"
       >
         <span className="min-w-0">
-          <span className="block text-[14.5px] font-semibold text-ink-950">Compare details</span>
-          <span className="mt-0.5 block text-[12.5px] text-ink-500">
+          <span className="block text-[15.5px] font-semibold text-ink-950">Compare details</span>
+          <span className="mt-0.5 block text-[13.5px] text-ink-500">
             All {FIT_ROWS.length} measures, side by side
           </span>
         </span>
@@ -411,7 +426,7 @@ function FitMatrix({ selected, onChoose }: { selected: string | null; onChoose: 
                 <div className="min-w-0">
                   <p className="font-display text-[19px] leading-tight text-ink-950">{p.short}</p>
                   {p.id === RECOMMENDED && (
-                    <p className="mt-0.5 flex items-center gap-1 text-[11px] font-normal text-teal-800">
+                    <p className="mt-0.5 flex items-center gap-1 text-[11.5px] font-normal text-teal-800">
                       <Icon.check size={11} />
                       Recommended
                     </p>
@@ -433,7 +448,7 @@ function FitMatrix({ selected, onChoose }: { selected: string | null; onChoose: 
           const leader = leaderOf(row.key)
           return (
             <tr key={row.key} className="group/row">
-              <th scope="row" className="py-3.5 pr-6 align-middle text-[13.5px] font-medium text-ink-600">
+              <th scope="row" className="py-3.5 pr-6 align-middle text-[14.5px] font-medium text-ink-600">
                 <span className="inline-flex items-center gap-1.5">
                   {row.label}
                   <InfoHint label={row.hint} />
@@ -464,7 +479,7 @@ function FitMatrix({ selected, onChoose }: { selected: string | null; onChoose: 
                               : `Lowest of the three. ${row.hint}`
                           }
                         >
-                          <span className="font-data rounded bg-teal-100 px-1.5 py-0.5 text-[10px] uppercase tracking-[0.1em] text-teal-800">
+                          <span className="font-data rounded bg-teal-100 px-1.5 py-0.5 text-[10.5px] uppercase tracking-[0.1em] text-teal-800">
                             Best
                           </span>
                         </Tooltip>
@@ -484,7 +499,7 @@ function FitMatrix({ selected, onChoose }: { selected: string | null; onChoose: 
         </tr>
 
         <tr>
-          <th scope="row" className="py-5 pr-6 align-top text-[13.5px] font-medium text-ink-600">
+          <th scope="row" className="py-5 pr-6 align-top text-[14.5px] font-medium text-ink-600">
             Decide
           </th>
           {PROS.map(p => (
@@ -524,7 +539,7 @@ function FitPairCompare({ pair, onPick }: { pair: string[]; onPick: (id: string)
                 aria-pressed={on}
                 onClick={() => onPick(p.id)}
                 className={`tap flex items-center gap-2 rounded-full border py-1.5 pl-1.5 pr-3.5
-                  text-[13.5px] font-medium transition-colors
+                  text-[14.5px] font-medium transition-colors
                   ${
                     on
                       ? 'border-teal-800 bg-teal-50 text-teal-900'
@@ -540,7 +555,7 @@ function FitPairCompare({ pair, onPick }: { pair: string[]; onPick: (id: string)
         </div>
       </fieldset>
 
-      <h3 className="mb-4 flex items-center gap-2.5 text-[14px] font-semibold text-ink-950">
+      <h3 className="mb-4 flex items-center gap-2.5 text-[15px] font-semibold text-ink-950">
         {a.short}
         <span className="text-ink-300" aria-hidden="true">
           ↔
@@ -555,7 +570,7 @@ function FitPairCompare({ pair, onPick }: { pair: string[]; onPick: (id: string)
           const differs = row.value(a) !== row.value(b)
           return (
             <li key={row.key}>
-              <p className="mb-1.5 flex items-center gap-1.5 text-[13px] font-medium text-ink-700">
+              <p className="mb-1.5 flex items-center gap-1.5 text-[14px] font-medium text-ink-700">
                 {row.label}
                 <InfoHint label={row.hint} />
               </p>
@@ -565,7 +580,7 @@ function FitPairCompare({ pair, onPick }: { pair: string[]; onPick: (id: string)
                     <span className="flex items-center gap-1.5">
                       <span className="tnum">{row.value(p)}</span>
                       {leader === p.id && (
-                        <span className="font-data rounded bg-teal-100 px-1 py-0.5 text-[10px] uppercase tracking-[0.1em] text-teal-800">
+                        <span className="font-data rounded bg-teal-100 px-1 py-0.5 text-[10.5px] uppercase tracking-[0.1em] text-teal-800">
                           Best
                         </span>
                       )}
@@ -620,8 +635,8 @@ function WhyThisFit({ pro, onClose }: { pro: Pro; onClose: () => void }) {
             <div className="flex items-start gap-3 py-3">
               <Icon.check size={15} className="mt-0.5 shrink-0 text-success-700" />
               <div className="min-w-0">
-                <p className="text-[14px] font-medium leading-snug text-ink-900">{item.label}</p>
-                <p className="mt-0.5 text-[12.5px] leading-relaxed text-ink-500">{item.detail}</p>
+                <p className="text-[15px] font-medium leading-snug text-ink-900">{item.label}</p>
+                <p className="mt-0.5 text-[13.5px] leading-relaxed text-ink-500">{item.detail}</p>
               </div>
             </div>
             <Rule />
@@ -630,7 +645,7 @@ function WhyThisFit({ pro, onClose }: { pro: Pro; onClose: () => void }) {
       </ul>
 
       <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-5">
-        <p className="measure text-[12.5px] leading-relaxed text-ink-400">
+        <p className="measure text-[13.5px] leading-relaxed text-ink-400">
           Each line is drawn from completed jobs and verified documents, not from self-reported profile
           claims.
         </p>
@@ -656,7 +671,7 @@ export function ProProfile({ id }: { id: string }) {
         <button
           type="button"
           onClick={() => navigate('/case/TC-2048/fit')}
-          className="tap mb-6 inline-flex items-center gap-2 text-[13px] text-ink-500 transition-colors hover:text-ink-900 sm:mb-8"
+          className="tap mb-6 inline-flex items-center gap-2 text-[14px] text-ink-500 transition-colors hover:text-ink-900 sm:mb-8"
         >
           <Icon.arrowLeft size={15} />
           Back to comparison
@@ -670,7 +685,7 @@ export function ProProfile({ id }: { id: string }) {
                 <Display size="md" as="h1" className="text-ink-950">
                   {pro.name}
                 </Display>
-                <p className="mt-1.5 text-[14.5px] text-ink-500 sm:text-[15px]">{pro.specialty}</p>
+                <p className="mt-1.5 text-[15.5px] text-ink-500 sm:text-[15px]">{pro.specialty}</p>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   <Pill tone="success" icon={<Icon.shield size={12} />}>
                     Identity verified
@@ -690,7 +705,7 @@ export function ProProfile({ id }: { id: string }) {
                 <span className="font-display text-[44px] leading-none text-ink-950 sm:text-[56px]">
                   {pro.similarJobs}
                 </span>
-                <span className="max-w-xs text-[14px] leading-relaxed text-ink-600">
+                <span className="max-w-xs text-[15px] leading-relaxed text-ink-600">
                   verified repairs of this type in the last 24 months — supply-line and connector leaks
                   specifically.
                 </span>
@@ -714,8 +729,8 @@ export function ProProfile({ id }: { id: string }) {
                     <div className="flex items-start gap-3 py-3.5">
                       <Icon.check size={15} className="mt-0.5 shrink-0 text-success-700" />
                       <div className="min-w-0">
-                        <p className="text-[14px] font-medium text-ink-900">{e.label}</p>
-                        <p className="mt-0.5 text-[12.5px] leading-relaxed text-ink-500">{e.detail}</p>
+                        <p className="text-[15px] font-medium text-ink-900">{e.label}</p>
+                        <p className="mt-0.5 text-[13.5px] leading-relaxed text-ink-500">{e.detail}</p>
                       </div>
                     </div>
                     <Rule />
@@ -725,7 +740,7 @@ export function ProProfile({ id }: { id: string }) {
             </Section>
 
             <Section title="Customer experience">
-              <p className="mb-5 flex items-start gap-2 text-[13px] leading-relaxed text-ink-500 sm:mb-6">
+              <p className="mb-5 flex items-start gap-2 text-[14px] leading-relaxed text-ink-500 sm:mb-6">
                 <Icon.info size={14} className="mt-0.5 shrink-0 text-ink-300" />
                 Only customers whose job completed through TrustCraft can leave a review.
               </p>
@@ -734,7 +749,7 @@ export function ProProfile({ id }: { id: string }) {
                   <li key={r.name}>
                     <div className="py-4 sm:py-5">
                       <p className="quote-lg measure text-ink-800">“{r.text}”</p>
-                      <p className="mt-3 text-[12.5px] text-ink-400">
+                      <p className="mt-3 text-[13.5px] text-ink-400">
                         {r.name} · {r.job} · {r.date}
                       </p>
                     </div>
@@ -754,7 +769,7 @@ export function ProProfile({ id }: { id: string }) {
               <p className="font-display text-[22px] leading-tight text-ink-950 sm:text-[24px]">
                 {pro.fitLabel}
               </p>
-              <p className="mt-2 text-[13.5px] leading-relaxed text-ink-500">{pro.fitNote}</p>
+              <p className="mt-2 text-[14.5px] leading-relaxed text-ink-500">{pro.fitNote}</p>
 
               <Rule className="my-5 sm:my-6" />
 
@@ -776,13 +791,13 @@ export function ProProfile({ id }: { id: string }) {
               >
                 Choose {pro.short}
               </Button>
-              <p className="mt-3 text-center text-[12px] text-ink-400">
+              <p className="mt-3 text-center text-[13px] text-ink-400">
                 Nothing is charged until you approve a plan.
               </p>
             </div>
 
             <Disclosure summary="How TrustCraft verifies people" className="mt-5 sm:mt-6">
-              <p className="text-[13px] leading-relaxed text-ink-600">
+              <p className="text-[14px] leading-relaxed text-ink-600">
                 Identity is checked against national ID. Qualifications are checked against the issuing
                 body. Job counts and completion rates are computed from jobs completed on TrustCraft —
                 a professional cannot edit them.
@@ -807,7 +822,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <div className="min-w-0">
-      <dt className="flex items-center gap-1.5 text-[12.5px] text-ink-500">
+      <dt className="flex items-center gap-1.5 text-[13.5px] text-ink-500">
         <span className="truncate">{label}</span>
         {hint && <InfoHint label={hint} />}
       </dt>
@@ -820,8 +835,8 @@ function Row({ label, value }: { label: string; value: string }) {
   return (
     <>
       <div className="flex items-baseline justify-between gap-4 py-2.5">
-        <dt className="text-[13px] text-ink-500">{label}</dt>
-        <dd className="tnum text-[13.5px] font-medium text-ink-900">{value}</dd>
+        <dt className="text-[14px] text-ink-500">{label}</dt>
+        <dd className="tnum text-[14.5px] font-medium text-ink-900">{value}</dd>
       </div>
       <Rule />
     </>
@@ -837,7 +852,7 @@ export function Professionals() {
     <AppShell>
       <div className="pb-16 pt-8 sm:pt-10 lg:pb-20 lg:pt-12">
         <PageHead
-          eyebrow="Professionals"
+          eyebrow="People"
           title="People, with their record attached"
           lede="TrustCraft normally brings professionals to you inside a case, where their record can be judged against the actual problem. This is the open directory."
         />
@@ -859,7 +874,7 @@ export function Professionals() {
                     <p className="font-display text-[21px] text-ink-950 transition-colors group-hover:text-teal-800 sm:text-[24px]">
                       {p.name}
                     </p>
-                    <p className="mt-1 text-[13px] text-ink-500 sm:text-[13.5px]">{p.specialty}</p>
+                    <p className="mt-1 text-[14px] text-ink-500 sm:text-[14.5px]">{p.specialty}</p>
                   </div>
                 </div>
                 <dl className="flex flex-wrap gap-x-8 gap-y-3 lg:gap-x-10">
@@ -868,7 +883,7 @@ export function Professionals() {
                   <MiniStat label="Area" value={p.area} />
                   <MiniStat label="Inspection" value={money(p.inspection)} />
                 </dl>
-                <span className="flex items-center gap-2 text-[13px] font-medium text-ink-400 transition-colors group-hover:text-teal-800">
+                <span className="flex items-center gap-2 text-[14px] font-medium text-ink-400 transition-colors group-hover:text-teal-800">
                   <StatusDot tone="success" />
                   Verified
                   <Icon.chevronRight size={15} className="transition-transform group-hover:translate-x-0.5" />

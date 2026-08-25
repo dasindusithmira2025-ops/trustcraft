@@ -182,10 +182,10 @@ export function Eyebrow({
     teal: 'text-teal-800',
     gold: 'text-gold-600',
     danger: 'text-danger-700',
-    light: 'text-white/45',
+    light: 'text-white/62',
   }
   return (
-    <p className={`font-data text-[10.5px] tracking-[0.16em] uppercase ${tones[tone]} ${className}`}>
+    <p className={`font-data text-[11px] tracking-[0.16em] uppercase ${tones[tone]} ${className}`}>
       {children}
     </p>
   )
@@ -254,9 +254,9 @@ export function Button({
     onDark: 'bg-white/[0.09] text-white border border-white/15 hover:bg-white/[0.16] active:bg-white/20',
   }
   const sizes = {
-    sm: 'h-9 px-3.5 text-[13px] gap-1.5 rounded-lg',
-    md: 'h-11 px-5 text-[14px] gap-2 rounded-[10px]',
-    lg: 'h-[52px] px-7 text-[15px] gap-2.5 rounded-xl',
+    sm: 'h-9 px-3.5 text-[14px] gap-1.5 rounded-lg',
+    md: 'h-11 px-5 text-[15px] gap-2 rounded-[10px]',
+    lg: 'h-[52px] px-7 text-[16px] gap-2.5 rounded-xl',
   }
   return (
     <button
@@ -303,7 +303,7 @@ export function TextLink({
         onClick?.()
         if (to) navigate(to)
       }}
-      className={`inline-flex items-center gap-1.5 text-[13.5px] font-medium underline underline-offset-[5px]
+      className={`inline-flex items-center gap-1.5 text-[14.5px] font-medium underline underline-offset-[5px]
         transition-colors duration-150 ${tones[tone]} ${className}`}
     >
       {children}
@@ -372,7 +372,7 @@ export function Pill({
 }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12.5px] font-medium
         ${TONE_BG[tone]} ${className}`}
     >
       {icon}
@@ -423,7 +423,7 @@ export function ScopeMark({ state }: { state: 'yes' | 'no' | 'unstated' }) {
   return (
     <span className="inline-flex items-center gap-1.5 text-warning-700">
       <Icon.question size={15} />
-      <span className="text-[11px] font-medium tracking-tight">Not stated</span>
+      <span className="text-[11.5px] font-medium tracking-tight">Not stated</span>
     </span>
   )
 }
@@ -471,7 +471,7 @@ export function Tooltip({
           id={id}
           role="tooltip"
           className="a-fade pointer-events-none fixed z-[90] w-60 -translate-x-1/2 -translate-y-full
-            rounded-lg bg-ink-950 px-3 py-2 text-[12px] leading-relaxed text-white/90 shadow-xl"
+            rounded-lg bg-ink-950 px-3 py-2 text-[13px] leading-relaxed text-white/90 shadow-xl"
           style={{
             left: Math.min(Math.max(rect.x, 128), window.innerWidth - 128),
             top: rect.y - 8,
@@ -512,7 +512,7 @@ export function Disclosure({
     <details className={`group ${className}`} open={defaultOpen}>
       <summary
         className="flex cursor-pointer list-none items-center justify-between gap-3 py-2.5
-          text-[13.5px] font-medium text-ink-700 transition-colors hover:text-ink-950
+          text-[14.5px] font-medium text-ink-700 transition-colors hover:text-ink-950
           [&::-webkit-details-marker]:hidden"
       >
         {summary}
@@ -583,17 +583,17 @@ export function Field({
 }) {
   return (
     <div className={`flex items-baseline justify-between gap-6 py-3 ${className}`}>
-      <dt className="flex shrink-0 items-center gap-1.5 text-[13px] text-ink-500">
+      <dt className="flex shrink-0 items-center gap-1.5 text-[14px] text-ink-500">
         {label}
         {hint && <InfoHint label={hint} />}
       </dt>
-      <dd className="text-right text-[13.5px] font-medium text-ink-900">{children}</dd>
+      <dd className="text-right text-[14.5px] font-medium text-ink-900">{children}</dd>
     </div>
   )
 }
 
 export function Money({ value, className = '' }: { value: number; className?: string }) {
-  return <span className={`tnum font-data ${className}`}>Rs.{value.toLocaleString('en-LK')}</span>
+  return <span className={`tnum font-data ${className}`}>LKR {value.toLocaleString('en-LK')}</span>
 }
 
 /** Non-blocking confirmation. Announced politely to assistive tech. */
@@ -604,7 +604,7 @@ export function Toast({ message }: { message: string | null }) {
       role="status"
       aria-live="polite"
       className="a-up fixed bottom-7 left-1/2 z-[80] flex -translate-x-1/2 items-center gap-2.5
-        rounded-full bg-ink-950 px-5 py-3 text-[13.5px] text-white shadow-2xl"
+        rounded-full bg-ink-950 px-5 py-3 text-[14.5px] text-white shadow-2xl"
     >
       <Icon.check size={15} className="text-teal-400" />
       {message}
@@ -625,7 +625,7 @@ export function Empty({
   return (
     <div className="py-16 text-center">
       <p className="font-display text-[24px] text-ink-800">{title}</p>
-      <p className="mx-auto mt-2 max-w-sm text-[14px] leading-relaxed text-ink-500">{body}</p>
+      <p className="mx-auto mt-2 max-w-sm text-[15px] leading-relaxed text-ink-500">{body}</p>
       {action && <div className="mt-6 flex justify-center">{action}</div>}
     </div>
   )
@@ -651,7 +651,7 @@ export function PageHead({
         <button
           type="button"
           onClick={() => navigate(back.to)}
-          className="a-fade tap mb-4 inline-flex items-center gap-2 text-[13px] text-ink-500
+          className="a-fade tap mb-4 inline-flex items-center gap-2 text-[14px] text-ink-500
             transition-colors hover:text-ink-900 sm:mb-5"
         >
           <Icon.arrowLeft size={15} />
@@ -663,7 +663,7 @@ export function PageHead({
           {eyebrow && <Eyebrow tone="teal" className="mb-2.5 sm:mb-3">{eyebrow}</Eyebrow>}
           <Display size="md" className="a-up text-ink-950">{title}</Display>
           {lede && (
-            <p className="a-up d1 measure mt-3 text-[14.5px] leading-relaxed text-ink-500 sm:text-[15px]">
+            <p className="a-up d1 measure mt-3 text-[15.5px] leading-relaxed text-ink-500 sm:text-[15px]">
               {lede}
             </p>
           )}
@@ -702,7 +702,7 @@ export function EvidenceRef({
     light: 'border-white/20 bg-white/[0.06] text-white/70',
   }
   const cls = `inline-flex h-[19px] shrink-0 items-center rounded-[5px] border px-1.5
-    font-data text-[10px] uppercase leading-none tracking-[0.1em] ${tones[tone]}`
+    font-data text-[10.5px] uppercase leading-none tracking-[0.1em] ${tones[tone]}`
 
   if (!onSelect) {
     return <span className={cls}>{label}</span>
@@ -725,6 +725,118 @@ export function evidenceTag(id: string, kind?: string): string {
   if (kind === 'note') return 'Note'
   const n = id.match(/(\d+)$/)?.[1]
   return n ? `E${n}` : 'Evidence'
+}
+
+/**
+ * Confidence, stated as a quantity *and* as a sentence.
+ *
+ * A bare percentage invites the reader to treat a reading as a diagnosis, so
+ * the number never appears alone: it is always paired with the plain-language
+ * band it falls in, and with what would be needed to raise it. Colour is not
+ * carrying the meaning — the word is.
+ */
+export function Confidence({
+  value,
+  claim,
+  note,
+  moved,
+}: {
+  value: number
+  claim: string
+  note?: string
+  moved?: boolean
+}) {
+  const band =
+    value >= 90 ? 'Reasonably confident' : value >= 70 ? 'Fairly confident' : 'Not yet confident'
+
+  return (
+    <div className="rounded-xl bg-white/70 p-4 ring-1 ring-[var(--color-rule)] sm:p-5">
+      <div className="flex items-baseline justify-between gap-4">
+        <p className="text-[14.5px] font-semibold text-ink-950">{band}</p>
+        <p className="tnum font-data text-[15px] text-teal-800" aria-hidden="true">
+          {value}%
+        </p>
+      </div>
+
+      <p className="measure-sm mt-1.5 text-[13.5px] leading-relaxed text-ink-600">{claim}</p>
+
+      <div
+        className="mt-3 h-1.5 overflow-hidden rounded-full bg-ink-100"
+        role="meter"
+        aria-valuenow={value}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={`Confidence in this reading: ${value} percent — ${band}`}
+      >
+        <div
+          className="h-full rounded-full bg-teal-700 transition-[width] duration-700 ease-out"
+          style={{ width: `${value}%` }}
+        />
+      </div>
+
+      {moved && (
+        <p className="a-up mt-3 flex items-start gap-2 text-[13px] leading-relaxed text-teal-800">
+          <Icon.arrow size={14} className="mt-0.5 shrink-0" />
+          This changed after your answer.
+        </p>
+      )}
+      {note && <p className="mt-2.5 text-[12.5px] leading-relaxed text-ink-500">{note}</p>}
+    </div>
+  )
+}
+
+/**
+ * A reading of the evidence, drawn as a share rather than a verdict. The bar
+ * is the whole point: three readings that add to one make it obvious that
+ * nothing here has been decided.
+ */
+export function ReadingRow({
+  text,
+  detail,
+  weight,
+  delta,
+  leading,
+}: {
+  text: string
+  detail: string
+  weight: number
+  delta: number
+  leading?: boolean
+}) {
+  return (
+    <li className="py-3.5">
+      <div className="flex items-baseline justify-between gap-4">
+        <p
+          className={`text-[14.5px] leading-snug ${leading ? 'font-semibold text-ink-950' : 'font-medium text-ink-700'}`}
+        >
+          {text}
+        </p>
+        <span className="flex shrink-0 items-baseline gap-1.5">
+          {delta !== 0 && (
+            <span
+              className={`a-fade font-data text-[11.5px] ${delta > 0 ? 'text-teal-800' : 'text-ink-400'}`}
+            >
+              {delta > 0 ? '↑' : '↓'}
+              <span className="sr-only">{delta > 0 ? 'more likely' : 'less likely'} after your answer</span>
+            </span>
+          )}
+          <span className={`tnum font-data text-[13.5px] ${leading ? 'text-ink-950' : 'text-ink-500'}`}>
+            {weight}%
+          </span>
+        </span>
+      </div>
+
+      <div className="mt-2 h-1 overflow-hidden rounded-full bg-ink-100" aria-hidden="true">
+        <div
+          className={`h-full rounded-full transition-[width] duration-700 ease-out
+            ${leading ? 'bg-teal-700' : 'bg-ink-300'}`}
+          style={{ width: `${weight}%` }}
+        />
+      </div>
+
+      <p className="measure-sm mt-2 text-[13px] leading-relaxed text-ink-500">{detail}</p>
+    </li>
+  )
 }
 
 /**
@@ -760,7 +872,7 @@ export function Segmented<T extends string>({
             aria-selected={active}
             onClick={() => onChange(o.value)}
             className={`tap min-w-0 flex-1 rounded-[9px] px-2 transition-all duration-150
-              ${size === 'sm' ? 'py-1.5 text-[12.5px]' : 'py-2 text-[13.5px]'}
+              ${size === 'sm' ? 'py-1.5 text-[13.5px]' : 'py-2 text-[14.5px]'}
               ${
                 active
                   ? 'bg-white font-semibold text-ink-950 shadow-[0_1px_2px_rgba(15,17,20,0.10)]'
@@ -769,7 +881,7 @@ export function Segmented<T extends string>({
           >
             <span className="block truncate">{o.label}</span>
             {o.hint && (
-              <span className={`mt-0.5 block truncate text-[10.5px] font-normal ${active ? 'text-ink-500' : 'text-ink-400'}`}>
+              <span className={`mt-0.5 block truncate text-[11px] font-normal ${active ? 'text-ink-500' : 'text-ink-400'}`}>
                 {o.hint}
               </span>
             )}
@@ -799,10 +911,10 @@ export function CompareCell({
         emphasis ? 'bg-white ring-1 ring-[var(--color-rule)]' : 'bg-[var(--color-sunken)]/70'
       }`}
     >
-      <p className="mb-1.5 truncate font-data text-[10px] uppercase tracking-[0.13em] text-ink-400">
+      <p className="mb-1.5 truncate font-data text-[10.5px] uppercase tracking-[0.13em] text-ink-400">
         {name}
       </p>
-      <div className="text-[13.5px] font-medium text-ink-900">{children}</div>
+      <div className="text-[14.5px] font-medium text-ink-900">{children}</div>
     </div>
   )
 }

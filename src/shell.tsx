@@ -82,7 +82,7 @@ const NAV: NavItem[] = [
   },
   {
     label: 'Messages',
-    short: 'Chat',
+    short: 'Messages',
     to: '#/messages',
     icon: Icon.message,
     primary: true,
@@ -124,8 +124,8 @@ function NavRail() {
                 type="button"
                 onClick={() => navigate(item.to)}
                 aria-current={active ? 'page' : undefined}
-                className={`relative flex w-full flex-col items-center gap-1 rounded-xl py-2.5
-                  transition-colors duration-150
+                className={`relative flex min-h-[56px] w-full flex-col items-center justify-center gap-1.5
+                  rounded-xl py-3 transition-colors duration-150
                   ${
                     active
                       ? 'bg-teal-50 text-teal-800'
@@ -139,8 +139,8 @@ function NavRail() {
                     className="absolute left-0 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-r-full bg-teal-800"
                   />
                 )}
-                <item.icon size={19} />
-                <span className={`text-[10px] leading-none ${active ? 'font-semibold' : 'font-medium'}`}>
+                <item.icon size={20} />
+                <span className={`text-[11.5px] leading-none ${active ? 'font-semibold' : 'font-medium'}`}>
                   {item.short}
                 </span>
               </button>
@@ -224,8 +224,8 @@ function AccountMenu({ placement }: { placement: 'rail' | 'bar' }) {
           <div className="flex items-center gap-3 px-2.5 py-2.5">
             <Avatar name={USER.full} size={36} />
             <div className="min-w-0">
-              <p className="truncate text-[13.5px] font-semibold text-ink-950">{USER.full}</p>
-              <p className="truncate text-[12px] text-ink-500">{USER.address}</p>
+              <p className="truncate text-[14.5px] font-semibold text-ink-950">{USER.full}</p>
+              <p className="truncate text-[13px] text-ink-500">{USER.address}</p>
             </div>
           </div>
           <Rule className="my-1.5" />
@@ -233,7 +233,7 @@ function AccountMenu({ placement }: { placement: 'rail' | 'bar' }) {
             <MenuLink
               key={item.to}
               icon={<item.icon size={16} />}
-              label={item.label === 'People' ? 'Professionals' : item.label}
+              label={item.label}
               onClick={() => {
                 setOpen(false)
                 navigate(item.to)
@@ -262,7 +262,7 @@ function MenuLink({ icon, label, onClick }: { icon: ReactNode; label: string; on
       type="button"
       role="menuitem"
       onClick={onClick}
-      className="flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left text-[13.5px]
+      className="flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left text-[14.5px]
         font-medium text-ink-700 transition-colors hover:bg-[var(--color-sunken)] hover:text-ink-950"
     >
       <span className="text-ink-400">{icon}</span>
@@ -318,7 +318,7 @@ function MobileTabBar() {
                   />
                 )}
                 <item.icon size={20} />
-                <span className={`text-[10.5px] leading-none ${active ? 'font-semibold' : 'font-medium'}`}>
+                <span className={`text-[11px] leading-none ${active ? 'font-semibold' : 'font-medium'}`}>
                   {item.short}
                 </span>
               </button>
@@ -355,13 +355,13 @@ export function CaseBar({ active, resolved }: { active: string; resolved?: boole
     <div className="border-b border-[var(--color-rule)] bg-[var(--color-canvas)]/94 backdrop-blur-md">
       <div className="page flex flex-col gap-2 py-2.5 lg:flex-row lg:items-center lg:gap-6 lg:py-3">
         <div className="flex min-w-0 items-center gap-2.5">
-          <span className="font-data text-[10.5px] tracking-[0.14em] text-ink-400">{CASE.id}</span>
+          <span className="font-data text-[11px] tracking-[0.14em] text-ink-400">{CASE.id}</span>
           <span className="h-3.5 w-px shrink-0 bg-[var(--color-rule-strong)]" aria-hidden="true" />
-          <span className="truncate text-[13px] font-semibold text-ink-950 sm:text-[13.5px]">
+          <span className="truncate text-[14px] font-semibold text-ink-950 sm:text-[14.5px]">
             {CASE.title}
           </span>
           <span
-            className={`ml-auto flex shrink-0 items-center gap-1.5 text-[11.5px] font-medium lg:ml-0
+            className={`ml-auto flex shrink-0 items-center gap-1.5 text-[12.5px] font-medium lg:ml-0
               ${done ? 'text-success-700' : 'text-teal-800'}`}
           >
             <StatusDot tone={done ? 'success' : 'teal'} pulse={!done} />
@@ -390,7 +390,7 @@ export function CaseBar({ active, resolved }: { active: string; resolved?: boole
                   onClick={() => navigate(s.to)}
                   aria-current={isActive ? 'step' : undefined}
                   className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1
-                    text-[12px] transition-colors lg:text-[12.5px]
+                    text-[13px] transition-colors lg:text-[13.5px]
                     ${
                       isActive
                         ? 'bg-teal-800 font-semibold text-white'
@@ -472,7 +472,7 @@ function Footer() {
       <div className="page flex flex-col gap-5 py-7 sm:flex-row sm:items-center sm:justify-between sm:gap-6 md:py-8">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
           <Wordmark size="sm" />
-          <span className="text-[12px] text-ink-400 sm:text-[12.5px]">
+          <span className="text-[13px] text-ink-400 sm:text-[13.5px]">
             Understand · Decide · Agree · Prove · Remember
           </span>
         </div>
@@ -510,7 +510,7 @@ function LanguageSwitch() {
             if (l.code !== 'en') notify(`${l.label} translation is in progress — layouts already account for it`)
           }}
           aria-pressed={lang === l.code}
-          className={`rounded-lg px-2.5 py-1.5 text-[12.5px] transition-colors
+          className={`rounded-lg px-2.5 py-1.5 text-[13.5px] transition-colors
             ${lang === l.code ? 'bg-ink-950 font-medium text-white' : 'text-ink-500 hover:bg-black/[0.05] hover:text-ink-900'}`}
         >
           {l.label}

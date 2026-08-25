@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { navigate, useStore } from '../app-state'
 import { AppShell } from '../shell'
 import {
@@ -9,10 +10,22 @@ import {
   PageHead,
   Pill,
   Rule,
+  Segmented,
   StatusDot,
   TextLink,
 } from '../ui'
-import { CASES, THREAD, proById, type Attention, type CaseRecord } from '../data'
+import {
+  AGREEMENT,
+  CASES,
+  CHANGE_REQUEST,
+  REPAIR_PLAN,
+  THREAD,
+  TIMELINE,
+  money,
+  proById,
+  type Attention,
+  type CaseRecord,
+} from '../data'
 
 // ════════════════════════════════════════════════════════════════════════════
 // Cases — grouped by what they want from you, not by date
@@ -57,8 +70,8 @@ export function Cases() {
             <section key={g.key} className="mb-10 sm:mb-14">
               <div className="mb-1 flex flex-wrap items-baseline gap-x-4 gap-y-1">
                 <Eyebrow tone={g.tone === 'muted' ? 'muted' : g.tone}>{g.title}</Eyebrow>
-                <span className="font-data text-[11px] text-ink-300">{items.length}</span>
-                <span className="text-[13px] text-ink-400">{g.blurb}</span>
+                <span className="font-data text-[11.5px] text-ink-300">{items.length}</span>
+                <span className="text-[14px] text-ink-400">{g.blurb}</span>
               </div>
               <Rule tone={g.key === 'needs-you' ? 'strong' : 'default'} />
               {items.map((c, i) => (
@@ -84,40 +97,44 @@ function CaseRow({ record, index }: { record: CaseRecord; index: number }) {
       <button
         type="button"
         onClick={() => navigate(record.route)}
-        className="a-up group flex w-full flex-col gap-3 py-5 text-left
+        className="a-up group -mx-3 flex w-full flex-col gap-3 rounded-xl px-3 py-5 text-left
+          transition-colors duration-150 hover:bg-white/70
           lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-8 lg:gap-y-3 lg:py-6"
         style={{ animationDelay: `${index * 0.05}s` }}
       >
         <span className="flex items-center gap-3 lg:contents">
-          <span className="font-data shrink-0 text-[11.5px] text-ink-400 lg:w-[74px]">{record.id}</span>
+          <span className="font-data shrink-0 text-[12.5px] text-ink-400 lg:w-[74px]">{record.id}</span>
           {record.attention === 'needs-you' && (
             <span className="lg:hidden">
               <Pill tone="gold">Decide</Pill>
             </span>
           )}
-          <span className="font-data ml-auto text-[11.5px] text-ink-400 lg:hidden">{record.opened}</span>
+          <span className="font-data ml-auto text-[12.5px] text-ink-400 lg:hidden">{record.opened}</span>
         </span>
 
         <span className="min-w-0 lg:min-w-[220px] lg:flex-1">
           <span className="block font-display text-[21px] leading-tight text-ink-950 transition-colors group-hover:text-teal-800 sm:text-[24px]">
             {record.title}
           </span>
-          <span className="mt-1 block text-[13px] text-ink-500">{record.room}</span>
+          <span className="mt-1 block text-[14px] text-ink-500">{record.room}</span>
         </span>
 
-        <span className="flex flex-col gap-1.5 lg:min-w-[210px]">
-          <span className="flex items-start gap-2 text-[13.5px] font-medium text-ink-800">
+        {/* What happens next, not what state a database is in. A row that
+            says "2 quotes ready to compare" answers the question the list
+            was opened to answer; "Waiting" does not. */}
+        <span className="flex flex-col gap-1.5 lg:min-w-[248px]">
+          <span className="flex items-start gap-2 text-[14.5px] font-medium text-ink-900">
             <span className="mt-1.5">
               <StatusDot tone={tone[record.attention]} pulse={record.attention === 'active'} />
             </span>
-            {record.status}
+            {record.next}
           </span>
-          {record.pro && <span className="pl-4 text-[12.5px] text-ink-400">{record.pro}</span>}
+          {record.pro && <span className="pl-4 text-[13.5px] text-ink-500">{record.pro}</span>}
         </span>
 
         <span className="hidden items-center gap-4 lg:flex">
-          {record.attention === 'needs-you' && <Pill tone="gold">Decide</Pill>}
-          <span className="text-[12.5px] text-ink-400">{record.opened}</span>
+          {record.action && <Pill tone="gold">{record.action}</Pill>}
+          <span className="text-[13.5px] text-ink-500">{record.opened}</span>
           <Icon.chevronRight
             size={16}
             className="text-ink-300 transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-ink-700"
@@ -135,20 +152,35 @@ function CaseRow({ record, index }: { record: CaseRecord; index: number }) {
 
 export function Messages() {
   const pro = proById('chamod')
-  const { notify } = useStore()
+  const { notify, progress } = useStore()
+  // On a phone the decisions rail cannot sit beside the thread, and burying it
+  // under 40 messages would defeat the point of it. So it becomes a peer tab.
+  const [tab, setTab] = useState<'thread' | 'decisions'>('thread')
 
   return (
     <AppShell>
       <div className="pb-16 pt-8 sm:pt-10 lg:pb-20 lg:pt-12">
         <PageHead
           eyebrow="Messages"
-          title={`Chamod Fernando`}
-          lede="Conversation about case TC-2048. Quotes, agreements and change requests appear here as objects you can open — they are never only text in a chat."
+          title="Chamod Fernando"
+          lede="Conversation about case TC-2048. Repair plans, agreements and change requests appear here as objects you can open — never only as text in a chat."
           back={{ label: 'All cases', to: '/cases' }}
         />
 
-        <div className="grid grid-cols-1 gap-x-14 gap-y-10 lg:grid-cols-[minmax(0,1fr)_280px] xl:gap-x-16 xl:grid-cols-[minmax(0,1fr)_300px]">
-          <div className="min-w-0">
+        <div className="mb-6 lg:hidden">
+          <Segmented
+            label="Messages view"
+            value={tab}
+            onChange={setTab}
+            options={[
+              { value: 'thread', label: 'Conversation', hint: 'What was said' },
+              { value: 'decisions', label: 'Case decisions', hint: 'What became true' },
+            ]}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-x-14 gap-y-10 lg:grid-cols-[minmax(0,1fr)_300px] xl:gap-x-16 xl:grid-cols-[minmax(0,1fr)_330px]">
+          <div className={`min-w-0 ${tab === 'thread' ? '' : 'hidden lg:block'}`}>
             <div className="space-y-5 sm:space-y-6">
               {THREAD.map(m =>
                 m.kind === 'text' ? (
@@ -184,8 +216,8 @@ export function Messages() {
                 name="msg"
                 rows={3}
                 placeholder="Write a message…"
-                className="w-full resize-none rounded-xl bg-white px-4 py-3.5 text-[14.5px] text-ink-900 sm:px-5 sm:py-4
-                  ring-1 ring-[var(--color-rule)] transition-shadow placeholder:text-ink-300
+                className="w-full resize-none rounded-xl bg-white px-4 py-3.5 text-[16px] text-ink-900 sm:px-5 sm:py-4
+                  ring-1 ring-[var(--color-rule)] transition-shadow placeholder:text-ink-400
                   focus:outline-none focus:ring-2 focus:ring-teal-700"
               />
               <div className="mt-3 flex flex-wrap items-center gap-3">
@@ -195,25 +227,65 @@ export function Messages() {
                 <Button size="md" variant="ghost" icon={<Icon.camera size={16} />}>
                   Attach a photo
                 </Button>
-                <span className="w-full text-[12px] text-ink-400 sm:ml-auto sm:w-auto">
+                <span className="w-full text-[13px] text-ink-500 sm:ml-auto sm:w-auto">
                   Messages are attached to case TC-2048
                 </span>
               </div>
             </form>
           </div>
 
-          <aside className="lg:sticky lg:top-24 lg:self-start">
-            <Eyebrow className="mb-4">Decisions in this case</Eyebrow>
-            <p className="mb-5 text-[13px] leading-relaxed text-ink-500">
-              These are the things that changed what you owe or what you agreed to. They live in the
-              case record, not in the conversation.
-            </p>
-            <div className="space-y-0">
-              <DecisionLink label="Repair plan" meta="Rs.6,900" to="/case/TC-2048/plan" />
-              <DecisionLink label="Work agreement" meta="Approved 11:28" to="/case/TC-2048/agreement" />
-              <DecisionLink label="Change request CR-1" meta="+ Rs.1,500" to="/case/TC-2048/change" />
-              <DecisionLink label="Proof timeline" meta="10 entries" to="/case/TC-2048/record" />
+          <aside
+            className={`lg:sticky lg:top-24 lg:self-start lg:block ${tab === 'decisions' ? '' : 'hidden'}`}
+            aria-label="Decisions in this case"
+          >
+            <Eyebrow className="mb-3">Decisions in this case</Eyebrow>
+
+            {/* The distinction the whole product rests on, said once, here. */}
+            <div className="mb-5 rounded-xl bg-[var(--color-sunken)] p-4">
+              <dl className="space-y-2.5">
+                <div className="flex gap-3">
+                  <dt className="w-[92px] shrink-0 font-data text-[11px] uppercase tracking-[0.13em] text-ink-500">
+                    Chat
+                  </dt>
+                  <dd className="text-[13.5px] leading-snug text-ink-700">What people said.</dd>
+                </div>
+                <div className="flex gap-3">
+                  <dt className="w-[92px] shrink-0 font-data text-[11px] uppercase tracking-[0.13em] text-teal-800">
+                    Case record
+                  </dt>
+                  <dd className="text-[13.5px] leading-snug text-ink-900">What became true.</dd>
+                </div>
+              </dl>
             </div>
+
+            <div className="space-y-0">
+              <DecisionLink label="Repair plan" meta={`${money(REPAIR_PLAN.total)} · proposed 11:26`} to="/case/TC-2048/plan" />
+              <DecisionLink
+                label={`Work agreement · V${progress.changeDecision === 'approved' ? 2 : 1}`}
+                meta={
+                  progress.agreementApproved
+                    ? `Approved 11:28 · ${money(progress.changeDecision === 'approved' ? CHANGE_REQUEST.newTotal : AGREEMENT.price)}`
+                    : 'Awaiting your approval'
+                }
+                to="/case/TC-2048/agreement"
+              />
+              <DecisionLink
+                label="Change request CR-1"
+                meta={
+                  progress.changeDecision
+                    ? `${progress.changeDecision === 'approved' ? 'Approved' : 'Declined'} 11:52 · + ${money(CHANGE_REQUEST.priceChange)}`
+                    : `Awaiting you · + ${money(CHANGE_REQUEST.priceChange)}`
+                }
+                to="/case/TC-2048/change"
+              />
+              <DecisionLink label="Proof timeline" meta={`${TIMELINE.length} entries`} to="/case/TC-2048/record" />
+              <Rule />
+            </div>
+
+            <p className="mt-4 text-[13px] leading-relaxed text-ink-500">
+              Each of these changed what you owe or what you agreed to. They live in the case record,
+              where they cannot be edited after the fact.
+            </p>
           </aside>
         </div>
       </div>
@@ -240,12 +312,12 @@ function TextBubble({
       {!mine && <Avatar tint={tint} name={name} size={32} />}
       <div className={`min-w-0 max-w-[80%] sm:max-w-lg ${mine ? 'text-right' : ''}`}>
         <div
-          className={`inline-block rounded-2xl px-[18px] py-3 text-left text-[14px] leading-relaxed sm:text-[14.5px]
+          className={`inline-block rounded-2xl px-[18px] py-3 text-left text-[15px] leading-relaxed sm:text-[15.5px]
             ${mine ? 'bg-teal-800 text-white' : 'bg-white text-ink-800 ring-1 ring-[var(--color-rule)]'}`}
         >
           {body}
         </div>
-        <p className="mt-1.5 font-data text-[11px] text-ink-400">{at}</p>
+        <p className="mt-1.5 font-data text-[11.5px] text-ink-400">{at}</p>
       </div>
     </div>
   )
@@ -278,12 +350,12 @@ function ObjectCard({
       >
         <div className="flex items-center justify-between">
           <Eyebrow tone="teal">{objectType}</Eyebrow>
-          <span className="font-data text-[11px] text-ink-400">{at}</span>
+          <span className="font-data text-[11.5px] text-ink-400">{at}</span>
         </div>
         <p className="mt-2.5 font-display text-[22px] leading-tight text-ink-950">{title}</p>
         <div className="mt-3 flex items-center justify-between">
-          <span className="tnum text-[13.5px] font-medium text-ink-700">{meta}</span>
-          <span className="flex items-center gap-1.5 text-[13px] font-medium text-teal-800">
+          <span className="tnum text-[14.5px] font-medium text-ink-700">{meta}</span>
+          <span className="flex items-center gap-1.5 text-[14px] font-medium text-teal-800">
             Open
             <Icon.arrow size={14} className="transition-transform group-hover:translate-x-0.5" />
           </span>
@@ -303,10 +375,10 @@ function DecisionLink({ label, meta, to }: { label: string; meta: string; to: st
         className="group flex w-full items-center gap-4 py-3.5 text-left"
       >
         <span className="min-w-0 flex-1">
-          <span className="block text-[13.5px] font-medium text-ink-900 transition-colors group-hover:text-teal-800">
+          <span className="block text-[14.5px] font-medium text-ink-900 transition-colors group-hover:text-teal-800">
             {label}
           </span>
-          <span className="tnum mt-0.5 block text-[12px] text-ink-500">{meta}</span>
+          <span className="tnum mt-0.5 block text-[13px] text-ink-500">{meta}</span>
         </span>
         <Icon.chevronRight
           size={15}
