@@ -17,6 +17,7 @@ export default defineConfig(({ mode }) => {
       minify: !emitSourcemaps,
     },
     plugins: [
+      trustcraftApi(),
       react(),
       tailwindcss(),
       figmaSiteConfiguration(siteConfiguration),
@@ -41,6 +42,27 @@ export default defineConfig(({ mode }) => {
     },
   }
 })
+
+/**
+ * Serves the TrustCraft API from the Vite server so `pnpm dev` is one process
+ * and needs no proxy. `node server/index.mjs` mounts the same handler in
+ * production. Loaded once, lazily, and kept warm across requests.
+ */
+function trustcraftApi(): Plugin {
+  let handler: Promise<typeof import('./server/api.mjs')> | null = null
+  const middleware = async (req: any, res: any, next: () => void) => {
+    if (!req.url?.startsWith('/api/')) return next()
+    handler ??= import('./server/api.mjs')
+    const { handleApi } = await handler
+    if (!(await handleApi(req, res))) next()
+  }
+
+  return {
+    name: 'trustcraft-api',
+    configureServer: server => { server.middlewares.use(middleware) },
+    configurePreviewServer: server => { server.middlewares.use(middleware) },
+  }
+}
 
 type FigmaSiteConfiguration = {
   title?: string
