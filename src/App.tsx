@@ -1,6 +1,6 @@
 import { useCallback, useState, type ReactElement } from 'react'
 import type { ScreenId } from './types'
-import { BottomNav, Icon, StatusBar } from './components/UI'
+import { BottomNav, Frame, Icon } from './components/UI'
 import { HomeScreen, NotificationsScreen, LocationScreen, CameraScreen, ProblemScreen } from './screens/FlowA'
 import { FindProsScreen, ProProfileScreen, AIAnalysisScreen, RecommendationsScreen, ConfirmationScreen } from './screens/FlowB'
 import {
@@ -8,6 +8,7 @@ import {
   QuotationScreen, QuotationPaymentScreen, WorkCompletedScreen, ReviewScreen, RecordScreen,
 } from './screens/FlowC'
 import { CasesScreen, MessagesScreen, ChatScreen, ProfileScreen, ProfileOverviewScreen } from './screens/FlowD'
+import WorkerApp from './worker/WorkerApp'
 
 /** Per-screen chrome: which tab lights up, and whether the device UI goes dark. */
 const TAB_OF: Partial<Record<ScreenId, string>> = {
@@ -41,7 +42,7 @@ const SCREENS: Record<ScreenId, (p: { navigate: (to: ScreenId) => void; goBack: 
   'profile-overview': ProfileOverviewScreen,
 }
 
-export default function App() {
+function CustomerApp() {
   const [history, setHistory] = useState<ScreenId[]>(['home'])
   const [animKey, setAnimKey] = useState(0)
 
@@ -62,55 +63,63 @@ export default function App() {
   }, [])
 
   const tab = TAB_OF[screen]
-  const showNav = Boolean(tab)
   const dark = screen === 'camera'
   const Screen = SCREENS[screen]
 
   return (
+    <Frame
+      screenKey={animKey}
+      light={dark}
+      topBg={dark ? '#020617' : '#fff'}
+      bg={dark ? '#020617' : '#fff'}
+      nav={tab ? <BottomNav active={tab} navigate={navigate} /> : undefined}
+    >
+      <Screen navigate={navigate} goBack={goBack} />
+    </Frame>
+  )
+}
+
+// ── Role switch ──────────────────────────────────────────────────────────────
+
+const ROLES = [
+  { id: 'customer', label: 'Customer', icon: 'user' },
+  { id: 'worker', label: 'Professional', icon: 'wrench' },
+] as const
+
+export default function App() {
+  const [role, setRole] = useState<'customer' | 'worker'>('worker')
+
+  return (
     <div className="min-h-screen flex flex-col items-center justify-center py-10 px-4">
-      <div className="mb-6 flex items-center gap-2.5">
+      <div className="mb-5 flex items-center gap-2.5">
         <div className="w-8 h-8 bg-brand-600 rounded-xl flex items-center justify-center text-white">
           <Icon name="shield" size={18} />
         </div>
         <span className="text-[20px] font-bold text-white tracking-tight">TrustCraft</span>
-        <span className="text-[10px] font-semibold text-white/40 tracking-widest ml-1">CUSTOMER APP</span>
       </div>
 
-      <div
-        className="relative bg-white overflow-hidden flex-shrink-0"
-        style={{
-          width: 390,
-          height: 844,
-          borderRadius: 44,
-          boxShadow: '0 40px 90px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.10)',
-        }}
-      >
-        <div
-          className="absolute z-50 bg-black"
-          style={{ top: 12, left: '50%', transform: 'translateX(-50%)', width: 120, height: 34, borderRadius: 20 }}
-        />
-
-        <StatusBar light={dark} />
-
-        <div
-          key={animKey}
-          className="absolute left-0 right-0 screen-slide"
-          style={{ top: 44, bottom: showNav ? 80 : 0, background: dark ? '#020617' : '#fff' }}
-        >
-          <div className="h-full overflow-y-auto no-scroll">
-            <Screen navigate={navigate} goBack={goBack} />
-          </div>
-        </div>
-
-        {showNav && (
-          <div className="absolute bottom-0 left-0 right-0 z-30">
-            <BottomNav active={tab!} navigate={navigate} />
-          </div>
-        )}
+      <div className="mb-6 p-1 rounded-full bg-white/8 ring-1 ring-white/10 flex gap-1">
+        {ROLES.map(r => {
+          const on = role === r.id
+          return (
+            <button
+              key={r.id}
+              onClick={() => setRole(r.id)}
+              className={`h-9 px-4 rounded-full text-[13px] font-semibold inline-flex items-center gap-2 transition-colors ${
+                on ? 'bg-white text-ink-900' : 'text-white/55 hover:text-white'
+              }`}
+            >
+              <Icon name={r.icon} size={15} />
+              {r.label}
+            </button>
+          )
+        })}
       </div>
+
+      {role === 'customer' ? <CustomerApp /> : <WorkerApp />}
 
       <p className="mt-5 text-[11px] text-white/30">
-        {history.length > 1 ? `${history.length - 1} screen${history.length > 2 ? 's' : ''} deep · use the in-app back button` : 'Start by describing a problem'}
+        {role === 'customer' ? 'Describe a problem to start' : 'Accept a request, quote it, prove the work'}
       </p>
     </div>
   )

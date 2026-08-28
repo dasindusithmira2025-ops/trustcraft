@@ -38,6 +38,9 @@ const PATHS: Record<string, string> = {
   shield: 'M12 3l7 3v5.5c0 4.5-3 8-7 9.5-4-1.5-7-5-7-9.5V6l7-3zM8.8 12l2.2 2.2 4.2-4.4',
   x: 'M6 6l12 12M18 6L6 18',
   plus: 'M12 5v14M5 12h14',
+  minus: 'M5 12h14',
+  logout: 'M15 4h4v16h-4M11 8l-4 4 4 4M7 12h10',
+  upload: 'M12 16V5M8 9l4-4 4 4M4 20h16',
   flip: 'M4 9a8 8 0 0113.5-3M20 15A8 8 0 016.5 18M17 3v3.5h-3.5M7 21v-3.5h3.5',
   play: 'M8 5l11 7-11 7V5z',
   sparkle: 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z',
@@ -385,6 +388,51 @@ export function BottomNav({ active, navigate }: { active: string; navigate: (to:
           </button>
         )
       })}
+    </div>
+  )
+}
+
+// ── Device frame ─────────────────────────────────────────────────────────────
+// Shared by both apps so the customer and professional shells stay identical
+// hardware and only their contents differ.
+
+export function Frame({
+  light, topBg = '#fff', bg = '#fff', nav, screenKey, children,
+}: {
+  /** Light status-bar glyphs, for dark chrome behind them. */
+  light?: boolean
+  topBg?: string
+  bg?: string
+  nav?: ReactNode
+  screenKey: number
+  children: ReactNode
+}) {
+  return (
+    <div
+      className="relative bg-white overflow-hidden flex-shrink-0"
+      style={{
+        width: 390,
+        height: 844,
+        borderRadius: 44,
+        boxShadow: '0 40px 90px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.10)',
+      }}
+    >
+      <div className="absolute top-0 left-0 right-0 h-11 z-30" style={{ background: topBg }} />
+      <div
+        className="absolute z-50 bg-black"
+        style={{ top: 12, left: '50%', transform: 'translateX(-50%)', width: 120, height: 34, borderRadius: 20 }}
+      />
+      <StatusBar light={light} />
+
+      <div
+        key={screenKey}
+        className="absolute left-0 right-0 screen-slide"
+        style={{ top: 44, bottom: nav ? 80 : 0, background: bg }}
+      >
+        <div className="h-full overflow-y-auto no-scroll">{children}</div>
+      </div>
+
+      {nav && <div className="absolute bottom-0 left-0 right-0 z-30">{nav}</div>}
     </div>
   )
 }
