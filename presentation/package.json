@@ -1,0 +1,13 @@
+{
+  "name": "trustcraft-presentation",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Presentation tooling for the TrustCraft DHACK Grand Final deck. Not part of the application.",
+  "dependencies": {
+    "jszip": "^3.10.1",
+    "playwright": "^1.58.0",
+    "pptxgenjs": "^3.12.0",
+    "sharp": "^0.34.0"
+  }
+}
