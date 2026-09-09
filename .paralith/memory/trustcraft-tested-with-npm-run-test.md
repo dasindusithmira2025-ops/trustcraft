@@ -1,12 +1,12 @@
 ---
-title: Trustcraft tested with npm run test
+title: trustcraft tested with npm run test
 type: test
 quality: observed
 ---
 
-Trustcraft tested with npm run test
+trustcraft tested with npm run test
 
-- Subject: Trustcraft
+- Subject: trustcraft
 - Property: tested with
 - Value: npm run test
 - Detected by: project_analyzer (deterministic)

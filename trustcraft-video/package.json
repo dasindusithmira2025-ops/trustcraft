@@ -1,0 +1,28 @@
+{
+  "name": "trustcraft-video",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TrustCraft Launch Film — a 30s cinematic product showcase built with Remotion. Standalone artifact; does not affect the TrustCraft application.",
+  "type": "module",
+  "scripts": {
+    "video:studio": "remotion studio",
+    "studio": "remotion studio",
+    "video:render": "remotion render TrustCraftLaunchFilm out/trustcraft-launch.mp4 --log=verbose",
+    "render": "remotion render TrustCraftLaunchFilm out/trustcraft-launch.mp4",
+    "video:still": "remotion still TrustCraftLaunchFilm out/end-frame.png --frame=890",
+    "compositions": "remotion compositions",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/fonts": "4.0.522",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "remotion": "4.0.522"
+  },
+  "devDependencies": {
+    "@remotion/cli": "4.0.522",
+    "@types/react": "19.0.0",
+    "@types/react-dom": "19.0.0",
+    "typescript": "5.7.3"
+  }
+}

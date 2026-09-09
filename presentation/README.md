@@ -14,7 +14,7 @@ and type token is lifted from `src/index.css`.
 ## ⚠ Before the final: set the team name
 
 The repository contains no team name, so the deck currently ships a flagged
-placeholder on slides 1, 2 and 20.
+placeholder on slides 1, 2 and 22.
 
 ```bash
 TEAM_NAME="Your Team Name" node presentation/generate.mjs
@@ -28,13 +28,43 @@ cannot ship it by accident.
 
 ## Deliverables
 
+### Slides 17–18: interactive redesign
+
+Open `output/TrustCraft_DHACK_Interactive.pptx` for the updated 22-slide deck.
+The original Grand Final file was locked during this edit, so the redesign is
+saved separately. Slide 17 now uses a savings chart and a large revenue flow;
+slide 18 uses a connected four-engine network and a compact evidence map.
+Each has three native click-to-reveal builds. Pricing assumptions and supporting
+detail remain in the slide footnotes and speaker notes.
+
+- `output/TrustCraft_DHACK_Interactive_Static.pptx`: matching static backup.
+- `output/interactive-preview/index.html`: self-contained browser companion for
+  slides 17 and 18, with reveal, replay, previous, and show-all controls.
+- `output/interactive-preview/slide-17.png` and `slide-18.png`: browser-rendered
+  previews. These are not PowerPoint exports; the original PDF is unchanged.
+
+Rebuild from this directory:
+
+```bash
+node generate.mjs --out TrustCraft_DHACK_Interactive.pptx
+node generate.mjs --static --out TrustCraft_DHACK_Interactive_Static.pptx
+node capture/business-preview.mjs
+```
+
+The layouts live in `business-slides.mjs`; `business-motion.mjs` writes native
+PresentationML animations during generation. The text audit passes and browser
+controls were exercised. Native playback could not be checked: the local
+PowerPoint session rejected both opening files and creating a blank deck with
+HRESULT `0x80048240`. The existing team-name placeholders on slides 1, 2, and 22
+still need the real team name.
+
 | File | What it is |
 |---|---|
-| `output/TrustCraft_DHACK_Grand_Final.pptx` | **The deck.** 20 slides, 12 chapters, Morph + Fade transitions, 3 looping GIF clips of the real app, speaker notes on every slide |
+| `output/TrustCraft_DHACK_Grand_Final.pptx` | **The deck.** 22 slides, 12 chapters, Morph + Fade transitions, 3 looping GIF clips of the real app, speaker notes on every slide |
 | `output/TrustCraft_DHACK_Static_Backup.pptx` | Same deck, no animated media, fade-only transitions. Opens anywhere |
 | `output/TrustCraft_DHACK_Grand_Final.pdf` | PDF export, produced by PowerPoint itself |
-| `previews/slide-01..20.png` | What PowerPoint actually renders, one PNG per slide |
-| `TrustCraft_DHACK_Speaker_Script.md` | Word-for-word script, 9:30, with click and cut cues |
+| `previews/slide-01..22.png` | What PowerPoint actually renders, one PNG per slide |
+| `TrustCraft_DHACK_Speaker_Script.md` | Word-for-word script, 9:32, with click and cut cues |
 | `TrustCraft_5_Minute_Demo_Script.md` | The prototype run, 4:35, one scenario |
 | `TrustCraft_Judge_QA.md` | 30+ hard questions, answers tagged BUILT / DESIGNED / PLANNED / UNKNOWN |
 | `TrustCraft_Presentation_Sources.md` | Every external number, with its source |
@@ -149,4 +179,4 @@ Design tokens live in `theme.mjs`; the reasoning behind them is in
 - The three GIF clips autoplay in slideshow. If one does not, the slide still
   makes its point — the speaker script says to keep going.
 - Verified opening in Microsoft PowerPoint (Office 16) on this machine: both
-  decks, 20 slides, 20 speaker notes, 13.33 × 7.5 in.
+  decks, 22 slides, 22 speaker notes, 13.33 × 7.5 in.

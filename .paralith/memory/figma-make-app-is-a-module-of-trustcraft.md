@@ -1,14 +1,14 @@
 ---
-title: figma-make-app is a module of Trustcraft
+title: figma-make-app is a module of trustcraft
 type: component
 quality: observed
 ---
 
-figma-make-app is a module of Trustcraft
+figma-make-app is a module of trustcraft
 
 - Subject: figma-make-app
 - Property: is module of
-- Value: Trustcraft
+- Value: trustcraft
 - Detected by: project_analyzer (deterministic)
 - Confidence: 0.85
 

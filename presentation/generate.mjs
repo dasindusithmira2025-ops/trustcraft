@@ -18,10 +18,12 @@ import { join } from 'node:path'
 import { ROOT, W, H } from './theme.mjs'
 import { build, TEAM } from './slides.mjs'
 import { flush, missing } from './measure.mjs'
+import { businessTiming } from './business-motion.mjs'
 
 const STATIC = process.argv.includes('--static')
 const OUT_DIR = join(ROOT, 'output')
-const FILE = STATIC ? 'TrustCraft_DHACK_Static_Backup.pptx' : 'TrustCraft_DHACK_Grand_Final.pptx'
+const outArg = process.argv.indexOf('--out')
+const FILE = outArg >= 0 ? process.argv[outArg + 1] : STATIC ? 'TrustCraft_DHACK_Static_Backup.pptx' : 'TrustCraft_DHACK_Grand_Final.pptx'
 const OUT = join(OUT_DIR, FILE)
 
 await mkdir(OUT_DIR, { recursive: true })
@@ -94,7 +96,8 @@ for (let i = 0; i < transitions.length; i++) {
 
   // CT_Slide order is cSld, clrMapOvr, transition, timing — appending just
   // before </p:sld> keeps that order because PptxGenJS emits no timing block.
-  patched.set(name, xml.replace('</p:sld>', (kind === 'morph' ? MORPH : FADE) + '</p:sld>'))
+  const timing = !STATIC && [17, 18].includes(i + 1) ? businessTiming(xml) : ''
+  patched.set(name, xml.replace('</p:sld>', (kind === 'morph' ? MORPH : FADE) + timing + '</p:sld>'))
   applied++
 }
 

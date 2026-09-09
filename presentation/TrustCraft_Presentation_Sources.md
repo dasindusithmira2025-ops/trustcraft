@@ -129,6 +129,96 @@ difference is the entry point, not the safeguards.
 
 ---
 
+## Slides 16–18 — Business model
+
+### What the deck claims, and what it does not
+
+The chapter claims the TrustCraft business **architecture** is more diversified,
+more aligned with professional success, less dependent on a single monetisation
+engine, and capable of recurring revenue and recurring demand. It does **not**
+claim TrustCraft already earns more than any operating competitor — there is no
+evidence for that, and slide 18 says so on the slide.
+
+### The pricing architecture (slide 16 and 17) — PROPOSED
+
+| Element | Value on the slide | Status |
+|---|---|---|
+| Customer subscription | none; search/discovery stays free | proposed model, matches the built product (customers are never charged) |
+| Free professional | no monthly subscription; **10%** commission on completed jobs | **proposed** |
+| Pro professional | optional subscription; **8%** completed-job commission | **proposed** |
+| Pro subscription price | `monthly charge = min( LKR 1,490 , 2% of that month's completed TrustCraft job value )` | **proposed** |
+| Completed-job fee in the build | flat **8%**, shown before the quote is sent (Rs 4,300 → Rs 344 → Rs 3,956) | **BUILT** — `src/worker/data.ts` → `PLATFORM_FEE`, `quoteTotals`, `SEED_QUOTE` |
+| Pro benefits (8% rate, ad-free workspace, Demand Radar, AI Quote Copilot, Pro Supply Club, CRM, analytics, scheduling, business tools) | listed as Pro value | **proposed** — unbuilt functionality |
+| Supply network (sponsored placement + negotiated commerce; Pro Supply Club) | revenue engine 3 | **proposed** — no partner signed, **no supplier commission rate stated** |
+| TrustCraft for Business (enterprise maintenance contracts) | revenue engine 4 | **proposed** — no customers, no pricing |
+
+**Why the Pro price is shaped this way.** Free commission is 10%, Pro commission
+is 8%, so the saving from upgrading is 2% of job value. Setting the subscription
+to `min(LKR 1,490, 2% of job value)` means that below ~LKR 74,500 of monthly
+job value the subscription exactly offsets the commission saving (Pro is never
+*worse* than Free), and above it the subscription is capped so Pro produces a
+growing cash advantage. Never implies Pro buys trust.
+
+### Slide 17 arithmetic — verify on the slide
+
+Professional side (all figures exact):
+
+| Monthly job value | Free (10%) | Pro (8% + capped sub) | Pro keeps more |
+|---|---|---|---|
+| LKR 100,000 | 10,000 | 8,000 + 1,490 = 9,490 | 510 |
+| LKR 200,000 | 20,000 | 16,000 + 1,490 = 17,490 | 2,510 |
+| LKR 300,000 | 30,000 | 24,000 + 1,490 = 25,490 | 4,510 |
+
+Annualised advantage at LKR 300,000/month: 4,510 × 12 = **LKR 54,120**.
+
+Platform side — labelled **ILLUSTRATIVE SCALE SCENARIO, not current revenue,
+not a forecast** on the slide:
+
+- 1,000 active professionals = 700 Free + 300 Pro
+- Free avg monthly TrustCraft job value LKR 40,000 → Free GMV = 700 × 40,000 = **LKR 28.0M**
+- Pro avg monthly job value LKR 75,000 → Pro GMV = 300 × 75,000 = **LKR 22.5M**
+- Total monthly GMV = **LKR 50.5M**
+- Free commission = 10% × 28.0M = **LKR 2.80M**
+- Pro commission = 8% × 22.5M = **LKR 1.80M**
+- Pro subscription MRR = 300 × 1,490 = **LKR 447K** *(shown at the LKR 1,490 ceiling; Pros doing under ~LKR 74,500/month would pay the 2% instead, so realised Pro MRR would be lower — the slide's point is the shape, not this figure)*
+- Core monthly platform revenue = 2.80M + 1.80M + 0.447M ≈ **LKR 5.05M**
+- Annualised ≈ **LKR 60.6M**
+- **Not included:** supplier advertising, supply commerce, TrustCraft for Business
+- Only the **LKR 447K** subscription portion is recurring subscription MRR — the slide does not call the full LKR 5.05M "MRR".
+
+### Slide 18 — competitor monetisation, publicly sourced
+
+All competitor pages checked/re-verified **9 September 2026**. TaskForce, Blu and
+Grab Me are client-rendered single-page apps that could not be machine-read this
+session; their entries rest on the primary-source review below plus the earlier
+(8 Sep 2026) review. Kaikili, Angi and Servixy were re-verified from live pages.
+
+Where no public evidence of a revenue mechanism was found, the matrix says
+**"Not publicly found"** / **"Not publicly disclosed"** — this is explicitly
+*not* a claim that the competitor does not use that mechanism privately.
+
+| Platform | What the deck shows | Source |
+|---|---|---|
+| **TaskForce** (taskforce.lk) | "Service fee per job" — completed-job fee, rate not publicly disclosed | TaskForce.lk Terms & Conditions (taskforce.lk/terms-and-conditions): a service fee applies on each successfully completed job and is shown before bid/offer confirmation; no fixed public percentage stated |
+| **Blu** (blu.lk) | "Commission on paid bookings" + "Subscription plans" — subscription-led public model, transaction economics unclear | Blu provider FAQ / plan pages (blu.lk): plan-based subscription fee, "no commission per job" messaging for providers; Blu legal terms separately reference deduction of an applicable platform commission for eligible online-paid bookings |
+| **Grab Me** | "Zero commission" | Grab Me public site: "zero commission", "free to use", "no hidden fees", direct payment between customer and provider |
+| **Servixy** (servixy.lk) | "Not publicly disclosed" across all columns | servixy.lk: free job posting, verified providers, quotes, profiles, ratings/reviews demonstrated; provider-side monetisation not disclosed on the pages found |
+| **Kaikili** (kaikili.com) | "11.25–15% commission", "No subscription" | Kaikili FAQ (kaikili.com/faq): platform commission 11.25%–15%, deducted from customer payment, charged only on a hire; no monthly/yearly subscription. Used only as a published international transaction benchmark |
+| **TrustCraft** | 10% Free · 8% Pro; optional Pro ≤ LKR 1,490/mo; supply ads + commerce (proposed); TrustCraft for Business (proposed) | This repository + the PROPOSED table above |
+
+### Global validation callout (slide 18)
+
+> "Multi-engine home-service monetisation is commercially proven at global scale."
+
+| | |
+|---|---|
+| **Claim** | Angi Inc.'s home-services business earns from multiple sources including professional advertising, paid memberships and services (leads/consumer-connection, advertising, Angi Services, and membership subscription revenue) |
+| **Organisation** | Angi Inc. (NASDAQ: ANGI) |
+| **Source** | Angi Inc. investor materials and public "how it works" descriptions; corroborated by third-party business-model analyses citing Angi's Q1 2025 revenue split across consumer-connection, advertising, services and membership |
+| **Used on** | Slide 18, as a concept-validation callout only. The slide explicitly says this says nothing about TrustCraft's own scale or revenue. |
+
+---
+
 ## Claims that come from the repository, not from external sources
 
 These are stated in the deck as facts about TrustCraft, and are verifiable in
@@ -140,6 +230,7 @@ this repository rather than in a publication.
 | Analysis confidence is capped at 0.95 and every category carries a "qualified professional must diagnose" disclaimer | `server/domain.mjs` → `analyse`, `RULES` |
 | Match ranking weights: relevant experience 30%, reliability 25%, availability 20%, distance 15%, price fit 10% | `server/domain.mjs` → `MATCH_WEIGHTS` |
 | 8% platform fee, shown to the professional before they send a quotation (Rs 4,300 → Rs 344 fee → Rs 3,956 payout) | `src/worker/data.ts` → `PLATFORM_FEE`, `quoteTotals`, `SEED_QUOTE` |
+| The 8% completed-job fee is the *only* revenue mechanism with code behind it. On slides 16–18 the proposed 10% free / 8% Pro commission split, the optional TrustCraft Pro subscription and its `min(LKR 1,490, 2% of monthly job value)` price, the supply network (sponsored placement + commerce), and TrustCraft for Business are all marked `PROPOSED` — none is built or earning | slides 16–18, and `TrustCraft_Judge_QA.md` → "How will you generate revenue?" |
 | Score drivers shown in-app: identity & NIC, trade certification, on-time arrival, quotation accuracy, completion evidence | `src/worker/data.ts` → `TRUST_FACTORS` |
 | Verification documents and their states | `src/worker/data.ts` → `DOCUMENTS` |
 | Seven live service categories | `src/store.tsx` → `CATEGORIES` |
@@ -162,9 +253,17 @@ source them honestly:
 - Any competitor's revenue, users, provider count or market share
 - TrustCraft users, revenue, providers, transactions, partnerships or pilots
 - Growth rates, projections, valuations or launch dates
-- Customer acquisition cost, average job value, or willingness to pay
+- Customer acquisition cost, or measured willingness to pay
 - Any user-research finding, interview or survey — we ran none
-- Any pricing for the proposed provider tier
+- Any *finalised* price for TrustCraft Pro, or any commission rate for supplier
+  commerce or sponsored placement — slide 16–17 numbers are a **proposed**
+  pricing architecture, and the slide-17 platform-scale figures are labelled
+  **ILLUSTRATIVE** (see the slide 16–18 section below)
+- Any competitor's revenue, and any claim that TrustCraft is more financially
+  successful than an operating competitor — slide 18 makes an *architectural*
+  claim only
+- Any existing hardware-supplier, payment or enterprise partnership — the slides
+  use "proposed" language for this reason
 
 If a judge asks for one of these, the answer is in `TrustCraft_Judge_QA.md`
 under "Questions that deserve 'I don't know'".

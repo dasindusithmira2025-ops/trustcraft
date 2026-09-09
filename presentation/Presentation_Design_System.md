@@ -32,10 +32,13 @@ radial-gradient(120% 120% at 50% 0%, #1E293B 0%, #0B1220 60%, #060A12 100%)
 ```
 
 Rendered once at 2560 × 1440 and reused, so every dark slide is the product's
-own surface rather than an approximation. Used on slides 1, 2, 4, 5, 10, 11, 12.
+own surface rather than an approximation. Carries the cold open, the problem,
+the reveal, the multimodal peak, the business model (slides 16–18), scale and
+the close.
 
 **Light surface — flat `#F8FAFC` (`ink-50`)**
-The app's own page tint behind tab screens. Used on slides 3, 6, 7, 8, 9.
+The app's own page tint behind tab screens. Carries the two-sides slide, the
+trust surface, UX by design, market evidence and competitive position.
 Never pure white: white is reserved for the device screens themselves, so the
 product always reads as the brightest object on the slide.
 
@@ -201,21 +204,37 @@ editable and readable at the back of a hall.
 
 ## 12. Slide inventory
 
-20 slides, 12 story chapters. Motion states are marked `→`.
+22 slides, 12 story chapters. Motion states are marked `→`.
 
 | # | Chapter | Surface | Time |
 |---|---|---|---|
-| 1–2 | 01 Cold open → typed query | dark | 0:30 |
-| 3–4 | 02 The real problem → three frictions | dark | 0:50 |
-| 5 | 03 Two sides of the trust gap | light | 0:40 |
-| 6–7 | 04 Reveal → describe / understand / discover | dark | 0:45 |
-| 8–10 | 05 Multimodal peak → convergence → live motion | dark | 1:10 |
-| 11–12 | 06 Trust is the product → what builds the score | light | 1:00 |
-| 13 | 07 UX by design | light | 0:45 |
-| 14 | 08 Market evidence | light | 0:50 |
-| 15 | 09 Competitive position | light | 0:45 |
-| 16 | 10 Business model | dark | 0:45 |
-| 17 | 11 Scale | dark | 0:45 |
-| 18–20 | 12 Closing → wordmark → handoff | dark | 0:45 |
+| 1–2 | 01 Cold open → typed query | dark | 0:28 |
+| 3–4 | 02 The real problem → three frictions | dark | 0:40 |
+| 5 | 03 Two sides of the trust gap | light | 0:35 |
+| 6–7 | 04 Reveal → describe / understand / discover | dark | 0:41 |
+| 8–10 | 05 Multimodal peak → convergence → live motion | dark | 1:03 |
+| 11–12 | 06 Trust is the product → what builds the score | light | 0:53 |
+| 13 | 07 UX by design | light | 0:39 |
+| 14 | 08 Market evidence | light | 0:41 |
+| 15 | 09 Competitive position | light | 0:40 |
+| 16–18 | 10 Business model · four engines → economics → architecture | dark | 2:05 |
+| 19 | 11 Scale | dark | 0:40 |
+| 20–22 | 12 Closing → wordmark → handoff | dark | 0:43 |
 
-Total spoken target: **9:30**, inside a 10:00 limit.
+Total spoken target: **9:48**, inside a 10:00 limit.
+
+**Chapter 10** is three slides, all on the dark surface, fade between them, and
+answers three questions in order: *what* the model is (16 — one completed job,
+four revenue engines: completed-job commission, optional TrustCraft Pro
+subscription, supply network, TrustCraft for Business), *why* the economics can
+work (17 — the professional-side arithmetic of the 10% / 8% split and the
+activity-adjusted Pro price, and an explicitly **illustrative** platform-scale
+scenario), and *why* the architecture is differentiated (18 — a publicly-sourced
+competitor matrix and four structural-advantage pillars). Only `BUILT` (solid
+green) and `PROPOSED` (outlined amber) tags are used; the 8% completed-job fee
+is the one `BUILT` mechanism. Product UI: the real quotation screen
+(`w-quote-money`) as the hub of slide 16. The chapter never claims TrustCraft
+already out-earns an operating competitor — the claim is architectural — and
+paying never buys trust: verification, score, reviews and ranking stay separate
+from any fee. Every competitor claim carries a slide footnote and is logged in
+`TrustCraft_Presentation_Sources.md`.

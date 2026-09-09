@@ -4,15 +4,27 @@ Everything checked, everything found, everything fixed — and the things that
 are still open.
 
 **Decks under test**
-- `output/TrustCraft_DHACK_Grand_Final.pptx` — 20 slides, 24.1 MB
-- `output/TrustCraft_DHACK_Static_Backup.pptx` — 20 slides, 19.6 MB
+- `output/TrustCraft_DHACK_Grand_Final.pptx` — 22 slides, 26.0 MB
+- `output/TrustCraft_DHACK_Static_Backup.pptx` — 22 slides, ~21 MB
+
+> **Update — business-model chapter rebuilt.** Chapter 10 went from one slide
+> ("free tier / paid tier") to three (`Core` → `B2B commerce` → `Expansion`),
+> so the deck is now 22 slides. The old slide positioned the professional
+> subscription as optional; the new chapter makes an active **TrustCraft
+> Professional** membership a required condition of operating, on top of the
+> already-built 8% completed-job fee, with B2B supply commerce, sponsored
+> placement, payments, enterprise and business tooling as tagged future
+> engines. Every claim carries a `BUILT / LAUNCH MODEL / NEXT / PROPOSED /
+> SCALE / LATER` tag. Governing rule on the slide: *access is paid, trust is
+> earned* — no badge, score, review or ranking is ever for sale. `validate.mjs`
+> and `audit.mjs` both pass; all 22 renders reviewed by eye.
 
 ---
 
 ## ⚠ One item is still open
 
 **The team name is a placeholder.** The repository contains no team name, so
-slides 1, 2 and 20 currently read `TEAM NAME — SET TEAM_NAME BEFORE THE FINAL`.
+slides 1, 2 and 22 currently read `TEAM NAME — SET TEAM_NAME BEFORE THE FINAL`.
 
 This is deliberately impossible to miss: `validate.mjs` treats it as a **hard
 failure** and exits non-zero while it is present. Fix with one command:
@@ -126,10 +138,10 @@ horizons, so the progression is legible as a step.
 ### Structure — both decks
 
 ```
-slides        20
-transitions   7 morph · 13 fade      (backup: 0 morph · 20 fade)
-speaker notes 20/20
-media parts   54 (png, gif)          (backup: 54 png)
+slides        22
+transitions   7 morph · 15 fade      (backup: 0 morph · 22 fade)
+speaker notes 22/22
+media parts   59 (png, gif)          (backup: 59 png)
 negative extents            none
 missing media targets       none
 undeclared content types    none
@@ -148,14 +160,14 @@ content at the exact Inter metrics PowerPoint will use.
 Verified via COM against Microsoft PowerPoint (Office 16):
 
 ```
-OPENS OK  TrustCraft_DHACK_Grand_Final.pptx    slides=20  notes=20  13.33 x 7.5 in
-OPENS OK  TrustCraft_DHACK_Static_Backup.pptx  slides=20  notes=20  13.33 x 7.5 in
+OPENS OK  TrustCraft_DHACK_Grand_Final.pptx    slides=22  notes=22  13.33 x 7.5 in
+OPENS OK  TrustCraft_DHACK_Static_Backup.pptx  slides=22  notes=22  13.33 x 7.5 in
 ```
 
 ### Remaining warnings (expected, not defects)
 
 `validate.mjs` reports three objects extending past the canvas, on slides 1, 2
-and 18. All three are the transparent padding around a device screenshot — the
+and 20. All three are the transparent padding around a device screenshot — the
 padding that keeps the app's drop shadow un-clipped. The device itself is fully
 on-slide in every case. This is intentional bleed.
 
@@ -180,13 +192,15 @@ on-slide in every case. This is intentional bleed.
 | 13 | UX by design | light | Three laws, in the product | Home + Recommendations | ✅ |
 | 14 | Market evidence | light | **76.1%** | — | ✅ |
 | 15 | Competitive position | light | Positioning map | — | ✅ |
-| 16 | Business model | dark | 8% fee, real; tiers, proposed | Quote builder | ✅ |
-| 17 | Scale | dark | Four horizons | — | ✅ |
-| 18 | Closing | dark | "shouldn't be another problem" | Confirmation, ghosted | ✅ |
-| 19 | Wordmark | dark | Describe it. Find them. Trust the choice. | — | ✅ |
-| 20 | Handoff | dark | "Let us show you how it works." | — | ⚠ team name |
+| 16 | Business model · Core | dark | Membership (LAUNCH MODEL) + 8% fee (BUILT) | Quote builder | ✅ |
+| 17 | Business model · B2B commerce | dark | The second marketplace a job creates (NEXT) | Quote builder | ✅ |
+| 18 | Business model · Expansion | dark | Payments / enterprise / business tooling; revenue architecture | — | ✅ |
+| 19 | Scale | dark | Four horizons | — | ✅ |
+| 20 | Closing | dark | "shouldn't be another problem" | Confirmation, ghosted | ✅ |
+| 21 | Wordmark | dark | Describe it. Find them. Trust the choice. | — | ✅ |
+| 22 | Handoff | dark | "Let us show you how it works." | — | ⚠ team name |
 
-Product UI appears on **13 of 20 slides**, roughly half the deck's visual
+Product UI appears on **14 of 22 slides**, roughly half the deck's visual
 weight — the target set in the design system.
 
 ---
@@ -203,13 +217,15 @@ Every claim in the deck traced to a source or to code.
 | Any competitor weakness asserted without checking? | **No.** Slide 15 names what Servixy, TaskForce and Blu each do *well*, from their own sites |
 | Any UI in the deck that does not exist in the app? | **No.** All 34 screens are captured from the running application |
 | Any redesigned or "improved" screen? | **No.** `capture/shots.tsx` imports the real components and draws none of its own |
-| Speculative business model labelled? | **Yes** — slide 16 carries a `PROPOSED` tag and the words "not yet built, and not yet earning" |
+| Speculative business model labelled? | **Yes** — slides 16–18 tag every claim `BUILT / LAUNCH MODEL / NEXT / PROPOSED / SCALE / LATER`; only the 8% completed-job fee is marked built |
+| Does the model sell trust? | **No** — slide 16 states *access is paid, trust is earned*; verification, score, reviews and ranking are never purchasable. Sponsored supplier placement is the only paid visibility and is labelled `SPONSORED` |
 | Every number on a slide sourced? | **Yes** — `TrustCraft_Presentation_Sources.md` |
 | Trust score / match figures traceable? | **Yes** — `server/domain.mjs`, cited in the sources file |
 
-**Stated openly on the slides themselves:** the business model tiers are
-proposed; the competitive axes are qualitative, not measured share; slide 17
-says there are deliberately no dates, targets or valuations.
+**Stated openly on the slides themselves:** every business-model layer beyond
+the 8% fee is tagged as a launch model or a future engine; the competitive axes
+are qualitative, not measured share; slide 19 says there are deliberately no
+dates, targets or valuations.
 
 **One thing a judge could find that the deck does not say:** the shipped app
 runs on seeded demo fixtures, while the scoring, classification and matching
@@ -230,7 +246,7 @@ thing to know before you answer anything".
 | Fonts available on the presenting machine | ✅ Inter installed for the current user; files + installer bundled |
 | Static fallback for every motion slide | ✅ backup deck substitutes each clip's closing frame |
 | Backup deck free of version-dependent features | ✅ fade only, no morph, no animated media |
-| File size reasonable | ✅ 24.1 MB / 19.6 MB |
+| File size reasonable | ✅ 26.0 MB / ~21 MB |
 | Editable, not flattened images | ✅ real text boxes and shapes throughout |
 | Opens in Microsoft PowerPoint | ✅ verified via COM |
 
@@ -245,9 +261,12 @@ tells the presenter to keep going.
 
 ## Timing
 
-Script total **9:30** against a 10:00 limit — 30 seconds of margin, with three
-marked `[CUT IF BEHIND]` lines worth a further ~40 seconds. Two mid-run
-checkpoints (3:55 and 6:30) let the presenter detect drift early.
+Script total **9:32** against a 10:00 limit — 28 seconds of margin. The
+business-model chapter grew from 0:45 to 1:49 for the three-slide rebuild; the
+other eleven chapters were tightened (and three `[CUT IF BEHIND]` passages made
+permanent) to hold the total. Three mid-run checkpoints (3:27, 5:40, 8:09) let
+the presenter detect drift early; the note in the script says the business
+chapter is the one place not to overrun.
 
 Demo script total **4:35** against 5:00, with step 8 marked droppable.
 

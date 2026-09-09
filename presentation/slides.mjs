@@ -15,6 +15,7 @@
  */
 import { A, C, F, T, W, H, M, DEV, pngSize } from './theme.mjs'
 import { measureH } from './measure.mjs'
+import { businessEconomics, businessArchitecture } from './business-slides.mjs'
 
 /** Lockup proportions come from the asset itself, never a hard-coded guess. */
 const LOCKUP = (() => { const d = pngSize(A.brand('lockup-white.png')); return d.h / d.w })()
@@ -761,74 +762,137 @@ function competitors(p) {
 }
 
 // ── Chapter 10 · Business model ──────────────────────────────────────────────
+//
+// Exactly three slides. Together they answer six questions: what the model is
+// (01 — four revenue engines around one completed job), why the economics can
+// work (02 — the professional-side and platform-side arithmetic), and why the
+// architecture is differentiated and structurally more resilient than the
+// publicly evidenced competitor models (03 — the competitor matrix and the
+// structural-advantage read).
+//
+// What this chapter does NOT claim: that TrustCraft already out-earns an
+// operating competitor. There is no evidence for that. The claim is
+// architectural — more diversified, more aligned with professional success,
+// less dependent on a single monetization engine, able to earn recurring
+// revenue, and able to generate recurring demand around successful work.
+//
+// Every unbuilt engine is marked PROPOSED. The 8% completed-job fee is the one
+// mechanism with code behind it (src/worker/data.ts → PLATFORM_FEE). The
+// 10% free / 8% Pro split and the activity-adjusted Pro subscription are a
+// proposed pricing architecture. Pro never buys trust — trust stays earned.
 
-function businessModel(p) {
+/** Small premium status tag. BUILT is the only solid fill; PROPOSED is an
+ *  outline whose word carries the meaning, so colour is never the only signal. */
+const TAGS = {
+  BUILT: { fill: C.successDeep, color: 'DCFCE7' },
+  PROPOSED: { line: C.warningDeep, color: 'FBBF24' },
+}
+function tag(s, kind, x, y, w) {
+  const t = TAGS[kind]
+  pill(s, kind, { x, y, w, h: 0.32, fill: t.fill, line: t.line, color: t.color, size: 9, spc: 1.2 })
+  return x + w
+}
+
+// ── 10a · What the model is — one completed job, four revenue engines ───────
+
+function businessEngines(p) {
   const s = dark(p)
   footer(s, true)
-  eyebrow(s, 'Business model', M.l, 0.6, C.onDarkFaint)
-  text(s, 'When providers grow, TrustCraft grows.', {
-    x: M.l, y: 0.9, w: 11.4, ...T.head, color: C.onDarkHead,
+  eyebrow(s, 'Business model · 01', M.l, 0.6, C.onDarkFaint)
+  text(s, [
+    { text: 'One completed job.\n', options: { color: C.onDarkHead } },
+    { text: 'Four revenue engines.', options: { color: C.brandLight } },
+  ], { x: M.l, y: 0.9, w: 8.0, fontSize: 32, fontFace: F.reg, bold: true, charSpacing: -1.1, lineSpacing: 38 })
+
+  pill(s, 'PROPOSED PRICING ARCHITECTURE', {
+    x: 9.02, y: 0.62, w: 3.69, h: 0.34, line: C.warningDeep, color: 'FBBF24', size: 9, spc: 0.8,
   })
 
-  // Left — what is already in the build
-  text(s, 'IN THE PRODUCT TODAY', { x: M.l, y: 1.78, w: 3.2, ...T.eyebrow, color: C.brandLight })
-  device(s, 'w-quote-money', { x: M.l, y: 2.12, h: 4.3 })
+  // ── Centre — the real completed job, as the hub ──
+  const dcx = 6.667
+  const dh = 3.42
+  const dw = dh * DEV.aspect
+  const dy = 2.5
+  tag(s, 'BUILT', dcx - 1.72, dy - 0.44, 0.86)
+  text(s, '8% completed-job fee — live today', {
+    x: dcx - 0.78, y: dy - 0.42, w: 2.6, fontSize: 9, fontFace: F.med, color: C.onDarkBody,
+  })
+  const d = device(s, 'w-quote-money', { x: dcx - dw / 2, y: dy, h: dh })
+  text(s, 'REAL QUOTATION SCREEN', {
+    x: dcx - 1.9, y: d.bottom + 0.12, w: 3.8, fontSize: 9, fontFace: F.semi,
+    charSpacing: 1, color: C.onDarkFaint, align: 'center',
+  })
 
-  const flows = [
-    ['Customer pays', 'Rs 4,300', C.onDarkHead],
-    ['TrustCraft fee (8%)', '– Rs 344', C.brandLight],
-    ['Professional receives', 'Rs 3,956', C.success],
+  // Two side spines, joined to the device centre by a short stub — the job is
+  // the hub, the four engines branch off it. Lines stay horizontal / vertical.
+  const cy = dy + dh / 2
+  const lsx = d.x - 0.44
+  const rsx = d.right + 0.44
+  const BR = '2E3D55'
+  vrule(s, { x: lsx, y: 2.86, h: 2.66, color: BR })
+  vrule(s, { x: rsx, y: 2.86, h: 2.66, color: BR })
+  rule(s, { x: lsx, y: cy, w: d.x - lsx, color: BR })
+  rule(s, { x: d.right, y: cy, w: rsx - d.right, color: BR })
+  dot(s, { x: lsx, y: cy, d: 0.11, color: C.brandLight })
+  dot(s, { x: rsx, y: cy, d: 0.11, color: C.brandLight })
+
+  const NODES = [
+    {
+      x: M.l, y: 2.1, n: '01', name: 'Completed jobs', kind: 'PRIMARY ENGINE',
+      big: 'FREE 10%     ·     PRO 8%',
+      line: 'TrustCraft earns when the work succeeds. The fee is taken inside the quotation builder, before the price is sent.',
+    },
+    {
+      x: M.l, y: 4.26, n: '02', name: 'TrustCraft Pro', kind: 'RECURRING ENGINE',
+      big: 'OPTIONAL  ·  UP TO LKR 1,490 / MONTH',
+      line: 'Free: “start earning.”  Pro: “grow your business.”  8% fee, ad-free workspace, Demand Radar, AI Quote Copilot, Supply Club.',
+    },
+    {
+      x: 8.35, y: 2.1, n: '03', name: 'Supply network', kind: 'B2B ENGINE',
+      big: 'SPONSORED PLACEMENT  +  COMMERCE',
+      line: 'A job creates material demand. The professional gets value, the supplier gets a high-intent buyer, TrustCraft earns on the placement.',
+    },
+    {
+      x: 8.35, y: 4.26, n: '04', name: 'TrustCraft for Business', kind: 'B2B RECURRING ENGINE',
+      big: 'B2B MAINTENANCE CONTRACTS',
+      line: 'Hotels, property managers, apartments, offices, restaurants, SMEs. Recurring platform revenue, and recurring demand that feeds every other engine.',
+    },
   ]
-  let fy = 2.4
-  for (const [l, v, col] of flows) {
-    const a = text(s, l, { x: 2.85, y: fy, w: 2.4, fontSize: 12, color: C.onDarkBody })
-    const b = text(s, v, { x: 2.85, y: a - 0.03, w: 2.4, fontSize: 20, fontFace: F.semi, color: col })
-    fy = b + 0.22
-  }
-  text(s, 'The quotation builder already takes the platform fee out of every job, and shows the professional their payout before they send the price.', {
-    x: 2.85, y: fy + 0.1, w: 2.6, ...T.cap, color: C.onDarkBody,
+
+  NODES.forEach(N => {
+    const left = N.x < dcx
+    const spineX = left ? lsx : rsx
+    const endX = left ? 5.0 : 8.24
+    const anchorY = N.y + 0.6
+    vrule(s, { x: spineX, y: Math.min(cy, anchorY), h: Math.abs(anchorY - cy), color: BR })
+    rule(s, { x: Math.min(spineX, endX), y: anchorY, w: Math.abs(spineX - endX), color: BR })
+    dot(s, { x: endX, y: anchorY, d: 0.09, color: C.brandLight })
+
+    const w = left ? endX - 0.26 - N.x : M.r - N.x
+    const a = text(s, N.n, { x: N.x, y: N.y, w: 0.6, fontSize: 11, fontFace: F.semi, color: C.brandLight, charSpacing: 0.5 })
+    text(s, N.name, { x: N.x + 0.42, y: N.y - 0.03, w: w - 0.42, fontSize: 16.5, fontFace: F.semi, color: C.onDarkHead })
+    const b = text(s, N.kind, { x: N.x, y: a + 0.02, w, ...T.eyebrow, color: C.onDarkFaint })
+    const c = text(s, N.big, { x: N.x, y: b + 0.05, w, fontSize: 12, fontFace: F.semi, color: C.brandLight })
+    text(s, N.line, { x: N.x, y: c + 0.06, w, fontSize: 9.5, fontFace: F.reg, lineSpacing: 13, color: C.onDarkBody })
   })
 
-  vrule(s, { x: 5.82, y: 1.78, h: 4.7, color: C.onDarkHair })
-
-  // Right — what is proposed
-  pill(s, 'PROPOSED', { x: 6.2, y: 1.72, w: 1.3, h: 0.28, fill: C.warningDeep, color: 'FFE9C2', size: 9, spc: 1.2 })
-  text(s, 'Not yet built, and not yet earning.', {
-    x: 7.65, y: 1.75, w: 5.0, fontSize: 11, color: C.onDarkFaint,
-  })
-
-  const tiers = [
-    ['Customers', 'Free, always',
-     'Describing a problem, seeing matches and reading trust evidence stays free. Charging the anxious side of a trust problem would break the product.'],
-    ['Professional · Free tier', 'Basic presence',
-     'A verified profile, discoverability, reputation and the full job lifecycle. Enough for a working professional to earn on the platform.'],
-    ['Professional · Paid tier', 'Business tools',
-     'Richer presence, lead management, portfolio and reputation tooling, stronger discovery. Priced only once real providers tell us what they would pay for.'],
-  ]
-  let y = 2.3
-  tiers.forEach(([who, what, body], i) => {
-    const a = text(s, who.toUpperCase(), { x: 6.2, y, w: 3.1, ...T.eyebrow, color: C.onDarkFaint })
-    text(s, what, { x: 6.2, y: a + 0.04, w: 3.1, fontSize: 17, fontFace: F.semi, color: C.onDarkHead })
-    const c = text(s, body, { x: 9.5, y: y - 0.02, w: 3.21, ...T.cap, color: C.onDarkBody })
-    const next = Math.max(a + 0.42, c) + 0.22
-    if (i < 2) rule(s, { x: 6.2, y: next - 0.11, w: 6.51, color: C.onDarkHair })
-    y = next
-  })
-
-  text(s, 'Later: service facilitation, property-management and maintenance-network partnerships.', {
-    x: 6.2, y: 6.5, w: 6.51, fontSize: 11.5, fontFace: F.med, color: C.onDarkFaint,
+  text(s, 'We don’t depend on taking more from one job.    We create more value around every job.', {
+    x: M.l, y: 6.62, w: 12.1, fontSize: 15, fontFace: F.semi, color: C.onDarkLead,
   })
 
   s.addNotes(
-    'BUSINESS MODEL — 0:45\n' +
-    'Left is real and in the build: an 8% platform fee, visible to the professional before they quote.\n' +
-    'Right is explicitly PROPOSED — say the word. No revenue exists yet, no prices are set.\n' +
-    'The exchange: the professional gets relevant customers and tools; we get recurring provider revenue.\n' +
-    'Never charge the customer for asking for help — that is the point of the free side.')
+    'BUSINESS MODEL · 01 — ~0:40\n' +
+    'Start at the centre: one completed job, on the real quotation screen. The 8% completed-job fee is the one revenue mechanism already built.\n' +
+    'Then the four engines that branch off it. 01 Completed jobs — free 10%, Pro 8%; TrustCraft earns only when the work succeeds. 02 TrustCraft Pro — an OPTIONAL subscription, activity-adjusted and capped at LKR 1,490, recurring. 03 Supply network — a job creates material demand; TrustCraft earns on clearly-labelled sponsored placement and negotiated commerce, never a competitor to trust. 04 TrustCraft for Business — enterprise maintenance contracts: recurring revenue AND recurring demand.\n' +
+    'The 10 / 8 split is a proposed pricing architecture, flagged as such. Land the line: we don’t depend on taking more from one job — we create more value around every job.')
   return s
 }
 
-// ── Chapter 11 · Scale ───────────────────────────────────────────────────────
+// ── 10b · Why the economics can work — professional side, platform side ─────
+
+
+
+// ── 10c · Why the architecture is differentiated and more resilient ─────────
 
 const HORIZONS = [
   ['Now', 'Core home services,\nColombo',
@@ -956,7 +1020,11 @@ export function build(pptx, mode = 'motion') {
   add(() => uxByDesign(pptx), 'fade')
   add(() => market(pptx), 'fade')
   add(() => competitors(pptx), 'fade')
-  add(() => businessModel(pptx), 'fade')
+
+  add(() => businessEngines(pptx), 'fade')
+  add(() => businessEconomics(pptx, mode), 'fade')
+  add(() => businessArchitecture(pptx, mode), 'fade')
+
   add(() => scale(pptx), 'fade')
 
   add(() => closing(pptx, 0), 'fade')

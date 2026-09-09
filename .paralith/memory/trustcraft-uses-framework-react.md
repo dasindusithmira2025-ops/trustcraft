@@ -1,12 +1,12 @@
 ---
-title: Trustcraft uses framework React
+title: trustcraft uses framework React
 type: component
 quality: observed
 ---
 
-Trustcraft uses framework React
+trustcraft uses framework React
 
-- Subject: Trustcraft
+- Subject: trustcraft
 - Property: uses framework
 - Value: React
 - Detected by: project_analyzer (deterministic)

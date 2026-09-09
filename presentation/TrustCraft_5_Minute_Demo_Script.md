@@ -141,8 +141,9 @@ Step 6 is the one that wins. If you are running long, take time from steps 1,
 
 - Settings, account editing, notifications
 - Every service category
-- The earnings screen or the analytics tab *(save it for Q&A — it's a great
-  answer to "why would a provider pay?", but a bad use of demo minutes)*
+- The earnings screen or the analytics tab *(save it for Q&A — it shows what a
+  TrustCraft Professional membership is worth to a provider, but it's a bad use
+  of demo minutes)*
 - Messages and chat, unless a judge asks
 - The full nine-stage case lifecycle — mention it exists, don't walk it
 

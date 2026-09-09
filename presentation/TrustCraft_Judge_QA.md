@@ -167,15 +167,27 @@ payment, completion evidence, earnings ledger — that is all in the
 professional app today.
 
 ### "Why would a provider pay?"
-**PLANNED — say the word.** Nothing is being charged today and no price is set.
-The honest answer is that we do not yet know what they would pay for, and we
-are not going to guess in front of you. What we can say is which side the value
-sits on: a provider whose income depends on being discoverable will pay for
-better discovery and lead management before they will pay for anything else.
-We would validate that with real providers before setting a number.
+**Most don't have to.** A professional can operate entirely on the **Free**
+plan: no monthly charge, a proposed 10% commission on completed jobs only.
+**TrustCraft Pro** is an *optional* subscription — a proposed 8% completed-job
+commission instead of 10%, plus an ad-free workspace, Demand Radar, an AI quote
+copilot, the Pro Supply Club and business tools.
 
-The one commission that *is* implemented is the 8% platform fee inside the
-quotation builder — the professional sees their payout before they send a price.
+The Pro subscription is designed so that upgrading never makes a low-volume
+professional worse off: the proposed charge is `min( LKR 1,490 , 2% of that
+month's completed TrustCraft job value )`. The gap between the 10% and 8%
+commissions is exactly 2%, so below ~LKR 74,500 of monthly job value the
+subscription just offsets the commission saving; above it, Pro creates real cash
+savings (slide 17 works the numbers: LKR 510 / 2,510 / 4,510 kept per month at
+100k / 200k / 300k).
+
+What Pro buys is *access to tools and a lower rate*, never trust. Verification,
+the trust score, reviews and ranking stay completely separate from payment.
+
+Only the **8% completed-job fee** is implemented today (`PLATFORM_FEE`). The 10 /
+8 split, the activity-adjusted subscription price, the supply engines and
+TrustCraft for Business are all **proposed** — no price is finalised and we
+would validate the Pro price with real providers first.
 
 ### "How do you solve the cold-start problem?"
 **PLANNED.** Supply first, narrow, and manual:
@@ -194,11 +206,13 @@ The specific number of providers, the suburbs and the timeline: **UNKNOWN.**
 We have not done that operational work and will not invent it here.
 
 ### "How will you attract the first professionals?"
-The free tier is deliberately generous — a verified profile, discovery,
-reputation and the entire job lifecycle at no cost. The pitch is not "pay us";
-it is "prove what you're already good at, and keep the record." Early
-providers also get the strongest scores simply by being early and completing
-work, which is a real, honest incentive.
+Hand-recruited, in person, in one district — verified before any consumer
+launch. The pitch is "prove what you're already good at, and keep the record":
+early providers earn the strongest scores simply by being early and completing
+work, which is a real, honest incentive. There is no barrier to joining — the
+Free plan has no subscription — so the ask is only "come and complete verified
+jobs". TrustCraft Pro is offered later, as an upgrade, and its price is a
+**PLANNED** decision made with those first providers rather than set here.
 
 ---
 
@@ -275,13 +289,38 @@ for the ranking and the evidence behind each option.
 ## Business and launch
 
 ### "How will you generate revenue?"
-One implemented mechanism and one proposed. Implemented: an 8% platform fee
-inside the quotation builder, shown to the professional before they send a
-price. Proposed: a paid provider tier for business tools. Consumers never pay
-to search or to read trust evidence.
+Four aligned engines around one completed job — not one relationship taxed
+harder (slides 16–18):
 
-Longer term there are service-facilitation and property-management partnership
-paths, but those are directions, not plans.
+1. **Completed jobs** — the primary engine. Proposed 10% commission on the Free
+   plan, 8% on Pro. **BUILT:** an 8% completed-job fee inside the quotation
+   builder, shown to the professional before they send a price.
+2. **TrustCraft Pro** — an *optional* recurring subscription, proposed at
+   `min( LKR 1,490 , 2% of monthly completed job value )`. Recurring revenue;
+   proposed price.
+3. **Supply network** — a job creates material demand. Clearly-labelled
+   sponsored supplier placement for Free professionals, a Pro Supply Club with
+   negotiated pricing, and negotiated commerce/referral revenue for TrustCraft.
+   No partner signed, no supplier commission rate invented.
+4. **TrustCraft for Business** — enterprise maintenance contracts for hotels,
+   property managers, apartment complexes, offices, restaurants and SMEs:
+   monthly/annual platform contract plus transaction economics. This engine
+   creates **both** recurring B2B revenue **and** recurring demand for
+   professionals. No such customers today; no pricing set.
+
+We do **not** claim to already out-earn any operating competitor — there is no
+evidence for that. The claim is architectural: more diversified, more aligned
+with professional success, and less dependent on a single monetisation engine.
+Consumers never pay to search or read trust evidence, and no amount of payment
+buys verification, a score, reviews or ranking.
+
+### "Isn't 300 × LKR 1,490 = LKR 447K optimistic — wouldn't some Pros pay the 2%?"
+Yes. The slide-17 platform scenario is explicitly **ILLUSTRATIVE** and shows the
+Pro subscription line at its LKR 1,490 ceiling; Pros doing less than ~LKR 74,500
+a month would pay the 2% instead, so real Pro MRR would be lower. The point of
+the slide is the *shape* — that the core marketplace (commissions + Pro MRR) can
+stand on its own before the supply and enterprise engines contribute — not that
+exact figure.
 
 ### "What is your launch strategy?"
 Narrow and manual — see the cold-start answer. Two trades, a few suburbs,
