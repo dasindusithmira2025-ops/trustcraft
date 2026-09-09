@@ -13,112 +13,16 @@
  * `mode` is 'motion' (animated GIFs on the peak slide) or 'static' (the same
  * frames, held still) for the backup build.
  */
-import { A, C, F, T, W, H, M, DEV, pngSize } from './theme.mjs'
+import { A, C, F, T, W, H, M, pngSize } from './theme.mjs'
 import { measureH } from './measure.mjs'
-import { businessEconomics, businessArchitecture } from './business-slides.mjs'
+import {
+  LOCKUP, dark, light, text, eyebrow, device, clip,
+  rule, vrule, panel, dot, pill, footer, cite, marker,
+} from './kit.mjs'
+import { businessEngines, businessEconomics, businessArchitecture } from './business-slides.mjs'
 
-/** Lockup proportions come from the asset itself, never a hard-coded guess. */
-const LOCKUP = (() => { const d = pngSize(A.brand('lockup-white.png')); return d.h / d.w })()
-
-/** Set before the final run, or pass TEAM_NAME=... on the command line. */
-export const TEAM = process.env.TEAM_NAME || 'TEAM NAME — SET TEAM_NAME BEFORE THE FINAL'
-
-// ── Primitives ───────────────────────────────────────────────────────────────
-
-const dark = (p, s = p.addSlide()) => (s.background = { path: A.brand('bg-dark.png') }, s)
-const light = (p, s = p.addSlide()) => (s.background = { color: C.ink50 }, s)
-
-/**
- * Places text with a measured box and returns the y it ends at, so callers can
- * stack the next block against a real number.
- */
-function text(s, t, o) {
-  const opts = { fontFace: F.reg, valign: 'top', ...o }
-  const h = opts.h ?? measureH(t, opts)
-  s.addText(t, { ...opts, h })
-  return o.y + h
-}
-
-const eyebrow = (s, t, x, y, color, w = 6) =>
-  text(s, t.toUpperCase(), { x, y, w, ...T.eyebrow, color })
-
-/**
- * Places a real screen so x/y/h describe the DEVICE, not the padded PNG.
- * The padding exists only so the app's own drop shadow survives the crop.
- */
-function device(s, id, { x, y, h, transparency }) {
-  const dw = h * DEV.aspect
-  s.addImage({
-    path: A.shot(id),
-    x: x - dw * DEV.padX,
-    y: y - h * DEV.padY,
-    w: dw * DEV.imgW,
-    h: h * DEV.imgH,
-    ...(transparency ? { transparency } : {}),
-  })
-  return { x, y, w: dw, right: x + dw, bottom: y + h, cx: x + dw / 2 }
-}
-
-/** Same contract for the recorded clips (780 x 1688 device pixels, no padding). */
-function clip(s, file, { x, y, h }) {
-  const w = h * (780 / 1688)
-  s.addImage({ path: A.motion(file), x, y, w, h })
-  return { x, y, w, right: x + w, bottom: y + h, cx: x + w / 2 }
-}
-
-const rule = (s, { x, y, w, color, width = 0.75 }) =>
-  s.addShape('line', { x, y, w, h: 0, line: { color, width } })
-
-const vrule = (s, { x, y, h, color, width = 0.75 }) =>
-  s.addShape('line', { x, y, w: 0, h, line: { color, width } })
-
-const panel = (s, { x, y, w, h, fill, line, radius = 0.1 }) =>
-  s.addShape('roundRect', {
-    x, y, w, h, rectRadius: radius,
-    fill: fill ? { color: fill } : { type: 'none' },
-    line: line ? { color: line, width: 0.75 } : { type: 'none' },
-  })
-
-const dot = (s, { x, y, d = 0.09, color = C.brand }) =>
-  s.addShape('ellipse', { x: x - d / 2, y: y - d / 2, w: d, h: d, fill: { color }, line: { type: 'none' } })
-
-/** A pill whose box IS the visual, so its height is fixed on purpose. */
-const pill = (s, t, { x, y, w, h = 0.3, fill, line, color, size = 10, face = F.semi, spc = 0 }) =>
-  s.addText(t, {
-    x, y, w, h, shape: 'roundRect', rectRadius: 0.05,
-    fill: fill ? { color: fill } : { type: 'none' },
-    line: line ? { color: line, width: 0.75 } : { type: 'none' },
-    fontSize: size, fontFace: face, charSpacing: spc, color,
-    align: 'center', valign: 'middle',
-  })
-
-const FOOTER_Y = 7.08
-
-/** Small brand furniture, bottom-left, on the chapters between the bookends. */
-function footer(s, isDark) {
-  s.addImage({ path: A.brand('mark.png'), x: M.l, y: FOOTER_Y, w: 0.17, h: 0.17 })
-  s.addText('TrustCraft', {
-    x: M.l + 0.24, y: FOOTER_Y - 0.05, w: 1.4, h: 0.26,
-    fontSize: 9.5, fontFace: F.semi, charSpacing: 0.3, valign: 'middle',
-    color: isDark ? C.onDarkFaint : C.ink400,
-  })
-}
-
-const cite = (s, t) =>
-  text(s, t, { x: M.l, y: 7.0, w: 11.9, ...T.cite, color: C.ink400 })
-
-/** A numbered marker that sits on top of a screen. */
-function marker(s, n, x, y) {
-  const d = 0.32
-  s.addShape('ellipse', {
-    x: x - d / 2, y: y - d / 2, w: d, h: d,
-    fill: { color: C.brand }, line: { color: 'FFFFFF', width: 1.5 },
-  })
-  s.addText(String(n), {
-    x: x - d / 2, y: y - d / 2, w: d, h: d,
-    fontSize: 11, fontFace: F.semi, color: 'FFFFFF', align: 'center', valign: 'middle',
-  })
-}
+/** Overridable with TEAM_NAME=... on the command line. */
+export const TEAM = process.env.TEAM_NAME || 'Team TrustCraft'
 
 // ── Chapter 01 · Cold open ───────────────────────────────────────────────────
 
@@ -763,137 +667,14 @@ function competitors(p) {
 
 // ── Chapter 10 · Business model ──────────────────────────────────────────────
 //
-// Exactly three slides. Together they answer six questions: what the model is
-// (01 — four revenue engines around one completed job), why the economics can
-// work (02 — the professional-side and platform-side arithmetic), and why the
-// architecture is differentiated and structurally more resilient than the
-// publicly evidenced competitor models (03 — the competitor matrix and the
-// structural-advantage read).
-//
-// What this chapter does NOT claim: that TrustCraft already out-earns an
-// operating competitor. There is no evidence for that. The claim is
-// architectural — more diversified, more aligned with professional success,
-// less dependent on a single monetization engine, able to earn recurring
-// revenue, and able to generate recurring demand around successful work.
-//
-// Every unbuilt engine is marked PROPOSED. The 8% completed-job fee is the one
-// mechanism with code behind it (src/worker/data.ts → PLATFORM_FEE). The
-// 10% free / 8% Pro split and the activity-adjusted Pro subscription are a
-// proposed pricing architecture. Pro never buys trust — trust stays earned.
+// Exactly three slides — 16, 17 and 18 — and all three live in
+// business-slides.mjs, next to the arithmetic and the sourcing they depend on.
+// Together they answer what the model is, why the economics can work, and why
+// the commercial architecture is broader than the publicly evidenced
+// competitor models. See the header of that file for what is BUILT and what is
+// PROPOSED; the distinction is load-bearing and is drawn on every slide.
 
-/** Small premium status tag. BUILT is the only solid fill; PROPOSED is an
- *  outline whose word carries the meaning, so colour is never the only signal. */
-const TAGS = {
-  BUILT: { fill: C.successDeep, color: 'DCFCE7' },
-  PROPOSED: { line: C.warningDeep, color: 'FBBF24' },
-}
-function tag(s, kind, x, y, w) {
-  const t = TAGS[kind]
-  pill(s, kind, { x, y, w, h: 0.32, fill: t.fill, line: t.line, color: t.color, size: 9, spc: 1.2 })
-  return x + w
-}
-
-// ── 10a · What the model is — one completed job, four revenue engines ───────
-
-function businessEngines(p) {
-  const s = dark(p)
-  footer(s, true)
-  eyebrow(s, 'Business model · 01', M.l, 0.6, C.onDarkFaint)
-  text(s, [
-    { text: 'One completed job.\n', options: { color: C.onDarkHead } },
-    { text: 'Four revenue engines.', options: { color: C.brandLight } },
-  ], { x: M.l, y: 0.9, w: 8.0, fontSize: 32, fontFace: F.reg, bold: true, charSpacing: -1.1, lineSpacing: 38 })
-
-  pill(s, 'PROPOSED PRICING ARCHITECTURE', {
-    x: 9.02, y: 0.62, w: 3.69, h: 0.34, line: C.warningDeep, color: 'FBBF24', size: 9, spc: 0.8,
-  })
-
-  // ── Centre — the real completed job, as the hub ──
-  const dcx = 6.667
-  const dh = 3.42
-  const dw = dh * DEV.aspect
-  const dy = 2.5
-  tag(s, 'BUILT', dcx - 1.72, dy - 0.44, 0.86)
-  text(s, '8% completed-job fee — live today', {
-    x: dcx - 0.78, y: dy - 0.42, w: 2.6, fontSize: 9, fontFace: F.med, color: C.onDarkBody,
-  })
-  const d = device(s, 'w-quote-money', { x: dcx - dw / 2, y: dy, h: dh })
-  text(s, 'REAL QUOTATION SCREEN', {
-    x: dcx - 1.9, y: d.bottom + 0.12, w: 3.8, fontSize: 9, fontFace: F.semi,
-    charSpacing: 1, color: C.onDarkFaint, align: 'center',
-  })
-
-  // Two side spines, joined to the device centre by a short stub — the job is
-  // the hub, the four engines branch off it. Lines stay horizontal / vertical.
-  const cy = dy + dh / 2
-  const lsx = d.x - 0.44
-  const rsx = d.right + 0.44
-  const BR = '2E3D55'
-  vrule(s, { x: lsx, y: 2.86, h: 2.66, color: BR })
-  vrule(s, { x: rsx, y: 2.86, h: 2.66, color: BR })
-  rule(s, { x: lsx, y: cy, w: d.x - lsx, color: BR })
-  rule(s, { x: d.right, y: cy, w: rsx - d.right, color: BR })
-  dot(s, { x: lsx, y: cy, d: 0.11, color: C.brandLight })
-  dot(s, { x: rsx, y: cy, d: 0.11, color: C.brandLight })
-
-  const NODES = [
-    {
-      x: M.l, y: 2.1, n: '01', name: 'Completed jobs', kind: 'PRIMARY ENGINE',
-      big: 'FREE 10%     ·     PRO 8%',
-      line: 'TrustCraft earns when the work succeeds. The fee is taken inside the quotation builder, before the price is sent.',
-    },
-    {
-      x: M.l, y: 4.26, n: '02', name: 'TrustCraft Pro', kind: 'RECURRING ENGINE',
-      big: 'OPTIONAL  ·  UP TO LKR 1,490 / MONTH',
-      line: 'Free: “start earning.”  Pro: “grow your business.”  8% fee, ad-free workspace, Demand Radar, AI Quote Copilot, Supply Club.',
-    },
-    {
-      x: 8.35, y: 2.1, n: '03', name: 'Supply network', kind: 'B2B ENGINE',
-      big: 'SPONSORED PLACEMENT  +  COMMERCE',
-      line: 'A job creates material demand. The professional gets value, the supplier gets a high-intent buyer, TrustCraft earns on the placement.',
-    },
-    {
-      x: 8.35, y: 4.26, n: '04', name: 'TrustCraft for Business', kind: 'B2B RECURRING ENGINE',
-      big: 'B2B MAINTENANCE CONTRACTS',
-      line: 'Hotels, property managers, apartments, offices, restaurants, SMEs. Recurring platform revenue, and recurring demand that feeds every other engine.',
-    },
-  ]
-
-  NODES.forEach(N => {
-    const left = N.x < dcx
-    const spineX = left ? lsx : rsx
-    const endX = left ? 5.0 : 8.24
-    const anchorY = N.y + 0.6
-    vrule(s, { x: spineX, y: Math.min(cy, anchorY), h: Math.abs(anchorY - cy), color: BR })
-    rule(s, { x: Math.min(spineX, endX), y: anchorY, w: Math.abs(spineX - endX), color: BR })
-    dot(s, { x: endX, y: anchorY, d: 0.09, color: C.brandLight })
-
-    const w = left ? endX - 0.26 - N.x : M.r - N.x
-    const a = text(s, N.n, { x: N.x, y: N.y, w: 0.6, fontSize: 11, fontFace: F.semi, color: C.brandLight, charSpacing: 0.5 })
-    text(s, N.name, { x: N.x + 0.42, y: N.y - 0.03, w: w - 0.42, fontSize: 16.5, fontFace: F.semi, color: C.onDarkHead })
-    const b = text(s, N.kind, { x: N.x, y: a + 0.02, w, ...T.eyebrow, color: C.onDarkFaint })
-    const c = text(s, N.big, { x: N.x, y: b + 0.05, w, fontSize: 12, fontFace: F.semi, color: C.brandLight })
-    text(s, N.line, { x: N.x, y: c + 0.06, w, fontSize: 9.5, fontFace: F.reg, lineSpacing: 13, color: C.onDarkBody })
-  })
-
-  text(s, 'We don’t depend on taking more from one job.    We create more value around every job.', {
-    x: M.l, y: 6.62, w: 12.1, fontSize: 15, fontFace: F.semi, color: C.onDarkLead,
-  })
-
-  s.addNotes(
-    'BUSINESS MODEL · 01 — ~0:40\n' +
-    'Start at the centre: one completed job, on the real quotation screen. The 8% completed-job fee is the one revenue mechanism already built.\n' +
-    'Then the four engines that branch off it. 01 Completed jobs — free 10%, Pro 8%; TrustCraft earns only when the work succeeds. 02 TrustCraft Pro — an OPTIONAL subscription, activity-adjusted and capped at LKR 1,490, recurring. 03 Supply network — a job creates material demand; TrustCraft earns on clearly-labelled sponsored placement and negotiated commerce, never a competitor to trust. 04 TrustCraft for Business — enterprise maintenance contracts: recurring revenue AND recurring demand.\n' +
-    'The 10 / 8 split is a proposed pricing architecture, flagged as such. Land the line: we don’t depend on taking more from one job — we create more value around every job.')
-  return s
-}
-
-// ── 10b · Why the economics can work — professional side, platform side ─────
-
-
-
-// ── 10c · Why the architecture is differentiated and more resilient ─────────
-
+// ── Chapter 11 · Scale ───────────────────────────────────────────────────────
 const HORIZONS = [
   ['Now', 'Core home services,\nColombo',
    'Plumbers · Electricians · AC Repair · Cleaners · Carpenters · Painters · Appliance Repair — the categories already in the build.', 0.12],

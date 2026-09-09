@@ -96,7 +96,7 @@ for (let i = 0; i < transitions.length; i++) {
 
   // CT_Slide order is cSld, clrMapOvr, transition, timing — appending just
   // before </p:sld> keeps that order because PptxGenJS emits no timing block.
-  const timing = !STATIC && [17, 18].includes(i + 1) ? businessTiming(xml) : ''
+  const timing = !STATIC && [16, 17, 18].includes(i + 1) ? businessTiming(xml) : ''
   patched.set(name, xml.replace('</p:sld>', (kind === 'morph' ? MORPH : FADE) + timing + '</p:sld>'))
   applied++
 }

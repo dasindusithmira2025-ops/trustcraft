@@ -221,7 +221,7 @@ editable and readable at the back of a hall.
 | 19 | 11 Scale | dark | 0:40 |
 | 20–22 | 12 Closing → wordmark → handoff | dark | 0:43 |
 
-Total spoken target: **9:48**, inside a 10:00 limit.
+Total spoken target: **9:43**, inside a 10:00 limit.
 
 **Chapter 10** is three slides, all on the dark surface, fade between them, and
 answers three questions in order: *what* the model is (16 — one completed job,

@@ -21,21 +21,13 @@ are still open.
 
 ---
 
-## ⚠ One item is still open
+## Open items: none
 
-**The team name is a placeholder.** The repository contains no team name, so
-slides 1, 2 and 22 currently read `TEAM NAME — SET TEAM_NAME BEFORE THE FINAL`.
-
-This is deliberately impossible to miss: `validate.mjs` treats it as a **hard
-failure** and exits non-zero while it is present. Fix with one command:
-
-```bash
-TEAM_NAME="Your Team Name" node presentation/generate.mjs
-TEAM_NAME="Your Team Name" node presentation/generate.mjs --static
-```
-
-Verified: with a real name supplied, `validate.mjs` reports `structure OK`.
-Nothing else in either deck is unresolved.
+**The team name is resolved.** Slides 1, 2 and 22 read **Team TrustCraft**
+(`slides.mjs` → `TEAM`, overridable with `TEAM_NAME=...`). The old
+`TEAM NAME — SET TEAM_NAME BEFORE THE FINAL` placeholder is gone from both
+decks; `validate.mjs` treats any leftover placeholder as a hard failure and
+reports `structure OK` on the Grand Final and the static backup.
 
 ---
 
@@ -193,12 +185,12 @@ on-slide in every case. This is intentional bleed.
 | 14 | Market evidence | light | **76.1%** | — | ✅ |
 | 15 | Competitive position | light | Positioning map | — | ✅ |
 | 16 | Business model · Core | dark | Membership (LAUNCH MODEL) + 8% fee (BUILT) | Quote builder | ✅ |
-| 17 | Business model · B2B commerce | dark | The second marketplace a job creates (NEXT) | Quote builder | ✅ |
-| 18 | Business model · Expansion | dark | Payments / enterprise / business tooling; revenue architecture | — | ✅ |
+| 17 | Business model · Economics | dark | Professional economics vs illustrative platform economics | — | ✅ |
+| 18 | Business model · Architecture | dark | Public evidence map + four structural advantages | — | ✅ |
 | 19 | Scale | dark | Four horizons | — | ✅ |
 | 20 | Closing | dark | "shouldn't be another problem" | Confirmation, ghosted | ✅ |
 | 21 | Wordmark | dark | Describe it. Find them. Trust the choice. | — | ✅ |
-| 22 | Handoff | dark | "Let us show you how it works." | — | ⚠ team name |
+| 22 | Handoff | dark | "Let us show you how it works." | — | ✅ |
 
 Product UI appears on **14 of 22 slides**, roughly half the deck's visual
 weight — the target set in the design system.
@@ -261,12 +253,11 @@ tells the presenter to keep going.
 
 ## Timing
 
-Script total **9:32** against a 10:00 limit — 28 seconds of margin. The
-business-model chapter grew from 0:45 to 1:49 for the three-slide rebuild; the
-other eleven chapters were tightened (and three `[CUT IF BEHIND]` passages made
-permanent) to hold the total. Three mid-run checkpoints (3:27, 5:40, 8:09) let
-the presenter detect drift early; the note in the script says the business
-chapter is the one place not to overrun.
+Script total **9:43** against a 10:00 limit — 17 seconds of margin. The
+business-model chapter is 2:00 across slides 16–18 (0:38 / 0:44 / 0:38). Three
+mid-run checkpoints (3:27, 5:40, 8:20) let the presenter detect drift early;
+the note in the script says the business chapter is the one place not to
+overrun, and each of its three slides carries its own `[CUT IF BEHIND]`.
 
 Demo script total **4:35** against 5:00, with step 8 marked droppable.
 

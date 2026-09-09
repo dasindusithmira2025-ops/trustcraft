@@ -1,7 +1,7 @@
 # TrustCraft — DHACK Grand Final Speaker Script
 
 **Deck:** `output/TrustCraft_DHACK_Grand_Final.pptx` · 22 slides · 12 chapters
-**Target spoken time: 9:32** (limit 10:00, so ~28 s of margin)
+**Target spoken time: 9:43** (limit 10:00, so ~17 s of margin)
 **Pace assumption:** ~145 words per minute. Slower than you think you talk.
 
 Timings below are for the **spoken** part only. The 5-minute prototype demo and
@@ -216,93 +216,125 @@ follow while you say something slightly different.
 
 ---
 
-## 10 · Business model — 2:05 (slides 16–18) · running 8:25
+## 10 · Business model — 2:00 (slides 16–18) · running 8:20
 
-### Slide 16 · One job, four engines — ~0:40
+### Slide 16 · One completed job, four revenue engines — ~0:38
 
 **[STAGE] Start at the centre of the slide — the real quotation screen.**
 
-> One completed job. Four revenue engines around it.
+Click 1 reveals engine 01; click 2 engine 02; click 3 engine 03; click 4
+engine 04; click 5 the takeaway.
+
+> One completed job. Four revenue engines around it. The commission is the
+> core; the network creates the upside.
 >
-> **One — completed jobs.** A proposed 10% commission on the free plan, 8% on
-> Pro. The 8% completed-job fee is already built — the quotation tool shows the
-> professional their payout before they send the price: 4,300 in, 344 fee,
-> 3,956 to them. TrustCraft earns when the work succeeds.
+> Start at the centre. That is the real quotation screen, and the 8% fee logic
+> inside it is what the prototype demonstrates today — 4,300 in, 344 fee, 3,956
+> to the professional. Everything around it is a **proposed commercial model**,
+> and every one of the four is tagged that way. I want that separation on the
+> record: built logic is not final pricing.
 >
-> **Two — TrustCraft Pro.** An *optional* subscription, proposed at up to
-> LKR 1,490 a month. That's recurring revenue. Free is "start earning"; Pro is
-> "grow your business" — a lower fee, an ad-free workspace, Demand Radar, an AI
-> quote copilot, the Supply Club.
+> **One — the completed-job commission.** Proposed: Free pays 10%, Pro pays 8%.
+> We earn when the work succeeds, and the fee is applied inside the quotation
+> builder before the price reaches the customer.
 >
-> **Three — the supply network.** A job creates material demand. TrustCraft
-> connects the professional to supply partners and earns on clearly-labelled
-> sponsored placement and negotiated commerce.
+> **Two — TrustCraft Pro.** *Optional*, never required. Up to LKR 1,490 a
+> month, and activity-adjusted below that. Free is "start earning"; Pro is
+> "grow your business" — 8% instead of 10%, an ad-free workspace, Demand Radar,
+> an AI quote copilot, the Supply Club.
 >
-> **Four — TrustCraft for Business.** Enterprise maintenance contracts for
-> hotels, property managers, offices, restaurants and SMEs — recurring revenue
-> *and* recurring demand that feeds every other engine.
+> **Three — the supply network.** A job creates material demand. Free
+> professionals see clearly-labelled sponsored supplier placements; Pro gets an
+> ad-free dashboard and an intentional Supply Club. We earn when purchases
+> happen. No supplier deals are signed — this is next.
 >
-> We don't depend on taking more from one job. We create more value around
-> every job.
-
-### Slide 17 · Why the economics work — ~0:45
-
-**[CLICK] — slide 17. Left side, then right.**
-
-**Redesigned deck:** once on this slide, click 1 reveals the savings bars and
-annual cash advantage; click 2 reveals GMV and platform revenue; click 3 reveals
-the shared-upside takeaway. The next click advances to slide 18.
-
-> On the professional's side: the gap between the 10% free rate and the 8% Pro
-> rate is exactly two percent, and the proposed Pro subscription is two percent
-> of job value until it caps at LKR 1,490. So a Pro is never worse off — and
-> above roughly LKR 74,500 of monthly job value, Pro creates real cash savings.
-> At 100k, 200k, 300k a month, a Pro keeps 510, 2,510, 4,510 rupees more —
-> about LKR 54,000 a year, before any supplier savings.
+> **Four — TrustCraft for Business.** Hotels, property managers, apartments,
+> offices, restaurants, SMEs. Recurring B2B revenue *and* recurring demand back
+> into jobs. This is scale, and it is proposed.
 >
-> On the platform side — and this is an **illustrative** scale scenario, not a
-> forecast — a thousand professionals, seven hundred free and three hundred
-> Pro, is about LKR 50 million a month in job value and roughly LKR 5 million a
-> month in core platform revenue: commissions plus Pro subscriptions. Only the
-> 447-thousand subscription piece is recurring MRR.
+> Customers never pay a subscription, and search stays free. We don't depend on
+> taking more from one job — we create more value around every job.
+
+### Slide 17 · Why the economics can work — ~0:44
+
+**[CLICK] — slide 17.** Eight clicks: professional economics + the 100K tier,
+then 200K, then 300K, then the annualised figure; then the scale scenario and
+GMV, then platform revenue, then the run rate, then the upside and takeaway.
+
+> When professionals earn more, TrustCraft earns more. One model, two take
+> rates, aligned growth.
 >
-> The point: the marketplace can work before the expansion engines contribute
-> anything.
-
-### Slide 18 · Why the architecture is differentiated — ~0:40
-
-**[CLICK] — slide 18.**
-
-**Redesigned deck:** click 1 connects the four engines around the completed job;
-click 2 reveals the competitor evidence map; click 3 reveals the network
-takeaway. Use the detailed competitor discussion below as backup. In the map,
-`P` means proposed; `—` means evidence was not found or disclosed, not absence.
-
-> Most platforms monetise one relationship. Here is what's publicly known about
-> the others: TaskForce takes a completed-job service fee, rate not public. Blu
-> is subscription-led. Grab Me runs a zero-commission model. Servixy doesn't
-> disclose. Kaikili publishes an 11.25-to-15% commission — a useful benchmark.
-> Where we found nothing public, we wrote "not publicly found" — that's not
-> proof they don't do it privately.
+> **Left, the professional.** Free is a flat 10%. Pro is 8% plus an
+> activity-adjusted subscription capped at LKR 1,490. Because the gap between
+> 10 and 8 is exactly the 2% the subscription charges until it caps, Pro is
+> never the more expensive choice — and the moment it caps, the advantage keeps
+> widening.
 >
-> TrustCraft is the only row with revenue in every column, and two of those
-> engines are already real. Four reasons that matters: it's diversified, it's
-> aligned — the biggest engine only fires when the work succeeds — it's
-> provider-oriented, and it's demand-compounding. Angi shows multi-engine
-> home-service monetisation works at global scale.
+> At LKR 100,000 of monthly work, Free pays 10,000 and Pro pays 9,490 — the Pro
+> keeps 510 more. At 200,000, 2,510 more. At 300,000, 4,510 more — **LKR 54,120
+> a year**, before hardware savings and before valuing the Pro tools at all.
+> That is the widening bar. Free helps you earn; Pro helps you grow.
 >
-> Lower dependence on any one revenue stream. More ways for every successful
-> job to compound.
+> **Right — and say this label out loud: an ILLUSTRATIVE SCALE SCENARIO.** Not
+> current revenue, not a forecast. A thousand active professionals, 700 Free
+> and 300 Pro. 700 Free at 40,000 a month is 28.0 million; 300 Pro at 75,000 is
+> 22.5 million — about **LKR 50.5 million of monthly job value**.
+>
+> Free commission, 10% of 28 million: 2.80 million. Pro commission, 8% of 22.5
+> million: 1.80 million. Pro subscription MRR, 300 × 1,490: 447 thousand. That
+> is about **LKR 5.05 million of core monthly platform revenue** — and only the
+> 447 thousand is recurring subscription MRR; I want that precise. Annualised,
+> roughly **LKR 60.6 million as a run rate**.
+>
+> None of that includes supplier advertising, supplier commerce or TrustCraft
+> for Business. The marketplace can work before the expansion engines even
+> contribute.
 
-**[CUT IF BEHIND]** on slide 18, drop the competitor read — just say "TrustCraft
-is the only architecture here with revenue in every column, and two of those
-engines are already real."
+**[CUT IF BEHIND]** give the 300,000 tier only, then jump straight to 5.05
+million and the upside line.
 
-*(~430 words across the chapter — trim slide 18 first if over time)*
+### Slide 18 · Why the architecture is broader — ~0:38
+
+**[CLICK] — slide 18.** Click 1 reveals the competitor rows; click 2 the
+TrustCraft rail; click 3 the four structural advantages; click 4 the takeaway.
+Say "proposed" out loud — do not let it read as revenue.
+
+> Most models monetise one relationship. TrustCraft monetises the network —
+> and this is assessed only on what each platform publicly discloses.
+>
+> TaskForce charges a fee on completed jobs; the rate is not public. Blu is
+> subscription-led publicly, and its transaction economics are not clear.
+> Findit.lk publishes "no commission, ever — you keep 100% of every job" and
+> charges LKR 990 a month instead. Servixy does not disclose provider
+> monetisation. Kaikili publishes 11.25 to 15% with no subscription, and it is
+> here only as an international benchmark.
+>
+> Where we found nothing public we wrote **"not publicly found"**. That is not
+> proof a competitor does not do it privately, and I am not going to claim it is.
+>
+> Then the TrustCraft rail. The 8% quotation logic is **built**. The 10/8
+> split, Pro, the supply network and TrustCraft for Business are **proposed**,
+> and they are labelled that way on the slide.
+>
+> Four structural advantages. **Diversified** — four engines, not one.
+> **Aligned** — the primary revenue only grows when successful work grows.
+> **Provider-oriented** — Pro actually lowers the transaction cost for the
+> professionals doing the most work. **Demand-compounding** — enterprise demand
+> compounds into every other engine.
+>
+> To be clear about what we are *not* claiming: not that we out-earn anyone,
+> and not that we have market share. The claim is architectural. Lower
+> dependence on any one revenue stream, and more ways for every successful job
+> to compound.
+
+**[CUT IF BEHIND]** on slide 18, skip the competitor-by-competitor read — go
+straight to the rail and the four advantages.
+
+*(~640 words across the chapter — trim slide 18 first if over time)*
 
 ---
 
-## 11 · Scale — 0:40 (slide 19) · running 8:49
+## 11 · Scale — 0:40 (slide 19) · running 9:00
 
 > Start narrow. Seven categories, Colombo — those are in the build today.
 >
@@ -320,7 +352,7 @@ engines are already real."
 
 ---
 
-## 12 · Closing — 0:43 (slides 20–22) · running 9:32
+## 12 · Closing — 0:43 (slides 20–22) · running 9:43
 
 **[STAGE] Come back to centre. Slow right down.**
 
@@ -355,20 +387,20 @@ engines are already real."
 | 07 | UX by design | 13 | 0:39 | 4:59 |
 | 08 | Market evidence | 14 | 0:41 | 5:40 |
 | 09 | Competitive position | 15 | 0:40 | 6:20 |
-| 10 | Business model | 16–18 | 2:05 | 8:25 |
-| 11 | Scale | 19 | 0:40 | 9:05 |
-| 12 | Closing | 20–22 | 0:43 | **9:48** |
+| 10 | Business model | 16–18 | 2:00 | 8:20 |
+| 11 | Scale | 19 | 0:40 | 9:00 |
+| 12 | Closing | 20–22 | 0:43 | **9:43** |
 
-**Margin: 12 seconds.** If you are past 5:00 at the end of chapter 07, start
+**Margin: 17 seconds.** If you are past 5:00 at the end of chapter 07, start
 taking the `[CUT IF BEHIND]` lines. The business chapter is the one place you
 must not overrun — if you are behind entering slide 16, take the slide-18
-`[CUT IF BEHIND]` immediately (saves ~15 s), and on slide 17 give the platform
+`[CUT IF BEHIND]` immediately (saves ~15 s), and on slide 17 give the 300,000 tier
 scenario as one sentence.
 
 **Checkpoints to say in your head:**
 - End of chapter 05 (the clips): should be **3:27**.
 - End of chapter 08 (76.1%): should be **5:40**.
-- End of chapter 10 (business model): should be **8:25**.
+- End of chapter 10 (business model): should be **8:20**.
 - If any is more than 15 s late, cut.
 
 ---
@@ -379,7 +411,8 @@ If a judge asks you to summarise the model in the Q&A:
 
 > One completed job, four aligned revenue engines. Customers are free.
 > Completed jobs carry a commission — a proposed 10% free, 8% on the optional
-> TrustCraft Pro subscription; the 8% fee is built. Pro is recurring revenue,
+> TrustCraft Pro subscription. The 8% quotation fee logic is what the prototype
+> demonstrates today; the 10/8 split is proposed. Pro is recurring revenue,
 > priced so it never makes a low-volume professional worse off. Around the job,
 > a supply network earns sponsored-placement and negotiated commerce revenue,
 > and TrustCraft for Business adds enterprise maintenance contracts — recurring

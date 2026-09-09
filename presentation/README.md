@@ -11,52 +11,78 @@ and type token is lifted from `src/index.css`.
 
 ---
 
-## ⚠ Before the final: set the team name
+## Team name
 
-The repository contains no team name, so the deck currently ships a flagged
-placeholder on slides 1, 2 and 22.
+The deck ships as **Team TrustCraft** on slides 1, 2 and 22 (`slides.mjs` →
+`TEAM`). Override for a different registration without editing the source:
 
 ```bash
 TEAM_NAME="Your Team Name" node presentation/generate.mjs
 TEAM_NAME="Your Team Name" node presentation/generate.mjs --static
 ```
 
-`validate.mjs` fails loudly while the placeholder is still present, so you
-cannot ship it by accident.
+`validate.mjs` treats any leftover placeholder as a hard failure, so an unset
+team name cannot ship by accident.
 
 ---
 
 ## Deliverables
 
-### Slides 17–18: interactive redesign
+### Slides 17–18: the business-model pair
 
-Open `output/TrustCraft_DHACK_Interactive.pptx` for the updated 22-slide deck.
-The original Grand Final file was locked during this edit, so the redesign is
-saved separately. Slide 17 now uses a savings chart and a large revenue flow;
-slide 18 uses a connected four-engine network and a compact evidence map.
-Each has three native click-to-reveal builds. Pricing assumptions and supporting
-detail remain in the slide footnotes and speaker notes.
+These two now ship **in the Grand Final deck itself** (`output/TrustCraft_DHACK_Grand_Final.pptx`),
+with the PDF and the 22 slide previews re-exported from PowerPoint.
 
-- `output/TrustCraft_DHACK_Interactive_Static.pptx`: matching static backup.
+Both slides are drawn with the deck's own primitives — same display and body
+type scale, same hairline rules, same `BUILT` / `PROPOSED` tags and brand
+footer as slides 16 and 19. Those primitives now live in **`kit.mjs`**, shared
+by `slides.mjs` and `business-slides.mjs`, so the pair cannot drift from the
+rest of the deck again.
+
+**Slide 16 — one completed job, four revenue engines.** The real quotation
+screen is the hub, carrying a green `CURRENT BUILD` tag: the 8% quotation fee
+logic is the one mechanism with code behind it (`src/worker/data.ts` →
+`PLATFORM_FEE`). All four engines branching off it carry amber PROPOSED tags,
+so *built logic* can never be mistaken for *final pricing*. **5 clicks.**
+
+**Slide 17 — why the economics can work.** Two halves. Left is professional
+economics: Free 10% against Pro 8% + a subscription capped at LKR 1,490, at
+LKR 100K / 200K / 300K of monthly work, with a bar whose length is what the Pro
+retains — 510, 2,510, 4,510 — so the widening gap *is* the chart. Right is an
+explicitly-labelled illustrative scale scenario: 50.5M GMV, ≈5.05M core monthly
+platform revenue, of which only the 447K subscription line is MRR, and ≈60.6M
+as an annualised run rate. **8 clicks.**
+
+**Slide 18 — the public evidence map.** Five competitors against four
+monetisation columns, then the TrustCraft rail on its own band, then four
+structural advantages. Cells are either something the platform publishes about
+itself or an explicit "not publicly found" — never a red cross, because absence
+of public evidence is not evidence of absence. The claim is *architectural*
+(more ways to earn), never comparative performance. **4 clicks.**
+
+Shapes inside a beat stagger 60 ms apart so a block assembles rather than
+blinking on. No macros and no add-ins — stock PresentationML written by
+`business-motion.mjs`.
+
+`output/TrustCraft_DHACK_Interactive.pptx` and `..._Interactive_Static.pptx` are
+byte-identical copies of the two main decks, refreshed on every rebuild. They
+exist only for the round when the Grand Final file is locked in PowerPoint.
+
 - `output/interactive-preview/index.html`: self-contained browser companion for
-  slides 17 and 18, with reveal, replay, previous, and show-all controls.
-- `output/interactive-preview/slide-17.png` and `slide-18.png`: browser-rendered
-  previews. These are not PowerPoint exports; the original PDF is unchanged.
+  slides 16–18, with reveal, replay, previous, and show-all controls.
 
 Rebuild from this directory:
 
 ```bash
-node generate.mjs --out TrustCraft_DHACK_Interactive.pptx
-node generate.mjs --static --out TrustCraft_DHACK_Interactive_Static.pptx
-node capture/business-preview.mjs
+node generate.mjs                 # Grand Final
+node generate.mjs --static        # backup
+node capture/business-preview.mjs # browser companion
+node audit.mjs && node validate.mjs
+powershell -ExecutionPolicy Bypass -File capture/preview.ps1   # PNGs + PDF
 ```
 
-The layouts live in `business-slides.mjs`; `business-motion.mjs` writes native
-PresentationML animations during generation. The text audit passes and browser
-controls were exercised. Native playback could not be checked: the local
-PowerPoint session rejected both opening files and creating a blank deck with
-HRESULT `0x80048240`. The existing team-name placeholders on slides 1, 2, and 22
-still need the real team name.
+`audit.mjs` reports no overflow; `validate.mjs` still fails only on the
+team-name placeholders on slides 1, 2 and 22.
 
 | File | What it is |
 |---|---|
@@ -64,7 +90,7 @@ still need the real team name.
 | `output/TrustCraft_DHACK_Static_Backup.pptx` | Same deck, no animated media, fade-only transitions. Opens anywhere |
 | `output/TrustCraft_DHACK_Grand_Final.pdf` | PDF export, produced by PowerPoint itself |
 | `previews/slide-01..22.png` | What PowerPoint actually renders, one PNG per slide |
-| `TrustCraft_DHACK_Speaker_Script.md` | Word-for-word script, 9:32, with click and cut cues |
+| `TrustCraft_DHACK_Speaker_Script.md` | Word-for-word script, 9:43, with click and cut cues |
 | `TrustCraft_5_Minute_Demo_Script.md` | The prototype run, 4:35, one scenario |
 | `TrustCraft_Judge_QA.md` | 30+ hard questions, answers tagged BUILT / DESIGNED / PLANNED / UNKNOWN |
 | `TrustCraft_Presentation_Sources.md` | Every external number, with its source |
@@ -162,8 +188,10 @@ label below the legibility floor, and ~130 text overflows.
 The `.pptx` is a genuine, fully editable PowerPoint file — real text boxes, real
 shapes, no flattened slide images. You can open it and change anything.
 
-If you want a change to survive a rebuild, make it in `slides.mjs` instead.
-Design tokens live in `theme.mjs`; the reasoning behind them is in
+If you want a change to survive a rebuild, make it in `slides.mjs` instead
+(slides 16, 17 and 18 live in `business-slides.mjs`). Design tokens live in
+`theme.mjs` and the shared drawing primitives — text, rules, pills, tags, the
+brand footer — in `kit.mjs`; the reasoning behind them is in
 `Presentation_Design_System.md`.
 
 ---

@@ -188,10 +188,17 @@ not a forecast** on the slide:
 
 ### Slide 18 — competitor monetisation, publicly sourced
 
-All competitor pages checked/re-verified **9 September 2026**. TaskForce, Blu and
-Grab Me are client-rendered single-page apps that could not be machine-read this
-session; their entries rest on the primary-source review below plus the earlier
-(8 Sep 2026) review. Kaikili, Angi and Servixy were re-verified from live pages.
+All competitor entries re-verified **10 September 2026**. TaskForce and Blu are
+client-rendered single-page apps that could not be machine-read this session;
+their entries rest on the earlier primary-source reviews (8–9 Sep 2026) and are
+stated on the slide only at the weakest defensible strength. Kaikili, Servixy
+and Findit.lk were re-verified from live pages on 10 Sep 2026.
+
+**Removed 10 Sep 2026 — "Grab Me".** The earlier table carried a zero-commission
+"Grab Me" row with no URL. On re-verification the domain did not resolve and no
+Sri Lankan home-services platform of that name could be found, so the row was
+removed rather than shown unsourced. **Findit.lk** replaces it: it makes the
+same zero-commission claim, publishes it in writing, and is verifiable.
 
 Where no public evidence of a revenue mechanism was found, the matrix says
 **"Not publicly found"** / **"Not publicly disclosed"** — this is explicitly
@@ -199,12 +206,12 @@ Where no public evidence of a revenue mechanism was found, the matrix says
 
 | Platform | What the deck shows | Source |
 |---|---|---|
-| **TaskForce** (taskforce.lk) | "Service fee per job" — completed-job fee, rate not publicly disclosed | TaskForce.lk Terms & Conditions (taskforce.lk/terms-and-conditions): a service fee applies on each successfully completed job and is shown before bid/offer confirmation; no fixed public percentage stated |
-| **Blu** (blu.lk) | "Commission on paid bookings" + "Subscription plans" — subscription-led public model, transaction economics unclear | Blu provider FAQ / plan pages (blu.lk): plan-based subscription fee, "no commission per job" messaging for providers; Blu legal terms separately reference deduction of an applicable platform commission for eligible online-paid bookings |
-| **Grab Me** | "Zero commission" | Grab Me public site: "zero commission", "free to use", "no hidden fees", direct payment between customer and provider |
-| **Servixy** (servixy.lk) | "Not publicly disclosed" across all columns | servixy.lk: free job posting, verified providers, quotes, profiles, ratings/reviews demonstrated; provider-side monetisation not disclosed on the pages found |
-| **Kaikili** (kaikili.com) | "11.25–15% commission", "No subscription" | Kaikili FAQ (kaikili.com/faq): platform commission 11.25%–15%, deducted from customer payment, charged only on a hire; no monthly/yearly subscription. Used only as a published international transaction benchmark |
-| **TrustCraft** | 10% Free · 8% Pro; optional Pro ≤ LKR 1,490/mo; supply ads + commerce (proposed); TrustCraft for Business (proposed) | This repository + the PROPOSED table above |
+| **TaskForce** (taskforce.lk) | "Charges · rate not public" | TaskForce.lk Terms & Conditions (taskforce.lk/terms-and-conditions): a service fee applies on each successfully completed job; no fixed public percentage stated. Terms page is a client-rendered SPA — not machine-readable 10 Sep 2026, so the slide claims only the weakest form: a fee exists, the rate is not public |
+| **Blu** (blu.lk) | "Transaction terms unclear" + "Subscription-led" | Blu provider FAQ / plan pages (blu.lk): plan-based subscription fee with "no commission per job" provider messaging; Blu legal terms separately reference an applicable platform commission on eligible online-paid bookings. The two do not reconcile publicly, so the completed-job cell says *unclear* rather than asserting either |
+| **Findit.lk** (hub.findit.lk/pros) | "No commission (stated)" + "LKR 990 / month" | Verified live 10 Sep 2026: "No commission, ever. You keep 100% of every job." Provider pricing on the same page: Registration Rs. 1,000 one-time; Pro Membership Rs. 990/month (unlimited leads, priority placement). A genuinely subscription-led, zero-commission Sri Lankan model |
+| **Servixy** (servixy.lk) | "not publicly disclosed" across all columns | Re-verified live 10 Sep 2026: "Posting a job and receiving quotes is completely free for customers." Provider-side monetisation is not disclosed anywhere on the pages found |
+| **Kaikili** (kaikili.com) | "11.25 – 15%", "No subscription (stated)" | Kaikili FAQ (kaikili.com/faq), re-verified 10 Sep 2026: platform commission 11.25%–15% (15% of service value standard), deducted from customer payment, charged only on a hire; no monthly or yearly subscription. Used only as a published international transaction benchmark |
+| **TrustCraft** | 10% Free · 8% Pro (10/8 proposed, 8% quotation logic built); optional Pro ≤ LKR 1,490/mo (proposed); supply ads + commerce (next/proposed); TrustCraft for Business (scale/proposed) | This repository (`src/worker/data.ts` → `PLATFORM_FEE = 0.08`) + the PROPOSED model above |
 
 ### Global validation callout (slide 18)
 
