@@ -1,0 +1,26 @@
+{
+  "name": "trustcraft-film",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TrustCraft 30-second cinematic launch film (Remotion)",
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "remotion render TrustCraftLaunchFilm out/trustcraft-launch-film.mp4 --concurrency=4",
+    "still": "remotion still TrustCraftLaunchFilm",
+    "score": "node scripts/score.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.523",
+    "@remotion/player": "^4.0.523",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "remotion": "^4.0.523"
+  },
+  "devDependencies": {
+    "@types/node": "^26.5.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "typescript": "^7.0.2"
+  }
+}
