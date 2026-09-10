@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "format": "oxfmt",
     "start": "node server/index.mjs",
-    "test": "node server/test.mjs && node src/flow.test.ts && node src/worker/data.test.ts"
+    "test": "node server/test.mjs && node src/case.test.ts && node src/flow.test.ts && node src/worker/data.test.ts",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "react": "^19.0.0",

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Avatar, Btn, Icon, Stars } from '../components/UI'
 import { AppBar, Bars, Dock, Meter, Money, Section, Switch, Tag } from './ui'
 import { useW } from './store'
+import { useCase } from '../caseStore'
 import {
   DOCUMENTS, EARNINGS, SERVICES, STATS, THREADS, TRUST_FACTORS, WORKER, money,
   type WNav,
@@ -153,8 +154,9 @@ const LEDGER_TONE: Record<string, string> = {
 }
 
 export function EarningsScreen() {
-  const { totals, w } = useW()
-  const pending = w.quoteSent ? totals.payout : EARNINGS.pending
+  const { totals } = useW()
+  const c = useCase()
+  const pending = c.quotation ? totals.payout : EARNINGS.pending
 
   return (
     <div className="min-h-full flex flex-col bg-ink-50">

@@ -1,7 +1,17 @@
 import { useEffect, useState } from 'react'
 import type { NavProps } from '../types'
-import { useDemo, PROS, CATEGORIES, proById, money } from '../store'
+import { useDemo, CATEGORIES, usePro, usePros, money } from '../store'
+import { matchPros, categoryLabel } from '../case'
+import { useCase, assignPro, toast, updateDraft } from '../caseStore'
 import { Avatar, Btn, Card, Chip, Header, Icon, Label, Stars, Tone, TrustPill } from '../components/UI'
+
+/** Shown wherever a professional is listed, because urgent matching depends
+ *  on it and the customer needs to see why someone is or is not offered. */
+function AvailabilityPill({ on }: { on: boolean }) {
+  return on
+    ? <Tone tone="success">Available now</Tone>
+    : <Tone tone="muted">Booked</Tone>
+}
 
 const CAT_ICON: Record<string, string> = {
   plumbers: 'wrench', electricians: 'sparkle', cleaners: 'star', carpenters: 'cases',
@@ -16,15 +26,9 @@ export function FindProsScreen({ navigate }: NavProps) {
   const [cat, setCat] = useState<string | null>(null)
   const [sort, setSort] = useState<'rating' | 'distance' | 'fee'>('rating')
 
-  const list = PROS
+  const list = usePros()
     .filter(p => (q ? (p.name + p.trade).toLowerCase().includes(q.toLowerCase()) : true))
-    .filter(p => {
-      if (!cat) return true
-      if (cat === 'plumbers') return p.trade.includes('Plumber')
-      if (cat === 'electricians') return p.trade.includes('Electrician')
-      if (cat === 'ac') return p.trade.includes('AC')
-      return false
-    })
+    .filter(p => (cat ? p.category === cat : true))
     .slice()
     .sort((a, b) =>
       sort === 'rating' ? b.rating - a.rating : sort === 'distance' ? a.distanceKm - b.distanceKm : a.inspectionFee - b.inspectionFee,
@@ -92,7 +96,10 @@ export function FindProsScreen({ navigate }: NavProps) {
                     <span className="text-[11.5px] text-ink-400">{p.distanceKm} km</span>
                     <TrustPill score={p.trust} />
                   </div>
-                  <p className="text-[11.5px] text-ink-500 mt-1">Inspection · LKR {money(p.inspectionFee)}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <AvailabilityPill on={p.availableNow} />
+                    <span className="text-[11.5px] text-ink-500">Inspection · LKR {money(p.inspectionFee)}</span>
+                  </div>
                 </div>
                 <Btn size="sm" full={false} variant="secondary" onClick={() => open(p.id)}>View</Btn>
               </Card>
@@ -116,13 +123,18 @@ const REVIEWS = [
 ]
 
 export function ProProfileScreen({ navigate, goBack }: NavProps) {
-  const { d, set, advance } = useDemo()
-  const p = proById(d.viewProId)
+  const { d, set } = useDemo()
+  const c = useCase()
+  const p = usePro(d.viewProId)
   const [saved, setSaved] = useState(false)
 
+  // Urgent requests can only go to someone who is free right now.
+  const blocked = c.serviceType === 'urgent' && !p.availableNow && c.status !== 'draft'
+
   const select = () => {
-    set({ proId: p.id, chatWith: p.id })
-    advance(2)
+    set({ chatWith: p.id })
+    assignPro(p.id)
+    toast(`${p.name.split(' ')[0]} assigned to your request`)
     navigate('confirmation')
   }
 
@@ -156,6 +168,7 @@ export function ProProfileScreen({ navigate, goBack }: NavProps) {
               <Stars value={p.rating} />
               <span className="text-[12px] text-ink-500">{p.rating} ({p.reviews} reviews)</span>
             </div>
+            <div className="mt-1.5"><AvailabilityPill on={p.availableNow} /></div>
           </div>
           <TrustPill score={p.trust} size="lg" />
         </div>
@@ -207,9 +220,16 @@ export function ProProfileScreen({ navigate, goBack }: NavProps) {
         </div>
       </div>
 
-      <div className="sticky bottom-0 bg-white border-t border-ink-100 p-4 flex gap-2.5">
-        <Btn variant="secondary" icon="chat" onClick={() => { set({ chatWith: p.id }); navigate('chat') }}>Message</Btn>
-        <Btn onClick={select}>Select</Btn>
+      <div className="sticky bottom-0 bg-white border-t border-ink-100 p-4">
+        {blocked && (
+          <p className="text-[11.5px] text-warning-700 mb-2 text-center">
+            {p.name.split(' ')[0]} is not available right now, so they cannot take an urgent request.
+          </p>
+        )}
+        <div className="flex gap-2.5">
+          <Btn variant="secondary" icon="chat" onClick={() => { set({ chatWith: p.id }); navigate('chat') }}>Message</Btn>
+          <Btn onClick={select} disabled={blocked}>Select</Btn>
+        </div>
       </div>
     </div>
   )
@@ -217,15 +237,18 @@ export function ProProfileScreen({ navigate, goBack }: NavProps) {
 
 // ── 08. AI analysis ──────────────────────────────────────────────────────────
 
-const STEPS = [
-  'Understanding your problem',
-  'Processing submitted information',
-  'Understanding service category',
-  'Finding suitable professionals',
-]
-
 export function AIAnalysisScreen({ navigate }: NavProps) {
+  const c = useCase()
   const [done, setDone] = useState(0)
+
+  const STEPS = [
+    'Understanding your problem',
+    `Processing ${c.attachments.length} attachment${c.attachments.length === 1 ? '' : 's'}`,
+    `Matching to ${categoryLabel(c.category)}`,
+    c.serviceType === 'urgent'
+      ? 'Finding professionals available right now'
+      : 'Finding professionals for your time slot',
+  ]
 
   useEffect(() => {
     const timers = STEPS.map((_, i) => setTimeout(() => setDone(i + 1), 700 * (i + 1)))
@@ -275,22 +298,65 @@ export function AIAnalysisScreen({ navigate }: NavProps) {
 // ── 09. AI recommended professionals ─────────────────────────────────────────
 
 export function RecommendationsScreen({ navigate, goBack }: NavProps) {
-  const { set, advance } = useDemo()
-  const list = PROS.filter(p => p.match > 0)
+  const { set } = useDemo()
+  const c = useCase()
+  const urgent = c.serviceType === 'urgent'
+
+  // The only matching rule in the product: right trade, and — for urgent work
+  // — free right now. Nothing else is offered to the customer.
+  const pros = usePros()
+  const list = matchPros(pros, c).slice().sort((a, b) => b.match - a.match)
+  const held = urgent ? pros.filter(p => p.category === c.category && !p.availableNow).length : 0
 
   const select = (id: string) => {
-    set({ proId: id, chatWith: id })
-    advance(2)
+    set({ chatWith: id })
+    assignPro(id)
+    toast('Professional assigned')
     navigate('confirmation')
   }
 
   return (
     <div className="bg-white min-h-full pb-6">
-      <Header title="Recommended Professionals" onBack={goBack} />
+      <Header title={urgent ? 'Available Right Now' : 'Recommended Professionals'} onBack={goBack} />
       <div className="px-5 pt-4">
+        {urgent && (
+          <div className="flex items-start gap-2.5 rounded-xl bg-warning-100/70 p-3.5 mb-4">
+            <span className="text-warning-700 mt-0.5"><Icon name="bolt" size={16} fill /></span>
+            <p className="text-[12.5px] text-warning-700 leading-relaxed">
+              Urgent request — only {categoryLabel(c.category).toLowerCase()} professionals who are available
+              right now are shown{held > 0 ? `. ${held} other${held === 1 ? ' is' : 's are'} booked` : ''}.
+            </p>
+          </div>
+        )}
         <p className="text-[13px] text-ink-500 leading-relaxed mb-4">
           Based on your request, these professionals may be a good match. You choose who takes the job.
         </p>
+
+        {list.length === 0 && (
+          <div className="text-center py-10 px-4 fade-in">
+            <span className="text-ink-300 inline-flex"><Icon name="search" size={34} /></span>
+            <p className="text-[15px] font-semibold text-ink-900 mt-3">
+              No suitable professionals are available right now.
+            </p>
+            <p className="text-[13px] text-ink-500 leading-relaxed mt-1.5">
+              {urgent
+                ? 'Every matching professional near you is on another job. Keep searching, or book a time instead.'
+                : 'No one covers this category in your area yet.'}
+            </p>
+            <div className="space-y-2.5 mt-5">
+              <Btn onClick={() => navigate('ai-analysis')}>Keep Searching</Btn>
+              {urgent && (
+                <Btn
+                  variant="secondary"
+                  onClick={() => { updateDraft({ serviceType: 'scheduled' }); navigate('problem') }}
+                >
+                  Schedule for Later Instead
+                </Btn>
+              )}
+              <Btn variant="ghost" onClick={() => navigate('find-pros')}>Browse All Professionals</Btn>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-3">
           {list.map((p, i) => (
@@ -312,6 +378,7 @@ export function RecommendationsScreen({ navigate, goBack }: NavProps) {
                     </span>
                     <span className="text-[11.5px] text-ink-400">{p.distanceKm} km</span>
                     <span className="text-[11.5px] text-ink-400">{p.years} yrs</span>
+                    <AvailabilityPill on={p.availableNow} />
                   </div>
                   <p className="text-[11.5px] text-ink-500 mt-0.5">Inspection Fee · LKR {money(p.inspectionFee)}</p>
                 </div>
@@ -344,8 +411,9 @@ export function RecommendationsScreen({ navigate, goBack }: NavProps) {
 // ── 10. Request confirmation ─────────────────────────────────────────────────
 
 export function ConfirmationScreen({ navigate, goBack }: NavProps) {
-  const { d, advance, set } = useDemo()
-  const p = proById(d.proId)
+  const { set } = useDemo()
+  const c = useCase()
+  const p = usePro(c.proId)
 
   return (
     <div className="bg-white min-h-full flex flex-col">
@@ -379,18 +447,29 @@ export function ConfirmationScreen({ navigate, goBack }: NavProps) {
         <div>
           <Label className="mb-1.5">Your Request</Label>
           <div className="rounded-xl border border-ink-200 bg-ink-50 p-3.5">
-            <p className="text-[14px] text-ink-800 leading-relaxed">{d.problem}</p>
+            <p className="text-[14px] font-semibold text-ink-900">{c.title}</p>
+            <p className="text-[13.5px] text-ink-700 leading-relaxed mt-1">{c.description}</p>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label className="mb-1">Location</Label>
-            <p className="text-[13px] text-ink-700">{d.location}</p>
+            <p className="text-[13px] text-ink-700">{c.location}</p>
           </div>
           <div>
             <Label className="mb-1">Submitted on</Label>
-            <p className="text-[13px] text-ink-700">{d.submittedAt}</p>
+            <p className="text-[13px] text-ink-700">{c.createdAt}</p>
+          </div>
+          <div>
+            <Label className="mb-1">Service Type</Label>
+            <p className="text-[13px] text-ink-700">
+              {c.serviceType === 'urgent' ? '⚡ Urgent — as soon as possible' : `${c.scheduledDate} · ${c.scheduledTime}`}
+            </p>
+          </div>
+          <div>
+            <Label className="mb-1">Attachments</Label>
+            <p className="text-[13px] text-ink-700">{c.attachments.length} item{c.attachments.length === 1 ? '' : 's'}</p>
           </div>
         </div>
 
@@ -404,7 +483,7 @@ export function ConfirmationScreen({ navigate, goBack }: NavProps) {
 
       <div className="sticky bottom-0 bg-white border-t border-ink-100 p-4 flex gap-2.5">
         <Btn variant="secondary" icon="chat" onClick={() => { set({ chatWith: p.id }); navigate('chat') }}>Message</Btn>
-        <Btn onClick={() => { advance(2); navigate('status') }}>Continue</Btn>
+        <Btn onClick={() => navigate('status')}>Continue</Btn>
       </div>
     </div>
   )

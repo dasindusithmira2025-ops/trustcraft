@@ -1,11 +1,11 @@
 import { useCallback, useState, type ReactElement } from 'react'
 import { Frame } from '../components/UI'
 import { WorkerNav } from './ui'
-import { WorkerProvider, useW } from './store'
+import { useW } from './store'
 import type { WNav, WScreen } from './data'
 import {
   HomeScreen, OpportunitiesScreen, RequestScreen, AcceptedScreen,
-  JobScreen, QuoteScreen, QuoteSentScreen, CompleteScreen, DoneScreen,
+  JobScreen, ProblemAnalysisScreen, QuoteScreen, QuoteSentScreen, CompleteScreen, DoneScreen,
 } from './jobs'
 import {
   MessagesScreen, ChatScreen, EarningsScreen, AnalyseScreen,
@@ -18,6 +18,7 @@ const SCREENS: Record<WScreen, (p: WNav) => ReactElement> = {
   request: RequestScreen,
   accepted: AcceptedScreen,
   job: JobScreen,
+  analysis: ProblemAnalysisScreen,
   quote: QuoteScreen,
   'quote-sent': QuoteSentScreen,
   complete: CompleteScreen,
@@ -72,10 +73,8 @@ function Shell() {
   )
 }
 
+// The provider lives at the app root (src/main.tsx) so the professional's
+// draft state survives flipping the role switch mid-demo.
 export default function WorkerApp() {
-  return (
-    <WorkerProvider>
-      <Shell />
-    </WorkerProvider>
-  )
+  return <Shell />
 }

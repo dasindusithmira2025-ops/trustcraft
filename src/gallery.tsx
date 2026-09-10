@@ -12,6 +12,7 @@ import {
   Timeline, Tone, TrustPill,
 } from './components/UI'
 import { DemoProvider, useDemo, type Demo } from './store'
+import { seedGalleryCase } from './caseStore'
 import { deriveStages } from './flow'
 import {
   HomeScreen as CHome, NotificationsScreen, LocationScreen, CameraScreen, ProblemScreen,
@@ -233,7 +234,12 @@ interface Entry { name: string; purpose: string; parts: string; node: ReactNode 
 
 const tag = (prefix: string, i: number) => `${prefix}-${String(i + 1).padStart(2, '0')}`
 
-const ACTIVE_CASE: Partial<Demo> = { proId: 'kasun', step: 3, inspectionPaid: false }
+/* Screens read one shared service case (src/caseStore.ts). The print document
+   renders every screen at once, so the case is seeded once, here, to the
+   mid-flight state most screens are interesting at. */
+seedGalleryCase()
+
+const ACTIVE_CASE: Partial<Demo> = {}
 
 const CUSTOMER: Entry[] = [
   {
@@ -294,7 +300,7 @@ const CUSTOMER: Entry[] = [
     name: 'Request Confirmation',
     purpose: 'Confirms the pairing of request and professional and hands over to case tracking.',
     parts: 'Success mark · selected pro card · request recap · location · timestamp · Message / Continue dock',
-    node: <CustomerShot screen="confirmation" Comp={ConfirmationScreen} seed={{ proId: 'kasun', step: 1 }} />,
+    node: <CustomerShot screen="confirmation" Comp={ConfirmationScreen} />,
   },
   {
     name: 'Problem Status',
@@ -306,43 +312,43 @@ const CUSTOMER: Entry[] = [
     name: 'Problem Assessment',
     purpose: 'The professional’s written diagnosis, with the inspection fee and three ways to respond.',
     parts: 'Pro row · assessment body · inspection fee card · Agree / Skip / Message actions',
-    node: <CustomerShot screen="assessment" Comp={AssessmentScreen} seed={{ proId: 'kasun', step: 2 }} />,
+    node: <CustomerShot screen="assessment" Comp={AssessmentScreen} />,
   },
   {
     name: 'Set Inspection',
     purpose: 'Date and time selection for the on-site visit, priced up front.',
     parts: 'Fee strip · date carousel · time-slot grid · service address · Continue to Payment',
-    node: <CustomerShot screen="set-inspection" Comp={SetInspectionScreen} seed={{ proId: 'kasun', step: 3 }} />,
+    node: <CustomerShot screen="set-inspection" Comp={SetInspectionScreen} />,
   },
   {
     name: 'Inspection Payment',
     purpose: 'Pays the one-time visit charge that unlocks the inspection.',
     parts: 'Amount summary · line items · payment-method selector · total bar · Pay Now with processing state',
-    node: <CustomerShot screen="inspection-payment" Comp={InspectionPaymentScreen} seed={{ proId: 'kasun', step: 3 }} />,
+    node: <CustomerShot screen="inspection-payment" Comp={InspectionPaymentScreen} />,
   },
   {
     name: 'Quotation',
     purpose: 'Itemised price the customer agrees to — every line is visible before any money moves.',
     parts: 'From card · problem recap · item table (item, qty, price, total) · duration, warranty, validity · Agree dock',
-    node: <CustomerShot screen="quotation" Comp={QuotationScreen} seed={{ proId: 'kasun', step: 4, inspectionPaid: true }} />,
+    node: <CustomerShot screen="quotation" Comp={QuotationScreen} />,
   },
   {
     name: 'Quotation Payment',
     purpose: 'Releases the service payment; funds are held until the work is confirmed complete.',
     parts: 'Service payment header · quotation total · fee breakdown · method selector · Pay Now',
-    node: <CustomerShot screen="quotation-payment" Comp={QuotationPaymentScreen} seed={{ proId: 'kasun', step: 5, inspectionPaid: true }} />,
+    node: <CustomerShot screen="quotation-payment" Comp={QuotationPaymentScreen} />,
   },
   {
     name: 'Work Completed',
     purpose: 'The evidence the professional submitted: what was done, before/after photos, notes.',
     parts: 'Pro row · work-done summary · before / after photo pair · notes · completed-on · Confirm Completion',
-    node: <CustomerShot screen="work-completed" Comp={WorkCompletedScreen} seed={{ proId: 'kasun', step: 7, quotationPaid: true }} />,
+    node: <CustomerShot screen="work-completed" Comp={WorkCompletedScreen} />,
   },
   {
     name: 'Review & Rate',
     purpose: 'Feeds the trust score. Star rating plus optional written feedback closes the case.',
     parts: 'Pro summary · 5-star input · comment field · submit action',
-    node: <CustomerShot screen="review" Comp={ReviewScreen} seed={{ proId: 'kasun', step: 8, rating: 5, quotationPaid: true }} />,
+    node: <CustomerShot screen="review" Comp={ReviewScreen} seed={{ rating: 5 }} />,
   },
   {
     name: 'Service Record',
@@ -351,7 +357,7 @@ const CUSTOMER: Entry[] = [
     node: (
       <CustomerShot
         screen="record" Comp={RecordScreen}
-        seed={{ proId: 'kasun', step: 9, rating: 5, quotationPaid: true, inspectionPaid: true, review: 'Fast, clean work and a fair price.' }}
+        seed={{ rating: 5, review: 'Fast, clean work and a fair price.' }}
       />
     ),
   },
@@ -422,7 +428,7 @@ const WORKER_SCREENS: Entry[] = [
     name: 'Opportunity Accepted',
     purpose: 'Commitment confirmation that sets expectations for the next three steps.',
     parts: 'Success mark · job title · What happens next list · Continue to Job Progress',
-    node: <WorkerShot screen="accepted" Comp={AcceptedScreen} seed={{ step: 0 }} />,
+    node: <WorkerShot screen="accepted" Comp={AcceptedScreen} />,
   },
   {
     name: 'Job Progress',
@@ -446,7 +452,7 @@ const WORKER_SCREENS: Entry[] = [
     name: 'Quotation Sent',
     purpose: 'Hand-off state while the ball is in the customer’s court, with the quote restated in full.',
     parts: 'Success mark · quoted total · line recap · escrow explainer · Back to Job Progress',
-    node: <WorkerShot screen="quote-sent" Comp={QuoteSentScreen} seed={{ quoteSent: true, step: 4 }} />,
+    node: <WorkerShot screen="quote-sent" Comp={QuoteSentScreen} />,
   },
   {
     name: 'Work Completed',
@@ -455,7 +461,7 @@ const WORKER_SCREENS: Entry[] = [
     node: (
       <WorkerShot
         screen="complete" Comp={CompleteScreen}
-        seed={{ step: 5, evidence: 3, checks: ['clean', 'walk'], summary: 'Replaced the corroded angle valve and both washers under the sink, resealed the connector and tested for 20 minutes with no drip.' }}
+        seed={{ evidence: 3, checks: ['clean', 'walk'], summary: 'Replaced the corroded angle valve and both washers under the sink, resealed the connector and tested for 20 minutes with no drip.' }}
       />
     ),
   },
@@ -463,7 +469,7 @@ const WORKER_SCREENS: Entry[] = [
     name: 'Job Summary',
     purpose: 'Close-out: payout releasing to balance and the trust evidence this job adds to the profile.',
     parts: 'Done headline · payout panel · evidence note · Back to Home · View earnings',
-    node: <WorkerShot screen="done" Comp={DoneScreen} seed={{ step: 7 }} />,
+    node: <WorkerShot screen="done" Comp={DoneScreen} />,
   },
   {
     name: 'Messages (tab)',

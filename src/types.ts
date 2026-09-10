@@ -18,6 +18,10 @@ export interface Pro {
   id: string
   name: string
   trade: string
+  /** Shared-case category id (see src/case.ts CATEGORIES). */
+  category: string
+  /** Drives urgent matching — urgent jobs only reach professionals who are on. */
+  availableNow: boolean
   trust: number
   rating: number
   reviews: number

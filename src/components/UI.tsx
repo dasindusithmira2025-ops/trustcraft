@@ -1,5 +1,8 @@
-import type { ReactNode } from 'react'
+import { createContext, useContext, useRef, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import type { ScreenId, StageState } from '../types'
+import type { Attachment } from '../case'
+import { useToast } from '../caseStore'
 
 // ── Icons ────────────────────────────────────────────────────────────────────
 // One 24×24 stroke set, drawn in currentColor, so every screen stays visually
@@ -50,6 +53,10 @@ const PATHS: Record<string, string> = {
   send: 'M4 12l16-8-6 16-2.5-6L4 12z',
   info: 'M12 4a8 8 0 100 16 8 8 0 000-16zM12 11v5M12 8h.01',
   chart: 'M4 20V10M10 20V4M16 20v-7M22 20H2',
+  bolt: 'M13 2L4.5 13.5H11l-1 8.5L19.5 10H13l0-8z',
+  stop: 'M6.5 6.5h11v11h-11z',
+  trash: 'M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13',
+  pause: 'M9 5v14M15 5v14',
   warn: 'M12 4l9 16H3l9-16zM12 10v4M12 17h.01',
 }
 
@@ -157,8 +164,8 @@ export function Btn({
       onClick={onClick}
       disabled={disabled}
       className={`${BTN[variant]} ${full ? 'w-full' : ''} ${
-        size === 'sm' ? 'h-9 px-3.5 text-[13px] rounded-lg' : 'h-12 px-5 text-[15px] rounded-xl'
-      } font-semibold inline-flex items-center justify-center gap-2 transition-colors disabled:opacity-40 disabled:pointer-events-none ${className}`}
+        size === 'sm' ? 'min-h-9 py-1.5 px-3.5 text-[13px] rounded-lg' : 'min-h-12 py-2 px-5 text-[15px] rounded-xl'
+      } font-semibold leading-tight text-center inline-flex items-center justify-center gap-2 transition-colors disabled:opacity-40 disabled:pointer-events-none ${className}`}
     >
       {icon && <Icon name={icon} size={size === 'sm' ? 15 : 17} />}
       {children}
@@ -392,6 +399,207 @@ export function BottomNav({ active, navigate }: { active: string; navigate: (to:
   )
 }
 
+// ── Overlays ─────────────────────────────────────────────────────────────────
+// Sheets and viewers must cover the whole device screen, so they are portalled
+// into a layer the Frame owns rather than positioned against whichever card
+// happens to contain the button that opened them.
+
+const OverlayHost = createContext<HTMLElement | null>(null)
+
+export function Overlay({ children }: { children: ReactNode }) {
+  const host = useContext(OverlayHost)
+  return host ? createPortal(children, host) : <>{children}</>
+}
+
+// ── Attachments ──────────────────────────────────────────────────────────────
+// One renderer for both apps, so a photo the customer attaches is the very
+// same object the professional opens. Real captures carry a blob URL and play
+// for real; seeded demo media falls back to the gradient placeholder.
+
+function Placeholder({ h, hue = 205, icon }: { h: number; hue?: number; icon: string }) {
+  return (
+    <div
+      className="w-full flex items-center justify-center text-white/75"
+      style={{ height: h, background: `linear-gradient(150deg, hsl(${hue} 25% 62%), hsl(${hue} 18% 38%))` }}
+    >
+      <Icon name={icon} size={22} />
+    </div>
+  )
+}
+
+export function AttachmentTile({
+  a, h = 74, onRemove, onOpen,
+}: { a: Attachment; h?: number; onRemove?: () => void; onOpen?: () => void }) {
+  const media = a.url
+    ? a.kind === 'video'
+      ? <video src={a.url} muted playsInline preload="metadata" className="w-full object-cover" style={{ height: h }} />
+      : <img src={a.url} alt={a.name} className="w-full object-cover" style={{ height: h }} />
+    : <Placeholder h={h} hue={a.hue} icon={a.kind === 'video' ? 'video' : 'image'} />
+
+  return (
+    <div className="relative rounded-xl overflow-hidden bg-ink-100" style={{ height: h }}>
+      <button type="button" onClick={onOpen} className="block w-full h-full text-left" aria-label={`Open ${a.name}`}>
+        {media}
+        {a.kind === 'video' && (
+          <span className="absolute inset-0 flex items-center justify-center text-white drop-shadow">
+            <Icon name="play" size={22} fill />
+          </span>
+        )}
+        <span className="absolute bottom-1 left-1.5 right-1.5 text-[9.5px] font-semibold text-white/95 truncate drop-shadow">
+          {a.name}
+        </span>
+      </button>
+      {onRemove && (
+        <button
+          type="button"
+          onClick={onRemove}
+          aria-label={`Remove ${a.name}`}
+          className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/55 text-white flex items-center justify-center hover:bg-danger-600"
+        >
+          <Icon name="x" size={12} />
+        </button>
+      )}
+    </div>
+  )
+}
+
+/** Full-size viewer, kept inside the device frame. */
+export function MediaViewer({ a, onClose }: { a: Attachment; onClose: () => void }) {
+  return (
+    <Overlay>
+    <div className="absolute inset-0 z-40 bg-black/85 flex flex-col fade-in" role="dialog" aria-label={a.name}>
+      <div className="flex items-center gap-2 px-3 h-14 text-white flex-shrink-0">
+        <button onClick={onClose} aria-label="Close" className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/15">
+          <Icon name="x" size={20} />
+        </button>
+        <p className="text-[14px] font-semibold truncate">{a.name}</p>
+      </div>
+      <div className="flex-1 min-h-0 flex items-center justify-center px-4 pb-8">
+        {!a.url ? (
+          <div className="text-center text-white/70 px-8">
+            <Icon name={a.kind === 'video' ? 'video' : 'image'} size={40} />
+            <p className="text-[13px] mt-3 leading-relaxed">
+              Demo attachment — this prototype ships no image files, so the capture is represented rather than stored.
+            </p>
+          </div>
+        ) : a.kind === 'video' ? (
+          <video src={a.url} controls autoPlay playsInline className="max-w-full max-h-full rounded-xl" />
+        ) : (
+          <img src={a.url} alt={a.name} className="max-w-full max-h-full rounded-xl object-contain" />
+        )}
+      </div>
+    </div>
+    </Overlay>
+  )
+}
+
+/** Voice note row: plays the real recording when there is one. */
+export function VoiceNote({ a, onRemove }: { a: Attachment; onRemove?: () => void }) {
+  const ref = useRef<HTMLAudioElement>(null)
+  const [playing, setPlaying] = useState(false)
+
+  const toggle = () => {
+    const el = ref.current
+    if (!el) { setPlaying(p => !p); return }
+    if (el.paused) { el.play().catch(() => setPlaying(false)); setPlaying(true) }
+    else { el.pause(); setPlaying(false) }
+  }
+
+  return (
+    <div className="flex items-center gap-3 rounded-xl border border-ink-200 bg-white px-3 py-2.5">
+      <button
+        type="button"
+        onClick={toggle}
+        aria-label={playing ? 'Pause voice note' : 'Play voice note'}
+        className="w-9 h-9 rounded-full bg-brand-50 text-brand-700 flex items-center justify-center flex-shrink-0 hover:bg-brand-100"
+      >
+        <Icon name={playing ? 'pause' : 'play'} size={15} fill={!playing} />
+      </button>
+      <div className="flex-1 min-w-0 flex items-end gap-[3px] h-6">
+        {Array.from({ length: 20 }).map((_, i) => (
+          <span
+            key={i}
+            className={`flex-1 rounded-full ${playing ? 'wave-bar bg-brand-500' : 'bg-brand-300'}`}
+            style={{ height: `${25 + ((i * 37) % 70)}%`, animationDelay: `${(i % 6) * 0.1}s` }}
+          />
+        ))}
+      </div>
+      <span className="text-[11px] text-ink-500 font-medium tabular-nums flex-shrink-0">{a.duration ?? '0:10'}</span>
+      {onRemove && (
+        <button
+          type="button"
+          onClick={onRemove}
+          aria-label="Remove voice note"
+          className="w-7 h-7 rounded-full text-ink-400 hover:text-danger-600 hover:bg-danger-100 flex items-center justify-center flex-shrink-0"
+        >
+          <Icon name="trash" size={14} />
+        </button>
+      )}
+      {a.url && <audio ref={ref} src={a.url} onEnded={() => setPlaying(false)} className="hidden" />}
+    </div>
+  )
+}
+
+/** Photos and videos in a grid with a tap-to-open viewer; voice notes below. */
+export function AttachmentGrid({
+  items, onRemove, cols = 3, h = 74, empty, extra,
+}: {
+  items: Attachment[]
+  onRemove?: (id: string) => void
+  cols?: number
+  h?: number
+  empty?: ReactNode
+  /** Rendered as the last cell of the grid (e.g. an "add" tile). */
+  extra?: ReactNode
+}) {
+  const [open, setOpen] = useState<Attachment | null>(null)
+  const visual = items.filter(a => a.kind !== 'voice')
+  const voice = items.filter(a => a.kind === 'voice')
+
+  if (items.length === 0 && !extra) return <>{empty}</>
+
+  return (
+    <>
+      {(visual.length > 0 || extra) && (
+        <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+          {visual.map(a => (
+            <AttachmentTile
+              key={a.id}
+              a={a}
+              h={h}
+              onOpen={() => setOpen(a)}
+              onRemove={onRemove ? () => onRemove(a.id) : undefined}
+            />
+          ))}
+          {extra}
+        </div>
+      )}
+      {voice.length > 0 && (
+        <div className={visual.length > 0 || extra ? 'mt-2 space-y-2' : 'space-y-2'}>
+          {voice.map(a => (
+            <VoiceNote key={a.id} a={a} onRemove={onRemove ? () => onRemove(a.id) : undefined} />
+          ))}
+        </div>
+      )}
+      {open && <MediaViewer a={open} onClose={() => setOpen(null)} />}
+    </>
+  )
+}
+
+// ── Toast ────────────────────────────────────────────────────────────────────
+
+export function Toaster() {
+  const msg = useToast()
+  if (!msg) return null
+  return (
+    <div className="absolute left-0 right-0 bottom-24 z-[60] flex justify-center px-6 pointer-events-none">
+      <div className="fade-up bg-ink-900/95 text-white text-[13px] font-medium rounded-full px-4 py-2.5 shadow-lg max-w-full text-center">
+        {msg}
+      </div>
+    </div>
+  )
+}
+
 // ── Device frame ─────────────────────────────────────────────────────────────
 // Shared by both apps so the customer and professional shells stay identical
 // hardware and only their contents differ.
@@ -407,6 +615,8 @@ export function Frame({
   screenKey: number
   children: ReactNode
 }) {
+  const [host, setHost] = useState<HTMLDivElement | null>(null)
+
   return (
     <div
       className="relative bg-white overflow-hidden flex-shrink-0"
@@ -417,6 +627,8 @@ export function Frame({
         boxShadow: '0 40px 90px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.10)',
       }}
     >
+      {/* Overlay layer: sheets and media viewers portal in here so they always
+          cover the screen, whatever card opened them. */}
       <div className="absolute top-0 left-0 right-0 h-11 z-30" style={{ background: topBg }} />
       <div
         className="absolute z-50 bg-black"
@@ -429,10 +641,18 @@ export function Frame({
         className="absolute left-0 right-0 screen-slide"
         style={{ top: 44, bottom: nav ? 80 : 0, background: bg }}
       >
-        <div className="h-full overflow-y-auto no-scroll">{children}</div>
+        <div className="h-full overflow-y-auto no-scroll">
+          <OverlayHost.Provider value={host}>{children}</OverlayHost.Provider>
+        </div>
       </div>
 
       {nav && <div className="absolute bottom-0 left-0 right-0 z-30">{nav}</div>}
+      <Toaster />
+      <div
+        ref={setHost}
+        className="absolute left-0 right-0 bottom-0 z-40 pointer-events-none [&>*]:pointer-events-auto"
+        style={{ top: 44 }}
+      />
     </div>
   )
 }

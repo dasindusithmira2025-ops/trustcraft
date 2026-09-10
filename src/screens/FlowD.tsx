@@ -1,21 +1,23 @@
 import { useEffect, useRef, useState } from 'react'
 import type { NavProps } from '../types'
 import { useDemo, PAST_CASES, THREADS, PROFILE, proById, money } from '../store'
+import { useCase } from '../caseStore'
 import { Avatar, Btn, Card, Chip, Header, Icon, Label, Row, Tone } from '../components/UI'
 
 // ── 21. Cases (tab) ──────────────────────────────────────────────────────────
 
 export function CasesScreen({ navigate }: NavProps) {
-  const { d, stages } = useDemo()
+  const { stages, step } = useDemo()
+  const c = useCase()
   const [filter, setFilter] = useState<'all' | 'active' | 'done'>('all')
   const active = stages.find(s => s.status === 'current')
-  const live = d.proId && d.step < 9
+  const live = step > 0 && c.status !== 'closed'
 
   const groups = [
     {
       when: 'Today',
       items: live
-        ? [{ id: 'c1', title: 'Kitchen Sink Leak', pro: proById(d.proId).name, state: active ? active.label : 'Completed', tone: 'brand' as const, to: 'status' as const }]
+        ? [{ id: 'c1', title: c.title, pro: c.proId ? proById(c.proId).name : 'Matching…', state: active ? active.label : 'Completed', tone: 'brand' as const, to: 'status' as const }]
         : [],
     },
     { when: 'Yesterday', items: PAST_CASES.slice(0, 1).map(c => ({ ...c, to: 'record' as const })) },
@@ -275,7 +277,7 @@ export function ProfileScreen({ navigate }: NavProps) {
 // ── 23b. Profile overview ────────────────────────────────────────────────────
 
 export function ProfileOverviewScreen({ navigate, goBack }: NavProps) {
-  const { d } = useDemo()
+  const c = useCase()
   const max = Math.max(...PROFILE.months.map(m => m.v))
   const [month, setMonth] = useState('August 2026')
 
@@ -324,7 +326,7 @@ export function ProfileOverviewScreen({ navigate, goBack }: NavProps) {
         <div>
           <Label className="mb-2">Recent Services</Label>
           <Card className="divide-y divide-ink-100 overflow-hidden">
-            {d.proId && <Row icon="wrench" label="Kitchen Sink Leak" value="Aug 24" onClick={() => navigate('record')} />}
+            {c.proId && <Row icon="wrench" label={c.title} value={c.createdAt} onClick={() => navigate('record')} />}
             {PAST_CASES.map(c => (
               <Row key={c.id} icon="cases" label={c.title} value={c.when} onClick={() => navigate('record')} />
             ))}

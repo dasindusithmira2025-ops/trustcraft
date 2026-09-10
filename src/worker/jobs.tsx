@@ -1,11 +1,17 @@
 import { useState } from 'react'
-import { Avatar, Btn, Icon } from '../components/UI'
+import { AttachmentGrid, Avatar, Btn, Icon, Label } from '../components/UI'
 import { AppBar, Bars, Dock, Meta, Meter, Money, Section, Shot, StepRail, Switch, Tag } from './ui'
-import { useW } from './store'
+import { ME, useW } from './store'
 import {
-  EARNINGS, LAST_STEP, OPPORTUNITIES, WORKER, money, oppById,
+  EARNINGS, LAST_STEP, OPPORTUNITIES, WORKER, caseToOpportunity, money, oppById,
   type Opportunity, type WNav,
 } from './data'
+import { categoryLabel, rank } from '../case'
+import {
+  useCase, assignPro, beginAnalysis, completeInspection, completeWork,
+  requestInspection, sendQuotation, skipInspection, submitAnalysis, toast,
+} from '../caseStore'
+import { adFor } from '../ads'
 
 // ── Shared pieces ────────────────────────────────────────────────────────────
 
@@ -29,9 +35,10 @@ function OppCard({ o, onOpen }: { o: Opportunity; onOpen: () => void }) {
       onClick={onOpen}
       className="w-full text-left bg-white border border-ink-200 rounded-2xl p-4 hover:border-brand-200 hover:shadow-[0_8px_24px_-16px_rgba(15,23,42,.5)] transition-all"
     >
-      <div className="flex items-center gap-2 mb-2">
+      <div className="flex items-center gap-2 mb-2 flex-wrap">
         <Tag hue={o.hue}>{o.trade}</Tag>
-        {o.urgent && <Tag hue={0} solid>URGENT</Tag>}
+        {o.urgent && <Tag hue={0} solid>⚡ URGENT</Tag>}
+        {o.live && <Tag hue={150} solid>NEW</Tag>}
         <span className="ml-auto text-[10.5px] font-medium text-ink-400">{o.posted}</span>
       </div>
 
@@ -47,12 +54,86 @@ function OppCard({ o, onOpen }: { o: Opportunity; onOpen: () => void }) {
   )
 }
 
+/**
+ * Everything the customer submitted, rendered from the shared case — the same
+ * object their app writes to. No separate copy exists on this side.
+ */
+function CustomerSubmission({ compact }: { compact?: boolean }) {
+  const c = useCase()
+  return (
+    <div className="space-y-5">
+      <section>
+        <Section title="In the customer's words" />
+        <p className="text-[14px] text-ink-800 leading-relaxed border-l-[3px] border-brand-200 pl-3.5">
+          {c.description}
+        </p>
+      </section>
+
+      <section>
+        <Section title={`Attachments · ${c.attachments.length}`} />
+        <AttachmentGrid
+          items={c.attachments}
+          h={86}
+          empty={<p className="text-[12.5px] text-ink-400">The customer sent no photos, video or voice.</p>}
+        />
+      </section>
+
+      {!compact && (
+        <section>
+          <div className="rounded-2xl bg-brand-50 border border-brand-100 p-4">
+            <div className="flex items-center gap-1.5 text-brand-700 mb-2">
+              <Icon name="sparkle" size={14} />
+              <p className="text-[11px] font-bold tracking-[0.1em] uppercase">TrustCraft read of the problem</p>
+            </div>
+            <p className="text-[13px] text-ink-800 leading-relaxed">
+              Categorised as {categoryLabel(c.category).toLowerCase()} from the customer's description and
+              {' '}{c.attachments.length} attachment{c.attachments.length === 1 ? '' : 's'}.
+              A suggestion only — your on-site judgement decides the job.
+            </p>
+          </div>
+        </section>
+      )}
+    </div>
+  )
+}
+
+/** Urgent / scheduled, stated identically on both sides of the transaction. */
+function WhenCard() {
+  const c = useCase()
+  const urgent = c.serviceType === 'urgent'
+  return (
+    <div className={`rounded-2xl border p-3.5 ${urgent ? 'border-danger-600/30 bg-danger-100/40' : 'border-ink-200'}`}>
+      <div className={urgent ? 'text-danger-600 mb-1.5' : 'text-ink-400 mb-1.5'}>
+        <Icon name={urgent ? 'bolt' : 'calendar'} size={16} fill={urgent} />
+      </div>
+      <p className="text-[11px] text-ink-500 font-medium">{urgent ? 'Service type' : 'Preferred window'}</p>
+      <p className="text-[13px] font-semibold text-ink-900 leading-snug mt-0.5">
+        {urgent ? 'Urgent — needs help immediately' : `${c.scheduledDate || 'Flexible'} · ${c.scheduledTime || 'Any time'}`}
+      </p>
+    </div>
+  )
+}
+
 // ── 1. Home ──────────────────────────────────────────────────────────────────
 
+/** The opportunities this professional may see right now. */
+export function useInbox() {
+  const { w, online } = useW()
+  const c = useCase()
+  const live = c.status === 'submitted' || (c.status === 'assigned' && c.proId === ME)
+  const list = OPPORTUNITIES.filter(o => !w.declined.includes(o.id) && !w.accepted.includes(o.id))
+  // Urgent work is only offered while the professional is marked available.
+  const offered = online ? list : list.filter(o => !o.urgent)
+  return live && (online || c.serviceType !== 'urgent')
+    ? [caseToOpportunity(c), ...offered]
+    : offered
+}
+
 export function HomeScreen({ go }: WNav) {
-  const { w, set, steps, action, unread } = useW()
+  const { w, set, job, step, steps, action, unread, onLiveCase, online, setOnline } = useW()
+  const c = useCase()
   const done = steps.filter(s => s.status === 'done').length
-  const open = OPPORTUNITIES.filter(o => !w.declined.includes(o.id) && o.id !== w.job.id)
+  const open = useInbox()
 
   return (
     <div className="min-h-full flex flex-col bg-ink-50">
@@ -68,14 +149,16 @@ export function HomeScreen({ go }: WNav) {
           </h1>
 
           <div className="mt-4 flex items-center gap-3 bg-white/8 ring-1 ring-white/12 rounded-2xl px-3.5 py-2.5">
-            <span className={`w-2 h-2 rounded-full ${w.online ? 'bg-success-600 soft-pulse' : 'bg-ink-400'}`} />
+            <span className={`w-2 h-2 rounded-full ${online ? 'bg-success-600 soft-pulse' : 'bg-ink-400'}`} />
             <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-semibold leading-tight">{w.online ? 'Accepting jobs' : 'Not accepting jobs'}</p>
+              <p className="text-[13px] font-semibold leading-tight">{online ? 'Available now' : 'Unavailable'}</p>
               <p className="text-[11px] text-white/50 leading-tight">
-                {w.online ? `${open.length} requests near ${WORKER.area.split(',')[0]}` : 'You are hidden from search'}
+                {online
+                  ? `${open.length} request${open.length === 1 ? '' : 's'} near ${WORKER.area.split(',')[0]}`
+                  : 'Hidden from search and from urgent requests'}
               </p>
             </div>
-            <Switch on={w.online} onChange={v => set({ online: v })} label="Availability" />
+            <Switch on={online} onChange={setOnline} label="Availability" />
           </div>
         </div>
       </div>
@@ -83,27 +166,32 @@ export function HomeScreen({ go }: WNav) {
       <div className="relative -mt-7 rounded-t-[28px] bg-ink-50 px-5 pt-6 pb-8 flex-1 space-y-7">
         {/* Active job */}
         <section className="fade-up">
-          <Section title="Active job" />
+          <Section title={onLiveCase ? 'Active job' : 'Last job'} />
           <div className="bg-white border border-ink-200 rounded-2xl overflow-hidden shadow-[0_10px_30px_-24px_rgba(15,23,42,.8)]">
             <div className="p-4">
               <div className="flex items-start gap-3">
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10.5px] font-bold tracking-[0.1em] text-ink-400">{w.job.id}</p>
-                  <p className="text-[17px] font-bold text-ink-900 tracking-[-0.02em] leading-snug mt-0.5">{w.job.title}</p>
+                  <p className="text-[10.5px] font-bold tracking-[0.1em] text-ink-400">{job.id}</p>
+                  <p className="text-[17px] font-bold text-ink-900 tracking-[-0.02em] leading-snug mt-0.5">{job.title}</p>
                 </div>
-                <Tag hue={w.job.hue}>{w.job.trade}</Tag>
+                <div className="flex flex-col items-end gap-1">
+                  <Tag hue={job.hue}>{job.trade}</Tag>
+                  {onLiveCase && c.serviceType === 'urgent' && <Tag hue={0} solid>⚡ URGENT</Tag>}
+                </div>
               </div>
 
-              <div className="mt-3.5"><JobStrip job={w.job} /></div>
+              <div className="mt-3.5"><JobStrip job={job} /></div>
 
               <div className="mt-4">
-                <div className="flex items-baseline justify-between mb-1.5">
-                  <p className="text-[12px] font-semibold text-ink-700">
-                    {w.step >= LAST_STEP ? 'Completed' : action.hint}
+                <div className="flex items-baseline justify-between gap-3 mb-1.5">
+                  <p className="text-[12px] font-semibold text-ink-700 min-w-0">
+                    {step >= LAST_STEP ? 'Completed' : action.hint}
                   </p>
-                  <p className="text-[11px] font-bold text-ink-400 tabular-nums">{Math.min(done + 1, LAST_STEP)}/{LAST_STEP}</p>
+                  <p className="text-[11px] font-bold text-ink-400 tabular-nums flex-shrink-0">
+                    {Math.min(done + 1, LAST_STEP)}/{LAST_STEP}
+                  </p>
                 </div>
-                <Meter value={(done / LAST_STEP) * 100} tone={w.step >= LAST_STEP ? 'success' : 'brand'} />
+                <Meter value={(done / LAST_STEP) * 100} tone={step >= LAST_STEP ? 'success' : 'brand'} />
               </div>
             </div>
 
@@ -123,6 +211,11 @@ export function HomeScreen({ go }: WNav) {
             {open.slice(0, 2).map(o => (
               <OppCard key={o.id} o={o} onOpen={() => { set({ viewOpp: o.id }); go('request') }} />
             ))}
+            {open.length === 0 && (
+              <p className="text-[12.5px] text-ink-400 py-6 text-center">
+                {online ? 'Nothing new right now.' : 'Turn availability on to receive requests.'}
+              </p>
+            )}
           </div>
         </section>
 
@@ -153,11 +246,11 @@ export function HomeScreen({ go }: WNav) {
 const FILTERS = ['All', 'Plumbing', 'Electrical', 'Nearby', 'Urgent']
 
 export function OpportunitiesScreen({ go, back }: WNav) {
-  const { w, set } = useW()
+  const { set, online } = useW()
+  const inbox = useInbox()
   const [f, setF] = useState('All')
 
-  const list = OPPORTUNITIES.filter(o => {
-    if (w.declined.includes(o.id)) return false
+  const list = inbox.filter(o => {
     if (f === 'Nearby') return o.km <= 4
     if (f === 'Urgent') return !!o.urgent
     if (f === 'All') return true
@@ -188,6 +281,11 @@ export function OpportunitiesScreen({ go, back }: WNav) {
         <p className="text-[11.5px] text-ink-400 font-medium">
           {list.length} request{list.length === 1 ? '' : 's'} matched to your trades and area
         </p>
+        {!online && (
+          <p className="text-[11.5px] text-warning-700 font-medium">
+            You are marked unavailable — urgent requests are not being shown.
+          </p>
+        )}
         {list.map((o, i) => (
           <div key={o.id} className={i < 4 ? `fade-up-${i}` : 'fade-up'}>
             <OppCard o={o} onOpen={() => { set({ viewOpp: o.id }); go('request') }} />
@@ -208,7 +306,26 @@ export function OpportunitiesScreen({ go, back }: WNav) {
 
 export function RequestScreen({ go, back }: WNav) {
   const { w, accept, decline } = useW()
-  const o = oppById(w.viewOpp)
+  const c = useCase()
+  const inbox = useInbox()
+  const o = oppById(w.viewOpp, inbox)
+  const isLive = !!o.live
+  const [busy, setBusy] = useState(false)
+
+  const take = () => {
+    if (busy) return
+    setBusy(true)
+    accept(o)
+    if (isLive) {
+      assignPro(ME)
+      toast('Request accepted')
+      go('accepted')
+    } else {
+      toast('Request accepted — added to your schedule')
+      back()
+    }
+    setBusy(false)
+  }
 
   return (
     <div className="min-h-full flex flex-col bg-white">
@@ -217,9 +334,9 @@ export function RequestScreen({ go, back }: WNav) {
       <div className="flex-1">
         {/* Hero */}
         <div className="px-5 pt-5 pb-5 border-b border-ink-100">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="text-[10.5px] font-bold tracking-[0.1em] text-brand-700 bg-brand-50 px-2 py-1 rounded-md">{o.id}</span>
-            {o.urgent && <Tag hue={0} solid>URGENT</Tag>}
+            {o.urgent && <Tag hue={0} solid>⚡ URGENT</Tag>}
             <span className="ml-auto text-[11px] text-ink-400 font-medium">{o.posted}</span>
           </div>
           <h1 className="text-[24px] font-bold text-ink-900 tracking-[-0.03em] leading-tight mt-2.5">{o.title}</h1>
@@ -227,6 +344,11 @@ export function RequestScreen({ go, back }: WNav) {
             <Tag hue={o.hue}>{o.trade}</Tag>
             <Meta icon="pin">{o.km} km from you</Meta>
           </div>
+          {o.urgent && (
+            <p className="text-[12px] text-danger-600 font-semibold mt-2">
+              Available-now request · the customer needs help immediately
+            </p>
+          )}
         </div>
 
         <div className="px-5 py-5 space-y-6">
@@ -246,38 +368,14 @@ export function RequestScreen({ go, back }: WNav) {
             </button>
           </div>
 
-          {/* Description */}
-          <section>
-            <Section title="In the customer's words" />
-            <p className="text-[14px] text-ink-800 leading-relaxed border-l-[3px] border-brand-200 pl-3.5">{o.summary}</p>
-          </section>
-
-          {/* AI read */}
-          <section>
-            <div className="rounded-2xl bg-brand-50 border border-brand-100 p-4">
-              <div className="flex items-center gap-1.5 text-brand-700 mb-2">
-                <Icon name="sparkle" size={14} />
-                <p className="text-[11px] font-bold tracking-[0.1em] uppercase">TrustCraft read of the problem</p>
-              </div>
-              <p className="text-[13px] text-ink-800 leading-relaxed">
-                Most likely a failed trap seal or worn compression washer. Photos show staining on the cabinet base,
-                so check for swelling before you quote replacement carpentry.
-              </p>
-              <p className="text-[11px] text-ink-500 mt-2.5 leading-relaxed">
-                A suggestion only — your on-site judgement decides the job.
-              </p>
-            </div>
-          </section>
-
-          {/* Photos */}
-          <section>
-            <Section title="Photos from the customer" />
-            <div className="grid grid-cols-3 gap-2">
-              <Shot h={86} hue={o.hue} label="Under sink" />
-              <Shot h={86} hue={o.hue + 20} label="Cabinet" />
-              <Shot h={86} hue={o.hue - 20} label="Tap" />
-            </div>
-          </section>
+          {isLive ? (
+            <CustomerSubmission />
+          ) : (
+            <section>
+              <Section title="In the customer's words" />
+              <p className="text-[14px] text-ink-800 leading-relaxed border-l-[3px] border-brand-200 pl-3.5">{o.summary}</p>
+            </section>
+          )}
 
           {/* Location */}
           <section>
@@ -297,8 +395,8 @@ export function RequestScreen({ go, back }: WNav) {
               </div>
               <div className="flex items-center gap-2 px-4 py-3 bg-white">
                 <Icon name="pin" size={15} />
-                <p className="text-[13px] font-medium text-ink-800 flex-1">{o.area}</p>
-                <span className="text-[12px] font-semibold text-ink-500 tabular-nums">{o.km} km · ~12 min</span>
+                <p className="text-[13px] font-medium text-ink-800 flex-1 min-w-0 truncate">{o.area}</p>
+                <span className="text-[12px] font-semibold text-ink-500 tabular-nums flex-shrink-0">{o.km} km · ~12 min</span>
               </div>
             </div>
             <p className="text-[11px] text-ink-400 mt-2">Exact address is released once you accept.</p>
@@ -306,11 +404,15 @@ export function RequestScreen({ go, back }: WNav) {
 
           {/* Schedule + budget */}
           <section className="grid grid-cols-2 gap-3">
-            <div className="rounded-2xl border border-ink-200 p-3.5">
-              <div className="text-ink-400 mb-1.5"><Icon name="calendar" size={16} /></div>
-              <p className="text-[11px] text-ink-500 font-medium">Preferred window</p>
-              <p className="text-[13px] font-semibold text-ink-900 leading-snug mt-0.5">{o.window}</p>
-            </div>
+            {isLive ? (
+              <WhenCard />
+            ) : (
+              <div className="rounded-2xl border border-ink-200 p-3.5">
+                <div className="text-ink-400 mb-1.5"><Icon name="calendar" size={16} /></div>
+                <p className="text-[11px] text-ink-500 font-medium">Preferred window</p>
+                <p className="text-[13px] font-semibold text-ink-900 leading-snug mt-0.5">{o.window}</p>
+              </div>
+            )}
             <div className="rounded-2xl border border-ink-200 p-3.5">
               <div className="text-ink-400 mb-1.5"><Icon name="wallet" size={16} /></div>
               <p className="text-[11px] text-ink-500 font-medium">Customer expects</p>
@@ -321,10 +423,14 @@ export function RequestScreen({ go, back }: WNav) {
       </div>
 
       <Dock>
-        <div className="flex gap-3">
-          <Btn variant="ghost" onClick={() => { decline(o.id); back() }} className="!text-danger-700">Reject</Btn>
-          <Btn onClick={() => { accept(o); go('accepted') }}>Accept Opportunity</Btn>
-        </div>
+        {isLive && rank(c.status) >= rank('assigned') ? (
+          <Btn onClick={() => go('job')}>Open Job Progress</Btn>
+        ) : (
+          <div className="flex gap-3">
+            <Btn variant="ghost" onClick={() => { decline(o.id); toast('Request declined'); back() }} className="!text-danger-700">Reject</Btn>
+            <Btn onClick={take} disabled={busy}>{busy ? 'Accepting…' : 'Accept Opportunity'}</Btn>
+          </div>
+        )}
         <p className="text-[10.5px] text-ink-400 text-center mt-2.5">
           Accepting locks your response time into your trust score.
         </p>
@@ -336,13 +442,13 @@ export function RequestScreen({ go, back }: WNav) {
 // ── 4. Accepted ──────────────────────────────────────────────────────────────
 
 const NEXT_UP = [
-  { icon: 'search', title: 'Analyse the problem', body: 'Review the photos and share what you think is wrong.' },
-  { icon: 'calendar', title: 'Inspect on site', body: 'Confirm the cause in person during the agreed window.' },
+  { icon: 'search', title: 'Analyse the problem', body: 'Review the photos, video and voice note, then share what you think is wrong.' },
+  { icon: 'calendar', title: 'Inspect on site', body: 'Ask for a visit if you cannot diagnose it remotely.' },
   { icon: 'doc', title: 'Send a quotation', body: 'Itemise parts and labour so the price is never a surprise.' },
 ]
 
 export function AcceptedScreen({ go }: WNav) {
-  const { w } = useW()
+  const { job } = useW()
   return (
     <div className="min-h-full flex flex-col bg-white">
       <div className="flex-1 flex flex-col items-center px-6 pt-16">
@@ -357,7 +463,7 @@ export function AcceptedScreen({ go }: WNav) {
           Opportunity accepted
         </h1>
         <p className="text-[14px] text-ink-500 leading-relaxed text-center mt-2 max-w-[290px] fade-up-1">
-          {w.job.customer.split(' ')[0]} has been notified. The full address and contact number are now unlocked for you.
+          {job.customer.split(' ')[0]} has been notified. The full address and contact number are now unlocked for you.
         </p>
 
         <div className="w-full mt-8 space-y-2.5 fade-up-2">
@@ -388,23 +494,28 @@ export function AcceptedScreen({ go }: WNav) {
 // ── 5. Job progress ──────────────────────────────────────────────────────────
 
 export function JobScreen({ go, back }: WNav) {
-  const { w, steps, action, advance } = useW()
-  const finished = w.step >= LAST_STEP
+  const { job, step, steps, action, totals, onLiveCase } = useW()
+  const c = useCase()
+  const finished = step >= LAST_STEP
 
   const run = () => {
-    if (action.advance !== undefined) advance(action.advance)
-    if (action.to !== 'job') go(action.to)
+    if (!onLiveCase) { go('done'); return }
+    if (step === 0) beginAnalysis()
+    go(action.to)
   }
 
   return (
     <div className="min-h-full flex flex-col bg-white">
-      <AppBar title={w.job.title} onBack={back} />
+      <AppBar title={job.title} onBack={back} />
 
       <div className="flex-1">
         <div className="px-5 py-4 border-b border-ink-100 flex items-center gap-3">
           <div className="flex-1 min-w-0">
-            <p className="text-[10.5px] font-bold tracking-[0.1em] text-ink-400">{w.job.id}</p>
-            <div className="mt-1"><JobStrip job={w.job} /></div>
+            <div className="flex items-center gap-2">
+              <p className="text-[10.5px] font-bold tracking-[0.1em] text-ink-400">{job.id}</p>
+              {onLiveCase && c.serviceType === 'urgent' && <Tag hue={0} solid>⚡ URGENT</Tag>}
+            </div>
+            <div className="mt-1"><JobStrip job={job} /></div>
           </div>
           <button
             onClick={() => go('chat')}
@@ -428,9 +539,19 @@ export function JobScreen({ go, back }: WNav) {
                     </div>
                   )}
                 </div>
+              ) : s.key === 'analysis' && s.status === 'done' && c.analysis ? (
+                <p className="mt-2 text-[12px] text-ink-600 leading-relaxed border-l-2 border-ink-200 pl-2.5">
+                  “{c.analysis}”
+                </p>
+              ) : s.key === 'inspection' && s.status === 'done' ? (
+                <p className="mt-2 text-[11.5px] font-medium text-ink-500">
+                  {c.inspection.status === 'skipped'
+                    ? 'Skipped — quoted from the customer submission'
+                    : `Completed ${c.inspection.completedAt}`}
+                </p>
               ) : s.key === 'payment' && s.status === 'done' ? (
                 <div className="mt-2 inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-success-700 bg-success-100 rounded-lg px-2 py-1">
-                  <Icon name="shield" size={12} /> Rs {money(w.items.reduce((a, i) => a + i.qty * i.price, 0))} held in escrow
+                  <Icon name="shield" size={12} /> Rs {money(totals.subtotal)} held in escrow
                 </div>
               ) : null
             }
@@ -447,7 +568,239 @@ export function JobScreen({ go, back }: WNav) {
       </div>
 
       <Dock>
-        <Btn onClick={run} variant={action.waiting ? 'secondary' : 'primary'}>{action.label}</Btn>
+        <Btn onClick={run} variant={action.waiting ? 'secondary' : 'primary'} disabled={action.waiting && step === 4}>
+          {action.label}
+        </Btn>
+      </Dock>
+    </div>
+  )
+}
+
+// ── 5b. Problem analysis ─────────────────────────────────────────────────────
+// The screen "Begin Problem Analysis" now leads to. It shows the customer's
+// original submission, takes the professional's written analysis, and offers
+// the on-site inspection branch.
+
+const INSPECT_DAYS = ['Sat, 24 Aug 2026', 'Sun, 25 Aug 2026', 'Mon, 26 Aug 2026', 'Tue, 27 Aug 2026']
+const INSPECT_TIMES = ['10:00 AM', '1:30 PM', '4:00 PM', '5:30 PM']
+
+export function ProblemAnalysisScreen({ go, back }: WNav) {
+  const { w, set, step } = useW()
+  const c = useCase()
+  const ins = c.inspection
+
+  const [text, setText] = useState(w.analysisDraft || c.analysis)
+  const [wantInspection, setWantInspection] = useState(false)
+  const [reason, setReason] = useState(ins.reason)
+  const [day, setDay] = useState(ins.proposedDate || INSPECT_DAYS[0])
+  const [time, setTime] = useState(ins.proposedTime || INSPECT_TIMES[1])
+  const [busy, setBusy] = useState(false)
+
+  const keep = (v: string) => { setText(v); set({ analysisDraft: v }) }
+  const sent = !!c.analysis
+  const valid = text.trim().length >= 12
+
+  const send = () => {
+    if (busy || !valid) return
+    setBusy(true)
+    submitAnalysis(text)
+    set({ analysisDraft: '' })
+    toast('Analysis submitted')
+    setBusy(false)
+  }
+
+  const askInspection = () => {
+    if (busy || reason.trim().length < 8) return
+    setBusy(true)
+    if (!c.analysis) submitAnalysis(text)
+    requestInspection(reason, day, time)
+    toast('Inspection requested')
+    setBusy(false)
+    setWantInspection(false)
+  }
+
+  return (
+    <div className="min-h-full flex flex-col bg-white">
+      <AppBar title="Problem Analysis" onBack={back} />
+
+      <div className="flex-1 px-5 py-5 space-y-6">
+        {/* What the customer actually sent */}
+        <div className="rounded-2xl border border-ink-200 p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[10.5px] font-bold tracking-[0.1em] text-ink-400">{c.id}</p>
+              <p className="text-[16px] font-bold text-ink-900 leading-snug">{c.title}</p>
+              <p className="text-[11.5px] text-ink-500 mt-0.5">
+                {c.customer} · {c.location} · {categoryLabel(c.category)}
+              </p>
+            </div>
+            {c.serviceType === 'urgent' && <Tag hue={0} solid>⚡ URGENT</Tag>}
+          </div>
+          <p className="text-[11px] text-ink-400 mt-2">Submitted {c.createdAt}</p>
+          <div className="mt-4"><CustomerSubmission compact /></div>
+        </div>
+
+        {/* Analysis */}
+        <section>
+          <Section title="Your analysis" />
+          <textarea
+            value={text}
+            onChange={e => keep(e.target.value)}
+            rows={5}
+            placeholder="Describe the likely cause of the issue and the work that may be required..."
+            className="w-full rounded-2xl border border-ink-200 p-3.5 text-[14px] text-ink-900 leading-relaxed outline-none focus:border-brand-200 focus:ring-2 focus:ring-brand-100 resize-none placeholder:text-ink-300"
+          />
+          <p className="text-[11px] text-ink-400 mt-1.5">
+            {valid ? 'The customer sees this exactly as written.' : 'Write at least a sentence — the customer reads this.'}
+          </p>
+          {!sent && <div className="mt-3"><Btn onClick={send} disabled={!valid || busy}>{busy ? 'Sending…' : 'Submit Analysis'}</Btn></div>}
+          {sent && (
+            <div className="mt-3 flex items-center gap-2 rounded-xl bg-success-100/60 px-3.5 py-2.5">
+              <span className="text-success-700"><Icon name="check" size={15} /></span>
+              <p className="text-[12.5px] text-success-700 font-medium">Analysis sent to {c.customer.split(' ')[0]} · {c.analysisAt}</p>
+            </div>
+          )}
+        </section>
+
+        {/* Inspection branch */}
+        {sent && ins.status === 'none' && (
+          <section>
+            <Section title="Can you diagnose it remotely?" />
+            {!wantInspection ? (
+              <div className="space-y-2.5">
+                <Btn variant="secondary" icon="search" onClick={() => setWantInspection(true)}>
+                  Request On-Site Inspection
+                </Btn>
+                <Btn
+                  icon="doc"
+                  onClick={() => { skipInspection(); toast('Moving to quotation'); go('quote') }}
+                >
+                  Create Quotation Now
+                </Btn>
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-ink-200 p-4 space-y-4 fade-in">
+                <div>
+                  <Label className="mb-1.5">Reason for the visit</Label>
+                  <textarea
+                    value={reason}
+                    onChange={e => setReason(e.target.value)}
+                    rows={3}
+                    placeholder="I need to inspect the pipe connections before providing an accurate quotation."
+                    className="w-full rounded-xl border border-ink-200 p-3 text-[13.5px] text-ink-900 leading-relaxed outline-none focus:border-brand-200 focus:ring-2 focus:ring-brand-100 resize-none placeholder:text-ink-300"
+                  />
+                </div>
+                <div>
+                  <Label className="mb-2">Suggested date</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {INSPECT_DAYS.map(x => (
+                      <button
+                        key={x}
+                        onClick={() => setDay(x)}
+                        className={`h-9 rounded-xl border text-[12px] font-semibold transition-colors ${
+                          day === x ? 'bg-brand-600 text-white border-brand-600' : 'bg-white text-ink-600 border-ink-200'
+                        }`}
+                      >
+                        {x.replace(' 2026', '')}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <Label className="mb-2">Suggested time</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {INSPECT_TIMES.map(x => (
+                      <button
+                        key={x}
+                        onClick={() => setTime(x)}
+                        className={`h-8 px-3 rounded-full text-[12px] font-semibold border transition-colors ${
+                          time === x ? 'bg-brand-600 text-white border-brand-600' : 'bg-white text-ink-600 border-ink-200'
+                        }`}
+                      >
+                        {x}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex gap-2.5">
+                  <Btn variant="ghost" onClick={() => setWantInspection(false)}>Cancel</Btn>
+                  <Btn onClick={askInspection} disabled={reason.trim().length < 8 || busy}>Send Request</Btn>
+                </div>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Inspection states */}
+        {ins.status === 'requested' && (
+          <section>
+            <div className="rounded-2xl border border-warning-600/30 bg-warning-100/50 p-4">
+              <div className="flex items-center gap-2 text-warning-700">
+                <Icon name="clock" size={15} />
+                <p className="text-[13px] font-bold">Inspection requested</p>
+              </div>
+              <p className="text-[12.5px] text-ink-700 leading-relaxed mt-2">“{ins.reason}”</p>
+              <p className="text-[12px] text-ink-600 mt-2">Suggested {ins.proposedDate} at {ins.proposedTime}</p>
+              <div className="flex items-center gap-2 mt-3 text-[11.5px] font-semibold text-warning-700">
+                <span className="w-1.5 h-1.5 rounded-full bg-warning-600 soft-pulse" />
+                Waiting for {c.customer.split(' ')[0]} to accept
+              </div>
+            </div>
+          </section>
+        )}
+
+        {ins.status === 'confirmed' && (
+          <section>
+            <div className="rounded-2xl border border-success-600/30 bg-success-100/50 p-4">
+              <div className="flex items-center gap-2 text-success-700">
+                <Icon name="check" size={15} />
+                <p className="text-[13px] font-bold">Inspection confirmed</p>
+              </div>
+              <p className="text-[12.5px] text-ink-700 mt-2">
+                {ins.confirmedDate} at {ins.confirmedTime} · {c.location}
+              </p>
+              <p className="text-[11.5px] text-ink-500 mt-1">
+                Inspection fee {ins.paid ? 'paid by the customer' : 'not yet paid'}.
+              </p>
+              <div className="mt-3">
+                <Btn onClick={() => { completeInspection(); toast('Inspection marked complete') }}>
+                  Inspection Completed
+                </Btn>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {ins.status === 'completed' && (
+          <section>
+            <div className="rounded-2xl border border-ink-200 p-4">
+              <p className="text-[13px] font-bold text-ink-900">Inspection completed</p>
+              <p className="text-[12px] text-ink-500 mt-0.5">{ins.completedAt}</p>
+              <div className="mt-3">
+                <Btn icon="doc" onClick={() => go('quote')}>Create Quotation</Btn>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {ins.status === 'skipped' && (
+          <section>
+            <div className="rounded-2xl border border-ink-200 p-4">
+              <p className="text-[13px] font-bold text-ink-900">Quoting without an inspection</p>
+              <div className="mt-3">
+                <Btn icon="doc" onClick={() => go('quote')}>
+                  {c.quotation ? 'View Quotation' : 'Create Quotation'}
+                </Btn>
+              </div>
+            </div>
+          </section>
+        )}
+      </div>
+
+      <Dock>
+        <Btn variant="ghost" onClick={() => go('job')}>
+          {step >= 3 ? 'Back to Job Progress' : 'Job Progress'}
+        </Btn>
       </Dock>
     </div>
   )
@@ -458,8 +811,51 @@ export function JobScreen({ go, back }: WNav) {
 const DURATIONS = ['1 – 2 hours', '2 – 3 hours', 'Half day', 'Full day']
 const WARRANTIES = ['14 days', '30 days', '90 days']
 
+/**
+ * TrustCraft's advertising revenue line. The placement is rendered inside the
+ * professional's quotation builder only — it is never attached to the
+ * quotation object, so nothing about it can reach the customer's copy.
+ */
+function SponsoredSlot({ category }: { category: string }) {
+  const ad = adFor(category)
+  const [clicked, setClicked] = useState(false)
+  return (
+    <section aria-label="Sponsored">
+      <div className="flex items-center gap-2 mb-1.5">
+        <span className="text-[10px] font-bold tracking-[0.12em] uppercase text-ink-400 bg-ink-100 rounded px-1.5 py-0.5">
+          Sponsored
+        </span>
+        <span className="text-[10.5px] text-ink-400">Not shown to the customer</span>
+      </div>
+      <div className="rounded-2xl border border-dashed border-ink-300 bg-ink-50 p-4">
+        <div className="flex items-start gap-3">
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-white flex-shrink-0"
+            style={{ background: `linear-gradient(140deg, hsl(${ad.hue} 62% 52%), hsl(${ad.hue + 24} 55% 38%))` }}
+          >
+            <Icon name={ad.icon} size={19} />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold text-ink-500">{ad.sponsor}</p>
+            <p className="text-[14px] font-bold text-ink-900 leading-snug mt-0.5">{ad.headline}</p>
+            <p className="text-[12px] text-ink-600 leading-relaxed mt-1">{ad.body}</p>
+          </div>
+        </div>
+        <button
+          onClick={() => { setClicked(true); toast('Offer opened in the supplier app') }}
+          className="mt-3 h-9 w-full rounded-xl bg-ink-900 text-white text-[12.5px] font-semibold hover:bg-ink-800 transition-colors"
+        >
+          {clicked ? 'Offer opened' : ad.cta}
+        </button>
+      </div>
+    </section>
+  )
+}
+
 export function QuoteScreen({ go, back }: WNav) {
-  const { w, set, totals, advance } = useW()
+  const { w, set, totals, onLiveCase } = useW()
+  const c = useCase()
+  const [busy, setBusy] = useState(false)
 
   const patch = (id: string, p: { qty?: number; price?: number }) =>
     set({ items: w.items.map(i => (i.id === id ? { ...i, ...p } : i)) })
@@ -469,7 +865,24 @@ export function QuoteScreen({ go, back }: WNav) {
 
   const removeItem = (id: string) => set({ items: w.items.filter(i => i.id !== id) })
 
-  const valid = w.items.length > 0 && totals.subtotal > 0
+  const valid = w.items.length > 0 && totals.subtotal > 0 && !busy
+
+  const submit = () => {
+    if (!valid) return
+    setBusy(true)
+    if (onLiveCase) {
+      sendQuotation({
+        items: w.items,
+        duration: w.duration,
+        warranty: w.warranty,
+        notes: w.notes.trim(),
+        validUntil: 'Aug 29, 2026',
+      })
+    }
+    toast('Quotation sent')
+    setBusy(false)
+    go('quote-sent')
+  }
 
   return (
     <div className="min-h-full flex flex-col bg-white">
@@ -551,6 +964,9 @@ export function QuoteScreen({ go, back }: WNav) {
           </button>
         </section>
 
+        {/* Contextual sponsored placement, chosen from the job category. */}
+        <SponsoredSlot category={onLiveCase ? c.category : 'plumbers'} />
+
         <section>
           <Section title="Time on site" />
           <div className="flex flex-wrap gap-2">
@@ -586,6 +1002,17 @@ export function QuoteScreen({ go, back }: WNav) {
         </section>
 
         <section>
+          <Section title="Notes for the customer" />
+          <textarea
+            value={w.notes}
+            onChange={e => set({ notes: e.target.value })}
+            rows={3}
+            placeholder="Anything the customer should know before approving (optional)"
+            className="w-full rounded-2xl border border-ink-200 p-3.5 text-[13.5px] text-ink-900 leading-relaxed outline-none focus:border-brand-200 focus:ring-2 focus:ring-brand-100 resize-none placeholder:text-ink-300"
+          />
+        </section>
+
+        <section>
           <div className="rounded-2xl bg-ink-50 border border-ink-200 p-4 space-y-2">
             <div className="flex justify-between text-[13px] text-ink-600">
               <span>Customer pays</span>
@@ -604,8 +1031,8 @@ export function QuoteScreen({ go, back }: WNav) {
       </div>
 
       <Dock>
-        <Btn disabled={!valid} onClick={() => { set({ quoteSent: true }); advance(4); go('quote-sent') }}>
-          Preview &amp; Send Quotation
+        <Btn disabled={!valid} onClick={submit}>
+          {busy ? 'Sending…' : 'Send Quotation'}
         </Btn>
       </Dock>
     </div>
@@ -615,7 +1042,7 @@ export function QuoteScreen({ go, back }: WNav) {
 // ── 7. Quotation sent ────────────────────────────────────────────────────────
 
 export function QuoteSentScreen({ go }: WNav) {
-  const { w, totals } = useW()
+  const { w, job, totals } = useW()
   return (
     <div className="min-h-full flex flex-col bg-white">
       <div className="flex-1 px-5 pt-14">
@@ -627,7 +1054,7 @@ export function QuoteSentScreen({ go }: WNav) {
             </div>
           </div>
           <h1 className="text-[24px] font-bold text-ink-900 tracking-[-0.03em] mt-6 fade-up-1">Quotation sent</h1>
-          <p className="text-[13.5px] text-ink-500 mt-1.5 fade-up-1">Waiting for {w.job.customer.split(' ')[0]} to approve</p>
+          <p className="text-[13.5px] text-ink-500 mt-1.5 fade-up-1">Waiting for {job.customer.split(' ')[0]} to approve</p>
         </div>
 
         <div className="mt-8 rounded-2xl border border-ink-200 overflow-hidden fade-up-2">
@@ -674,8 +1101,18 @@ const CHECKS = [
 ]
 
 export function CompleteScreen({ go, back }: WNav) {
-  const { w, set, toggleCheck, advance } = useW()
-  const ready = w.summary.trim().length >= 12 && w.evidence >= 2
+  const { w, set, toggleCheck, onLiveCase } = useW()
+  const [busy, setBusy] = useState(false)
+  const ready = w.summary.trim().length >= 12 && w.evidence >= 2 && !busy
+
+  const submit = () => {
+    if (!ready) return
+    setBusy(true)
+    if (onLiveCase) completeWork(w.summary, w.evidence)
+    toast('Completion submitted')
+    setBusy(false)
+    go('done')
+  }
 
   return (
     <div className="min-h-full flex flex-col bg-white">
@@ -721,12 +1158,12 @@ export function CompleteScreen({ go, back }: WNav) {
         <section>
           <Section title="Before you submit" />
           <div className="rounded-2xl border border-ink-200 divide-y divide-ink-100">
-            {CHECKS.map(c => {
-              const on = w.checks.includes(c.key)
+            {CHECKS.map(x => {
+              const on = w.checks.includes(x.key)
               return (
                 <button
-                  key={c.key}
-                  onClick={() => toggleCheck(c.key)}
+                  key={x.key}
+                  onClick={() => toggleCheck(x.key)}
                   className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-ink-50 transition-colors"
                 >
                   <span
@@ -736,7 +1173,7 @@ export function CompleteScreen({ go, back }: WNav) {
                   >
                     {on && <Icon name="check" size={12} />}
                   </span>
-                  <span className={`text-[13.5px] ${on ? 'text-ink-900 font-medium' : 'text-ink-600'}`}>{c.label}</span>
+                  <span className={`text-[13.5px] ${on ? 'text-ink-900 font-medium' : 'text-ink-600'}`}>{x.label}</span>
                 </button>
               )
             })}
@@ -745,7 +1182,7 @@ export function CompleteScreen({ go, back }: WNav) {
       </div>
 
       <Dock>
-        <Btn disabled={!ready} onClick={() => { advance(6); go('done') }}>Submit Completion</Btn>
+        <Btn disabled={!ready} onClick={submit}>{busy ? 'Submitting…' : 'Submit Completion'}</Btn>
       </Dock>
     </div>
   )
@@ -754,7 +1191,7 @@ export function CompleteScreen({ go, back }: WNav) {
 // ── 9. Job summary ───────────────────────────────────────────────────────────
 
 export function DoneScreen({ go }: WNav) {
-  const { w, totals, advance } = useW()
+  const { w, job, totals } = useW()
   return (
     <div className="min-h-full flex flex-col bg-white">
       <div className="flex-1 px-5 pt-14">
@@ -765,9 +1202,9 @@ export function DoneScreen({ go }: WNav) {
               <Icon name="check" size={38} />
             </div>
           </div>
-          <h1 className="text-[24px] font-bold text-ink-900 tracking-[-0.03em] mt-6 fade-up-1">{w.job.title} is done</h1>
+          <h1 className="text-[24px] font-bold text-ink-900 tracking-[-0.03em] mt-6 fade-up-1">{job.title} is done</h1>
           <p className="text-[13.5px] text-ink-500 mt-1.5 max-w-[300px] leading-relaxed fade-up-1">
-            Your evidence went to {w.job.customer.split(' ')[0]}. Payment is released the moment they confirm.
+            Your evidence went to {job.customer.split(' ')[0]}. Payment is released the moment they confirm.
           </p>
         </div>
 
@@ -783,14 +1220,14 @@ export function DoneScreen({ go }: WNav) {
         <div className="mt-4 rounded-2xl border border-ink-200 p-4 fade-up-3">
           <p className="text-[13px] font-semibold text-ink-900">This job adds evidence to your profile</p>
           <p className="text-[12px] text-ink-500 leading-relaxed mt-1">
-            {w.evidence} photos, a written summary and an itemised quotation are now attached to service record {w.job.id}.
+            {w.evidence} photos, a written summary and an itemised quotation are now attached to service record {job.id}.
           </p>
         </div>
       </div>
 
       <Dock>
         <div className="space-y-2.5">
-          <Btn onClick={() => { advance(LAST_STEP); go('home') }}>Back to Home</Btn>
+          <Btn onClick={() => go('home')}>Back to Home</Btn>
           <Btn variant="ghost" onClick={() => go('earnings')}>View earnings</Btn>
         </div>
       </Dock>

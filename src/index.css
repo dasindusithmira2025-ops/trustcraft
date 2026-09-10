@@ -90,3 +90,11 @@ body {
   background-size: 360px 100%;
   animation: shimmer 1.4s linear infinite;
 }
+
+/* The device mock is a fixed 390 x 844 frame. On phones there is no room for
+   it at 1:1, so it is zoomed to fit rather than allowed to overflow. */
+body { overflow-x: hidden; }
+@media (max-width: 440px) { .device-fit { zoom: 0.94 } }
+@media (max-width: 412px) { .device-fit { zoom: 0.88 } }
+@media (max-width: 380px) { .device-fit { zoom: 0.80 } }
+@media (max-width: 344px) { .device-fit { zoom: 0.72 } }

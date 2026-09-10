@@ -1,9 +1,10 @@
 // Worker-side fixtures and the pure job-progress logic.
 // Kept JSX-free so it runs under `node src/worker/data.test.ts`.
+import type { ServiceCase } from '../case'
 
 export type WScreen =
   | 'home' | 'opportunities' | 'request' | 'accepted'
-  | 'job' | 'quote' | 'quote-sent' | 'complete' | 'done'
+  | 'job' | 'analysis' | 'quote' | 'quote-sent' | 'complete' | 'done'
   | 'messages' | 'chat' | 'earnings' | 'analyse'
   | 'profile' | 'services' | 'documents' | 'settings'
 
@@ -49,29 +50,48 @@ export function deriveSteps(step: number): Step[] {
 export interface WAction {
   label: string
   to: WScreen
-  advance?: number
   hint: string
   /** True while the ball is in the customer's court. */
   waiting?: boolean
 }
 
-/** The single call-to-action the job screen renders for the current stage. */
-export function nextAction(step: number): WAction {
+/**
+ * The single call-to-action the job screen renders for the current stage.
+ * Every branch reads the shared case, so the professional is never shown an
+ * action the customer has not unblocked (and vice versa).
+ */
+export function nextAction(step: number, c: ServiceCase): WAction {
+  const ins = c.inspection
   switch (step) {
     case 0:
-      return { label: 'Begin Problem Analysis', to: 'job', advance: 1, hint: 'Read the photos and notes the customer sent.' }
+      return { label: 'Begin Problem Analysis', to: 'analysis', hint: 'Read the photos, video and voice note the customer sent.' }
     case 1:
-      return { label: 'Submit Analysis', to: 'job', advance: 2, hint: 'Tell the customer what you think is wrong.' }
+      return { label: 'Continue Analysis', to: 'analysis', hint: 'Tell the customer what you think is wrong.' }
     case 2:
-      return { label: 'Mark Inspection Complete', to: 'job', advance: 3, hint: 'Confirm the on-site visit is finished.' }
+      if (ins.status === 'requested') {
+        return { label: 'View Inspection Request', to: 'analysis', waiting: true, hint: 'Waiting for the customer to accept the inspection.' }
+      }
+      if (ins.status === 'confirmed') {
+        return {
+          label: 'Mark Inspection Completed', to: 'analysis',
+          hint: `Inspection confirmed for ${ins.confirmedDate} at ${ins.confirmedTime}.`,
+        }
+      }
+      return { label: 'Inspection or Quotation', to: 'analysis', hint: 'Request an on-site visit, or price the job from what you have.' }
     case 3:
       return { label: 'Create Quotation', to: 'quote', hint: 'Price the job line by line.' }
     case 4:
-      return { label: 'Payment Received — Start Work', to: 'job', advance: 5, waiting: true, hint: 'Waiting for the customer to release payment.' }
+      return {
+        label: c.status === 'quotation_accepted' ? 'Quotation Approved — Awaiting Payment' : 'Awaiting Customer Approval',
+        to: 'job', waiting: true,
+        hint: c.status === 'quotation_accepted'
+          ? 'The customer approved the quotation. Work starts once payment is held in escrow.'
+          : 'Waiting for the customer to approve the quotation and release payment.',
+      }
     case 5:
       return { label: 'Mark Work Completed', to: 'complete', hint: 'Upload evidence when the job is done.' }
     case 6:
-      return { label: 'View Job Summary', to: 'done', advance: LAST_STEP, hint: 'Completion sent for customer confirmation.' }
+      return { label: 'View Job Summary', to: 'done', waiting: true, hint: 'Completion sent for customer confirmation.' }
     default:
       return { label: 'View Job Summary', to: 'done', hint: 'This job is closed and paid out.' }
   }
@@ -110,6 +130,8 @@ export interface Opportunity {
   id: string
   title: string
   trade: string
+  /** Matches the shared case category ids, so ads and filters line up. */
+  category: string
   customer: string
   area: string
   km: number
@@ -119,40 +141,70 @@ export interface Opportunity {
   summary: string
   window: string
   hue: number
+  /** Set on the one opportunity that is the live shared case. */
+  live?: boolean
+}
+
+/** The live customer request, expressed in the shape the job cards expect. */
+export function caseToOpportunity(c: ServiceCase): Opportunity {
+  return {
+    id: c.id,
+    title: c.title,
+    trade: TRADE_OF[c.category] ?? 'Home Repair',
+    category: c.category,
+    customer: c.customer,
+    area: c.location,
+    km: 1.2,
+    posted: c.createdAt || 'Just now',
+    budget: 6000,
+    urgent: c.serviceType === 'urgent',
+    summary: c.description,
+    window: c.serviceType === 'urgent'
+      ? 'As soon as possible'
+      : `${c.scheduledDate || 'Flexible'} · ${c.scheduledTime || 'Any time'}`,
+    hue: 212,
+    live: true,
+  }
+}
+
+const TRADE_OF: Record<string, string> = {
+  plumbers: 'Plumbing Repair',
+  electricians: 'Electrical Repair',
+  ac: 'AC Repair',
+  carpenters: 'Carpentry',
+  painters: 'Painting',
+  cleaners: 'Cleaning',
+  appliance: 'Appliance Repair',
+  others: 'Home Repair',
 }
 
 export const OPPORTUNITIES: Opportunity[] = [
   {
-    id: 'TC-8821', title: 'Kitchen Sink Leakage', trade: 'Plumbing Repair', customer: 'Nimal Perera',
-    area: 'Rajagiriya', km: 2.4, posted: '12 min ago', budget: 6000, urgent: true, hue: 212,
-    summary: 'Water drips from the pipe under the kitchen sink whenever the tap runs. It has been getting worse for three days and the cupboard below is soaked.',
-    window: 'Today · 2:00 PM – 6:00 PM',
-  },
-  {
-    id: 'TC-8822', title: 'Ceiling Fan Not Working', trade: 'Electrical Repair', customer: 'Sanduni Silva',
+    id: 'TC-8822', title: 'Ceiling Fan Not Working', trade: 'Electrical Repair', category: 'electricians', customer: 'Sanduni Silva',
     area: 'Nugegoda', km: 3.8, posted: '40 min ago', budget: 4500, hue: 275,
     summary: 'The bedroom ceiling fan stopped turning. The regulator light still comes on, so the switch seems fine.',
     window: 'Tomorrow · 9:00 AM – 12:00 PM',
   },
   {
-    id: 'TC-8823', title: 'Bathroom Tap Replacement', trade: 'Plumbing', customer: 'Ruwan Jayasuriya',
+    id: 'TC-8823', title: 'Bathroom Tap Replacement', trade: 'Plumbing', category: 'plumbers', customer: 'Ruwan Jayasuriya',
     area: 'Battaramulla', km: 5.1, posted: '1 hr ago', budget: 3800, hue: 160,
     summary: 'Old mixer tap is corroded and will not close fully. A replacement tap has already been bought.',
     window: 'Sat · 10:00 AM – 4:00 PM',
   },
   {
-    id: 'TC-8824', title: 'Power Trip in Kitchen', trade: 'Electrical', customer: 'Ayesha Kumari',
+    id: 'TC-8824', title: 'Power Trip in Kitchen', trade: 'Electrical', category: 'electricians', customer: 'Ayesha Kumari',
     area: 'Malabe', km: 6.3, posted: '2 hr ago', budget: 7200, urgent: true, hue: 24,
     summary: 'The main breaker trips whenever the oven and kettle run together. Needs load checking and possibly a new circuit.',
     window: 'Today · 5:00 PM – 8:00 PM',
   },
 ]
 
-export const oppById = (id: string) => OPPORTUNITIES.find(o => o.id === id) ?? OPPORTUNITIES[0]
+export const oppById = (id: string, extra: Opportunity[] = []) =>
+  [...extra, ...OPPORTUNITIES].find(o => o.id === id) ?? OPPORTUNITIES[0]
 
 /** The job already in flight when the demo opens. */
 export const ACTIVE_JOB: Opportunity = {
-  id: 'TC-8776', title: 'Kitchen Sink Repair', trade: 'Plumbing Repair', customer: 'Nimal Perera',
+  id: 'TC-8776', title: 'Kitchen Sink Repair', trade: 'Plumbing Repair', category: 'plumbers', customer: 'Nimal Perera',
   area: 'Rajagiriya', km: 2.4, posted: 'Accepted Aug 24, 9:05 AM', budget: 5600, hue: 212,
   summary: 'Leak under the kitchen sink. Inspection confirmed a failed trap seal and a corroded compression washer.',
   window: 'Today · 2:00 PM – 6:00 PM',

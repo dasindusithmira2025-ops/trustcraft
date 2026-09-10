@@ -90,7 +90,7 @@ export default function App() {
   const [role, setRole] = useState<'customer' | 'worker'>('worker')
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center py-10 px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center py-10 px-3 sm:px-4">
       <div className="mb-5 flex items-center gap-2.5">
         <div className="w-8 h-8 bg-brand-600 rounded-xl flex items-center justify-center text-white">
           <Icon name="shield" size={18} />
@@ -116,7 +116,9 @@ export default function App() {
         })}
       </div>
 
-      {role === 'customer' ? <CustomerApp /> : <WorkerApp />}
+      <div className="device-fit">
+        {role === 'customer' ? <CustomerApp /> : <WorkerApp />}
+      </div>
 
       <p className="mt-5 text-[11px] text-white/30">
         {role === 'customer' ? 'Describe a problem to start' : 'Accept a request, quote it, prove the work'}
