@@ -533,26 +533,6 @@ export function ProblemScreen({ navigate, goBack }: NavProps) {
         </div>
 
         <div>
-          <Label className="mb-2">Service Category</Label>
-          <div className="flex flex-wrap gap-2">
-            {CATEGORIES.map(x => {
-              const on = category === x.id
-              return (
-                <button
-                  key={x.id}
-                  onClick={() => updateDraft({ category: x.id })}
-                  className={`h-8 px-3 rounded-full text-[12px] font-semibold border transition-colors ${
-                    on ? 'bg-brand-600 text-white border-brand-600' : 'bg-white text-ink-600 border-ink-200 hover:border-brand-300'
-                  }`}
-                >
-                  {x.label}
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
-        <div>
           <Label className="mb-1.5">Location</Label>
           <button
             onClick={() => navigate('location')}
