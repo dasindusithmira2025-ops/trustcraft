@@ -588,6 +588,8 @@ export function ProblemAnalysisScreen({ go, back }: WNav) {
   const { w, set, step } = useW()
   const c = useCase()
   const ins = c.inspection
+  const urgent = c.serviceType === 'urgent'
+  const urgentDate = c.createdAt.split(',')[0]?.trim() || 'today'
 
   const [text, setText] = useState(w.analysisDraft || c.analysis)
   const [wantInspection, setWantInspection] = useState(false)
@@ -690,38 +692,49 @@ export function ProblemAnalysisScreen({ go, back }: WNav) {
                     className="w-full rounded-xl border border-ink-200 p-3 text-[13.5px] text-ink-900 leading-relaxed outline-none focus:border-brand-200 focus:ring-2 focus:ring-brand-100 resize-none placeholder:text-ink-300"
                   />
                 </div>
-                <div>
-                  <Label className="mb-2">Suggested date</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {INSPECT_DAYS.map(x => (
-                      <button
-                        key={x}
-                        onClick={() => setDay(x)}
-                        className={`h-9 rounded-xl border text-[12px] font-semibold transition-colors ${
-                          day === x ? 'bg-brand-600 text-white border-brand-600' : 'bg-white text-ink-600 border-ink-200'
-                        }`}
-                      >
-                        {x.replace(' 2026', '')}
-                      </button>
-                    ))}
+                {urgent ? (
+                  <div className="rounded-xl border border-danger-600/20 bg-danger-100/40 p-3.5">
+                    <p className="text-[12.5px] font-semibold text-danger-700">Same-day inspection</p>
+                    <p className="text-[12px] text-ink-600 leading-relaxed mt-1">
+                      This urgent request was received on {urgentDate}. No inspection date or time needs to be selected.
+                    </p>
                   </div>
-                </div>
-                <div>
-                  <Label className="mb-2">Suggested time</Label>
-                  <div className="flex flex-wrap gap-2">
-                    {INSPECT_TIMES.map(x => (
-                      <button
-                        key={x}
-                        onClick={() => setTime(x)}
-                        className={`h-8 px-3 rounded-full text-[12px] font-semibold border transition-colors ${
-                          time === x ? 'bg-brand-600 text-white border-brand-600' : 'bg-white text-ink-600 border-ink-200'
-                        }`}
-                      >
-                        {x}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                ) : (
+                  <>
+                    <div>
+                      <Label className="mb-2">Suggested date</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {INSPECT_DAYS.map(x => (
+                          <button
+                            key={x}
+                            onClick={() => setDay(x)}
+                            className={`h-9 rounded-xl border text-[12px] font-semibold transition-colors ${
+                              day === x ? 'bg-brand-600 text-white border-brand-600' : 'bg-white text-ink-600 border-ink-200'
+                            }`}
+                          >
+                            {x.replace(' 2026', '')}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="mb-2">Suggested time</Label>
+                      <div className="flex flex-wrap gap-2">
+                        {INSPECT_TIMES.map(x => (
+                          <button
+                            key={x}
+                            onClick={() => setTime(x)}
+                            className={`h-8 px-3 rounded-full text-[12px] font-semibold border transition-colors ${
+                              time === x ? 'bg-brand-600 text-white border-brand-600' : 'bg-white text-ink-600 border-ink-200'
+                            }`}
+                          >
+                            {x}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
                 <div className="flex gap-2.5">
                   <Btn variant="ghost" onClick={() => setWantInspection(false)}>Cancel</Btn>
                   <Btn onClick={askInspection} disabled={reason.trim().length < 8 || busy}>Send Request</Btn>
@@ -740,7 +753,9 @@ export function ProblemAnalysisScreen({ go, back }: WNav) {
                 <p className="text-[13px] font-bold">Inspection requested</p>
               </div>
               <p className="text-[12.5px] text-ink-700 leading-relaxed mt-2">“{ins.reason}”</p>
-              <p className="text-[12px] text-ink-600 mt-2">Suggested {ins.proposedDate} at {ins.proposedTime}</p>
+              <p className="text-[12px] text-ink-600 mt-2">
+                {urgent ? `Same-day inspection · ${ins.proposedDate}` : `Suggested ${ins.proposedDate} at ${ins.proposedTime}`}
+              </p>
               <div className="flex items-center gap-2 mt-3 text-[11.5px] font-semibold text-warning-700">
                 <span className="w-1.5 h-1.5 rounded-full bg-warning-600 soft-pulse" />
                 Waiting for {c.customer.split(' ')[0]} to accept

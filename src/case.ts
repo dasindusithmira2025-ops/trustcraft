@@ -147,6 +147,16 @@ export function titleFrom(text: string) {
   return first.length > 46 ? `${first.slice(0, 44).trim()}…` : first
 }
 
+/** Split the request timestamp into the same-day inspection slot for urgent work. */
+export function sameDayInspectionSlot(createdAt: string, fallbackStamp: string) {
+  const stamp = createdAt.trim() || fallbackStamp.trim()
+  const comma = stamp.indexOf(',')
+  return {
+    date: (comma === -1 ? stamp : stamp.slice(0, comma)).trim(),
+    time: comma === -1 ? '' : stamp.slice(comma + 1).trim(),
+  }
+}
+
 // ── Matching ─────────────────────────────────────────────────────────────────
 
 export interface Matchable { id: string; category: string; availableNow: boolean }

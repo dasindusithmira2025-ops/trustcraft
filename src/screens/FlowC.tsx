@@ -123,6 +123,7 @@ export function AssessmentScreen({ navigate, goBack }: NavProps) {
   const p = proById(c.proId)
   const ins = c.inspection
   const first = p.name.split(' ')[0]
+  const urgent = c.serviceType === 'urgent'
 
   return (
     <div className="bg-white min-h-full pb-6">
@@ -176,7 +177,7 @@ export function AssessmentScreen({ navigate, goBack }: NavProps) {
               <div className="mt-3 flex items-center gap-2 rounded-lg bg-white px-3 py-2 border border-warning-600/20">
                 <span className="text-warning-700"><Icon name="calendar" size={14} /></span>
                 <span className="text-[12.5px] text-ink-800 font-medium">
-                  Suggested · {ins.proposedDate} at {ins.proposedTime}
+                  {urgent ? `Same-day inspection · ${ins.proposedDate}` : `Suggested · ${ins.proposedDate} at ${ins.proposedTime}`}
                 </span>
               </div>
             )}
@@ -192,11 +193,11 @@ export function AssessmentScreen({ navigate, goBack }: NavProps) {
                   toast('Inspection accepted')
                   navigate('inspection-payment')
                 }}
-                disabled={!ins.proposedDate || !ins.proposedTime}
+                disabled={!ins.proposedDate || (!urgent && !ins.proposedTime)}
               >
                 Accept Inspection
               </Btn>
-              <Btn variant="secondary" onClick={() => navigate('set-inspection')}>Suggest Another Time</Btn>
+              {!urgent && <Btn variant="secondary" onClick={() => navigate('set-inspection')}>Suggest Another Time</Btn>}
               <Btn variant="ghost" icon="chat" onClick={() => navigate('chat')}>Message Professional</Btn>
             </div>
           </Card>
@@ -275,6 +276,7 @@ export function SetInspectionScreen({ navigate, goBack }: NavProps) {
   const c = useCase()
   const p = proById(c.proId)
   const ins = c.inspection
+  const urgent = c.serviceType === 'urgent'
   const [day, setDay] = useState(ins.confirmedDate || ins.proposedDate || DAYS[0].full)
   const [time, setTime] = useState(ins.confirmedTime || ins.proposedTime || TIMES[1])
   const locked = ins.status === 'completed'
@@ -304,48 +306,59 @@ export function SetInspectionScreen({ navigate, goBack }: NavProps) {
           <span className="text-[18px] font-bold text-ink-900">LKR {money(p.inspectionFee)}</span>
         </Card>
 
-        <div>
-          <Label className="mb-2">Select Date</Label>
-          <div className="grid grid-cols-4 gap-2">
-            {DAYS.map(x => {
-              const on = day === x.full
-              return (
-                <button
-                  key={x.full}
-                  disabled={locked}
-                  onClick={() => setDay(x.full)}
-                  className={`rounded-xl border py-2.5 flex flex-col items-center transition-colors disabled:opacity-50 ${
-                    on ? 'border-brand-600 bg-brand-600 text-white' : 'border-ink-200 text-ink-700 hover:border-brand-300'
-                  }`}
-                >
-                  <span className="text-[11px] font-medium opacity-80">{x.d}</span>
-                  <span className="text-[13px] font-bold">{x.n}</span>
-                </button>
-              )
-            })}
+        {urgent ? (
+          <div className="rounded-2xl border border-warning-600/30 bg-warning-100/50 p-4">
+            <Label className="mb-1.5">Urgent inspection</Label>
+            <p className="text-[13px] text-ink-700 leading-relaxed">
+              This inspection stays on the request date: <span className="font-semibold">{day}</span>.
+            </p>
           </div>
-        </div>
+        ) : (
+          <>
+            <div>
+              <Label className="mb-2">Select Date</Label>
+              <div className="grid grid-cols-4 gap-2">
+                {DAYS.map(x => {
+                  const on = day === x.full
+                  return (
+                    <button
+                      key={x.full}
+                      disabled={locked}
+                      onClick={() => setDay(x.full)}
+                      className={`rounded-xl border py-2.5 flex flex-col items-center transition-colors disabled:opacity-50 ${
+                        on ? 'border-brand-600 bg-brand-600 text-white' : 'border-ink-200 text-ink-700 hover:border-brand-300'
+                      }`}
+                    >
+                      <span className="text-[11px] font-medium opacity-80">{x.d}</span>
+                      <span className="text-[13px] font-bold">{x.n}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
 
-        <div>
-          <Label className="mb-2">Select Time</Label>
-          <div className="grid grid-cols-3 gap-2">
-            {TIMES.map(t => {
-              const on = time === t
-              return (
-                <button
-                  key={t}
-                  disabled={locked}
-                  onClick={() => setTime(t)}
-                  className={`h-10 rounded-xl border text-[13px] font-semibold transition-colors disabled:opacity-50 ${
-                    on ? 'border-brand-600 bg-brand-600 text-white' : 'border-ink-200 text-ink-700 hover:border-brand-300'
-                  }`}
-                >
-                  {t}
-                </button>
-              )
-            })}
-          </div>
-        </div>
+            <div>
+              <Label className="mb-2">Select Time</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {TIMES.map(t => {
+                  const on = time === t
+                  return (
+                    <button
+                      key={t}
+                      disabled={locked}
+                      onClick={() => setTime(t)}
+                      className={`h-10 rounded-xl border text-[13px] font-semibold transition-colors disabled:opacity-50 ${
+                        on ? 'border-brand-600 bg-brand-600 text-white' : 'border-ink-200 text-ink-700 hover:border-brand-300'
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          </>
+        )}
 
         <div>
           <Label className="mb-1.5">Location</Label>
@@ -367,7 +380,7 @@ export function SetInspectionScreen({ navigate, goBack }: NavProps) {
 
       <div className="sticky bottom-0 bg-white border-t border-ink-100 p-4">
         <Btn onClick={confirm} disabled={locked}>
-          {locked ? 'Inspection Completed' : ins.status === 'confirmed' ? 'Update Inspection' : 'Confirm Inspection'}
+          {locked ? 'Inspection Completed' : urgent ? 'Confirm Same-Day Inspection' : ins.status === 'confirmed' ? 'Update Inspection' : 'Confirm Inspection'}
         </Btn>
       </div>
     </div>

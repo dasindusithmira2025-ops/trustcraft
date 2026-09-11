@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict'
 import {
   EMPTY_INSPECTION, STATUS_ORDER, customerStep, guessCategory, matchPros,
-  quoteTotal, rank, titleFrom, workerStep,
+  quoteTotal, rank, sameDayInspectionSlot, titleFrom, workerStep,
   type CaseStatus, type ServiceCase,
 } from './case.ts'
 import { DONE_STEP } from './flow.ts'
@@ -69,6 +69,15 @@ assert.equal(guessCategory('something odd', 'others'), 'others')
 assert.equal(titleFrom('Kitchen sink leak. It got worse.'), 'Kitchen sink leak')
 assert.ok(titleFrom('x'.repeat(200)).length <= 46)
 assert.equal(titleFrom('   '), 'New service request')
+
+// Urgent inspections inherit the request date/time instead of asking the
+// professional to schedule another slot.
+assert.deepEqual(sameDayInspectionSlot('Sep 10, 9:00 AM', 'Sep 11, 2:00 PM'), {
+  date: 'Sep 10', time: '9:00 AM',
+})
+assert.deepEqual(sameDayInspectionSlot('', 'Sep 11, 2:00 PM'), {
+  date: 'Sep 11', time: '2:00 PM',
+})
 
 // Quotation maths.
 assert.equal(quoteTotal(null), 0)

@@ -10,7 +10,7 @@
 import { useSyncExternalStore } from 'react'
 import {
   EMPTY_INSPECTION, type Attachment, type CaseStatus, type Inspection,
-  type Quotation, type ServiceCase, rank,
+  sameDayInspectionSlot, type Quotation, type ServiceCase, rank,
 } from './case'
 
 export const nowTime = () =>
@@ -105,8 +105,14 @@ export function assignPro(proId: string) {
 
 /** Customer agrees to the inspection the professional asked for. */
 export function acceptInspection(date: string, time: string) {
+  const confirmedDate = current.serviceType === 'urgent' && current.inspection.proposedDate
+    ? current.inspection.proposedDate
+    : date
+  const confirmedTime = current.serviceType === 'urgent' && current.inspection.proposedTime
+    ? current.inspection.proposedTime
+    : time
   to('inspection_confirmed', patchInspection({
-    status: 'confirmed', confirmedDate: date, confirmedTime: time, confirmedAt: nowStamp(),
+    status: 'confirmed', confirmedDate, confirmedTime, confirmedAt: nowStamp(),
   }))
 }
 
@@ -141,8 +147,11 @@ export function submitAnalysis(text: string) {
 }
 
 export function requestInspection(reason: string, date: string, time: string) {
+  const urgentSlot = current.serviceType === 'urgent'
+    ? sameDayInspectionSlot(current.createdAt, nowStamp())
+    : { date, time }
   to('inspection_requested', patchInspection({
-    status: 'requested', reason: reason.trim(), proposedDate: date, proposedTime: time,
+    status: 'requested', reason: reason.trim(), proposedDate: urgentSlot.date, proposedTime: urgentSlot.time || nowTime(),
     requestedAt: nowStamp(),
   }))
 }
